@@ -94,7 +94,34 @@ export function SchoolPortalClient({
       const storedLang = localStorage.getItem('janta_school_lang') as 'hi' | 'en';
 
       if (storedUser) {
-        setUser(JSON.parse(storedUser));
+        const parsed = JSON.parse(storedUser);
+        setUser(parsed);
+        // Verify with persistent database to get latest verified profile
+        const idToFetch = parsed.studentId || parsed.id || parsed.loginId || parsed.email;
+        if (idToFetch) {
+          fetch(`/api/auth/profile?id=${encodeURIComponent(idToFetch)}`)
+            .then((r) => r.json())
+            .then((data) => {
+              if (data.success && data.user) {
+                setUser(data.user);
+                localStorage.setItem('janta_school_user', JSON.stringify(data.user));
+              }
+            })
+            .catch(() => {});
+        }
+      } else {
+        // Attempt cookie-based persistent session restoration
+        fetch('/api/auth/profile')
+          .then((r) => r.json())
+          .then((data) => {
+            if (data.success && data.user) {
+              setUser(data.user);
+              setSelectedClass(data.user.selectedClass);
+              localStorage.setItem('janta_school_user', JSON.stringify(data.user));
+              localStorage.setItem('janta_school_class', data.user.selectedClass);
+            }
+          })
+          .catch(() => {});
       }
       if (storedAdmin === 'true') {
         setIsAdmin(true);

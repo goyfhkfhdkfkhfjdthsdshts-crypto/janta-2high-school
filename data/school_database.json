@@ -1114,6 +1114,21 @@
   ],
   "attendance": [
     {
+      "studentId": "std-10-1071",
+      "studentEmail": "std-10-1071@student.janta.edu",
+      "studentName": "Ritesh Chouhan",
+      "spokenOrEnteredName": "Ritesh Chouhan",
+      "class": "10",
+      "rollNo": "1015",
+      "date": "2026-09-30",
+      "time": "12:57 PM",
+      "status": "Present",
+      "method": "voice",
+      "verifiedBy": "google_auth",
+      "id": "att_1790753189159_nnijx",
+      "timestamp": "2026-09-30T07:26:29.159Z"
+    },
+    {
       "id": "att_seed_std-10-1_2026-09-16",
       "studentId": "std-10-1",
       "studentEmail": "amit.singh@student.janta.edu",
@@ -3172,5 +3187,201 @@
     },
     "updatedAt": "2026-09-22T21:00:00.000Z",
     "updatedBy": "School Administrator"
-  }
+  },
+  "writtenQuestions": [
+    {
+      "id": "wq-10-sci-1",
+      "class": "10",
+      "subject": "Science (Physics)",
+      "chapter": "Light - Reflection and Refraction",
+      "question": "State Snell’s law of refraction and derive the relation between refractive index, speed of light in vacuum, and speed of light in the medium. Also state the conditions for total internal reflection. [5 Marks]",
+      "marks": 5,
+      "wordLimit": "150 - 200 words",
+      "modelAnswer": "1. Snell’s Law: The ratio of the sine of the angle of incidence (i) to the sine of the angle of refraction (r) is a constant for a given pair of media and color of light: sin(i) / sin(r) = constant (n₂₁).\n2. Refractive Index formula: Absolute refractive index n = c / v, where c is speed of light in vacuum (3 × 10⁸ m/s) and v is speed of light in the medium.\n3. Conditions for Total Internal Reflection (TIR):\n   a) Light must travel from an optically denser medium to an optically rarer medium.\n   b) The angle of incidence in the denser medium must be greater than the critical angle (i > c) for the pair of media.",
+      "markingScheme": "2 marks for Snell’s law statement and formula; 1.5 marks for refractive index relation; 1.5 marks for the two TIR conditions.",
+      "createdAt": "2026-09-30T07:26:26.980Z"
+    },
+    {
+      "id": "wq-10-math-1",
+      "class": "10",
+      "subject": "Mathematics",
+      "chapter": "Trigonometry",
+      "question": "Prove the trigonometric identity: (sin θ - 2 sin³ θ) / (2 cos³ θ - cos θ) = tan θ. [4 Marks]",
+      "marks": 4,
+      "wordLimit": "Step-by-step mathematical proof",
+      "modelAnswer": "LHS = (sin θ - 2 sin³ θ) / (2 cos³ θ - cos θ)\n= [sin θ (1 - 2 sin² θ)] / [cos θ (2 cos² θ - 1)]\nSince 1 = sin² θ + cos² θ:\nNumerator = sin θ (sin² θ + cos² θ - 2 sin² θ) = sin θ (cos² θ - sin² θ)\nDenominator = cos θ (2 cos² θ - (sin² θ + cos² θ)) = cos θ (cos² θ - sin² θ)\nCanceling (cos² θ - sin² θ):\nLHS = sin θ / cos θ = tan θ = RHS. Hence proved.",
+      "markingScheme": "1 mark for factoring sin θ and cos θ; 2 marks for expanding/substituting 1 = sin²θ + cos²θ; 1 mark for simplification to tan θ.",
+      "createdAt": "2026-09-30T07:26:26.980Z"
+    },
+    {
+      "id": "wq-10-sst-1",
+      "class": "10",
+      "subject": "Social Science",
+      "chapter": "Nationalism in India & Jharkhand Movement",
+      "question": "Explain the significance of the Non-Cooperation Movement in the Chotanagpur region of Jharkhand. Mention the role of Tana Bhagats and tribal leadership. [5 Marks]",
+      "marks": 5,
+      "wordLimit": "150 - 200 words",
+      "modelAnswer": "1. Tribal Participation: The Tana Bhagats under Jatra Bhagat followed Mahatma Gandhi’s non-violence principles and actively refused to pay chowkidari tax and British rent.\n2. Ranchi & Hazaribagh Centers: Palamu, Ranchi, and Hazaribagh became major agitation zones. Boycott of foreign cloth and British liquor shops was led by tribal women and local volunteers.\n3. National Unity: The movement united urban leaders with rural and forest-dwelling communities across Jharkhand, elevating the local struggle into the national freedom movement.",
+      "markingScheme": "2 marks for Tana Bhagats movement details; 1.5 marks for boycott movement across districts; 1.5 marks for national integration impact.",
+      "createdAt": "2026-09-30T07:26:26.980Z"
+    },
+    {
+      "id": "wq-9-sci-1",
+      "class": "9",
+      "subject": "Science",
+      "chapter": "Force and Laws of Motion",
+      "question": "State Newton’s Second Law of Motion and deduce the mathematical formula F = ma. [4 Marks]",
+      "marks": 4,
+      "wordLimit": "100 - 150 words",
+      "modelAnswer": "Newton’s Second Law states that the rate of change of momentum of an object is proportional to the applied unbalanced force in the direction of force.\nDerivation:\nInitial momentum p₁ = mu, Final momentum p₂ = mv.\nChange in momentum Δp = m(v - u).\nRate of change = m(v - u) / t = ma (since acceleration a = (v - u)/t).\nTherefore, Force F ∝ ma => F = k·ma. In SI units where k = 1, F = ma.",
+      "markingScheme": "1.5 marks for statement; 2 marks for step-by-step derivation; 0.5 marks for unit definition.",
+      "createdAt": "2026-09-30T07:26:26.980Z"
+    }
+  ],
+  "writtenSubmissions": [],
+  "chatConversations": [
+    {
+      "id": "group-10",
+      "type": "group",
+      "title": "Class 10 - Academic Discussion",
+      "subtitle": "Official Classroom & Board Exam Doubt Group",
+      "class": "10",
+      "participants": [
+        "all-class-10"
+      ],
+      "lastMessage": "Dr. A. K. Verma: Remember to revise ray diagrams for the pre-board exam.",
+      "lastMessageTime": "10:45 AM"
+    },
+    {
+      "id": "group-9",
+      "type": "group",
+      "title": "Class 9 - Student Study Circle",
+      "subtitle": "Daily Homework, Science & Maths Discussions",
+      "class": "9",
+      "participants": [
+        "all-class-9"
+      ],
+      "lastMessage": "Mr. S. K. Gupta: Mathematics exercises 8.1 questions 1 to 5 to be completed today.",
+      "lastMessageTime": "09:15 AM"
+    },
+    {
+      "id": "group-11",
+      "type": "group",
+      "title": "Class 11 - Science & Commerce",
+      "subtitle": "Physics, Chemistry, Accountancy & Economics",
+      "class": "11",
+      "participants": [
+        "all-class-11"
+      ],
+      "lastMessage": "Acharya R. Mishra: Sanskrit practical recitation notes are uploaded.",
+      "lastMessageTime": "Yesterday"
+    },
+    {
+      "id": "group-12",
+      "type": "group",
+      "title": "Class 12 - JAC Board Focus",
+      "subtitle": "Inter-Science, Arts & Commerce Board Preparation",
+      "class": "12",
+      "participants": [
+        "all-class-12"
+      ],
+      "lastMessage": "Dr. Rameshwar Mahto: Model question papers for 2026 examination are available.",
+      "lastMessageTime": "Yesterday"
+    },
+    {
+      "id": "dm-teacher-math",
+      "type": "direct",
+      "title": "Mr. R. K. Sharma (Mathematics PGT)",
+      "subtitle": "Direct Teacher Academic Consultation",
+      "participants": [
+        "teacher-math",
+        "student"
+      ],
+      "lastMessage": "Great job solving the quadratic equation exercise. Keep practicing!",
+      "lastMessageTime": "11:20 AM"
+    },
+    {
+      "id": "dm-principal",
+      "type": "direct",
+      "title": "Dr. Rameshwar Mahto (Principal Office)",
+      "subtitle": "Official Student & Parent Guidance Desk",
+      "participants": [
+        "principal",
+        "student",
+        "parent"
+      ],
+      "lastMessage": "Welcome to Janta +2 High School academic portal. Feel free to contact for school guidance.",
+      "lastMessageTime": "Sep 25"
+    }
+  ],
+  "chatMessages": [
+    {
+      "id": "msg-1",
+      "conversationId": "group-10",
+      "senderId": "faculty-verma",
+      "senderName": "Dr. A. K. Verma (Physics)",
+      "senderRole": "teacher",
+      "text": "Dear Class 10 students, please revise Chapter 10 Light (Reflection & Refraction) numericals tonight. Focus on convex lens magnification formula.",
+      "createdAt": "2026-09-30T04:26:26.980Z",
+      "reactions": {
+        "👍": [
+          "Student Aman",
+          "Priya Kumari"
+        ],
+        "💡": [
+          "Rohit Kumar"
+        ]
+      }
+    },
+    {
+      "id": "msg-2",
+      "conversationId": "group-10",
+      "senderId": "student-aman",
+      "senderName": "Aman Kumar (Roll 101)",
+      "senderRole": "student",
+      "text": "Sir, what is the sign convention for object distance (u) in concave mirror problems?",
+      "createdAt": "2026-09-30T06:36:26.980Z",
+      "reactions": {
+        "❓": [
+          "Kavita Soren"
+        ]
+      }
+    },
+    {
+      "id": "msg-3",
+      "conversationId": "group-10",
+      "senderId": "faculty-verma",
+      "senderName": "Dr. A. K. Verma (Physics)",
+      "senderRole": "teacher",
+      "text": "Object distance (u) is ALWAYS negative in Cartesian sign conventions because the object is placed to the left of the mirror.",
+      "replyTo": {
+        "id": "msg-2",
+        "senderName": "Aman Kumar (Roll 101)",
+        "text": "Sir, what is the sign convention for object distance (u)..."
+      },
+      "createdAt": "2026-09-30T06:46:26.980Z",
+      "reactions": {
+        "👏": [
+          "Aman Kumar (Roll 101)",
+          "Rahul Oraon",
+          "Pooja Kumari"
+        ]
+      }
+    },
+    {
+      "id": "msg-4",
+      "conversationId": "group-10",
+      "senderId": "faculty-sharma",
+      "senderName": "Mr. R. K. Sharma (Maths)",
+      "senderRole": "teacher",
+      "text": "Class 10 Saturday special schedule: Maths period is 9:45 AM - 10:45 AM followed by S.S.T at 10:45 AM. Be punctual!",
+      "createdAt": "2026-09-30T07:06:26.980Z",
+      "reactions": {
+        "👍": [
+          "Dr. Rameshwar Mahto",
+          "Aman Kumar (Roll 101)"
+        ]
+      }
+    }
+  ]
 }

@@ -105,18 +105,42 @@ export function McqPracticeView({
     }
   };
 
+  const studentAccountId = user?.studentId || user?.id || 'default_student';
+
   useEffect(() => {
     fetchMcqs();
     try {
-      const storedHistory = localStorage.getItem('janta_school_test_history');
+      const historyKey = `janta_test_history_${studentAccountId}`;
+      const bookmarkKey = `janta_bookmarks_${studentAccountId}`;
+      const storedHistory = localStorage.getItem(historyKey);
       if (storedHistory) setTestHistory(JSON.parse(storedHistory));
-      const storedBookmarks = localStorage.getItem('janta_school_bookmarks_v1');
+      const storedBookmarks = localStorage.getItem(bookmarkKey);
       if (storedBookmarks) {
         const parsed = JSON.parse(storedBookmarks);
         setBookmarkedIds(parsed.map((b: any) => b.itemId));
       }
+
+      // Fetch from persistent database for this specific student
+      if (studentAccountId && studentAccountId !== 'default_student') {
+        fetch(`/api/student/activity?studentId=${encodeURIComponent(studentAccountId)}`)
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.success && data.data) {
+              if (data.data.testAttempts && data.data.testAttempts.length > 0) {
+                setTestHistory(data.data.testAttempts);
+                localStorage.setItem(historyKey, JSON.stringify(data.data.testAttempts));
+              }
+              if (data.data.bookmarks && data.data.bookmarks.length > 0) {
+                const bIds = data.data.bookmarks.map((b: any) => b.itemId);
+                setBookmarkedIds(bIds);
+                localStorage.setItem(bookmarkKey, JSON.stringify(data.data.bookmarks));
+              }
+            }
+          })
+          .catch(() => {});
+      }
     } catch {}
-  }, [selectedClass]);
+  }, [selectedClass, studentAccountId]);
 
   // Extract unique subjects & chapters
   const availableSubjects = Array.from(new Set(allQuestions.map((q) => q.subject)));
@@ -132,13 +156,26 @@ export function McqPracticeView({
   // Bookmark toggler
   const handleToggleBookmark = (q: MCQQuestion) => {
     try {
-      const key = 'janta_school_bookmarks_v1';
+      const key = `janta_bookmarks_${studentAccountId}`;
       const stored = JSON.parse(localStorage.getItem(key) || '[]');
       const existsIdx = stored.findIndex((b: any) => b.itemId === q.id);
       let updated: any[];
       if (existsIdx >= 0) {
         updated = stored.filter((b: any) => b.itemId !== q.id);
         setBookmarkedIds((prev) => prev.filter((id) => id !== q.id));
+
+        // Sync with persistent database
+        if (studentAccountId !== 'default_student') {
+          fetch('/api/student/activity', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'remove_bookmark',
+              studentId: studentAccountId,
+              itemId: q.id,
+            }),
+          }).catch(() => {});
+        }
       } else {
         const newBm = {
           id: `bm-${Date.now()}`,
@@ -151,6 +188,19 @@ export function McqPracticeView({
         };
         updated = [newBm, ...stored];
         setBookmarkedIds((prev) => [...prev, q.id]);
+
+        // Sync with persistent database
+        if (studentAccountId !== 'default_student') {
+          fetch('/api/student/activity', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'save_bookmark',
+              studentId: studentAccountId,
+              bookmark: newBm,
+            }),
+          }).catch(() => {});
+        }
       }
       localStorage.setItem(key, JSON.stringify(updated));
     } catch (err) {
@@ -222,10 +272,29 @@ export function McqPracticeView({
     );
 
     try {
-      const existingHistory = JSON.parse(localStorage.getItem('janta_school_test_history') || '[]');
+      const historyKey = `janta_test_history_${studentAccountId}`;
+      const existingHistory = JSON.parse(localStorage.getItem(historyKey) || '[]');
       const updated = [newAttempt, ...existingHistory].slice(0, 50);
-      localStorage.setItem('janta_school_test_history', JSON.stringify(updated));
+      localStorage.setItem(historyKey, JSON.stringify(updated));
       setTestHistory(updated);
+
+      // Save to real persistent database
+      if (studentAccountId !== 'default_student') {
+        fetch('/api/student/activity', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'save_test_attempt',
+            studentId: studentAccountId,
+            subject: activeSubject,
+            chapter: selectedChapter,
+            class: selectedClass,
+            totalQuestions: quizQuestions.length,
+            correctAnswers: correctCount,
+            scorePercentage: percentage,
+          }),
+        }).catch((err) => console.error('Error saving test attempt to database:', err));
+      }
     } catch (e) {
       console.error(e);
     }

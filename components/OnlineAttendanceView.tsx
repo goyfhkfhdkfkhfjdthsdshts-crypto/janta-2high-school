@@ -302,8 +302,8 @@ export function OnlineAttendanceView({
     if (!user) {
       setErrorMessage(
         language === 'hi'
-          ? 'कृपया उपस्थिति दर्ज करने से पहले अपने गूगल खाते से लॉगिन करें।'
-          : 'Please log in with your Google account before marking attendance.'
+          ? 'कृपया उपस्थिति दर्ज करने से पहले अपने छात्र खाते से लॉगिन करें।'
+          : 'Please log in with your Student account before marking attendance.'
       );
       return;
     }
@@ -335,9 +335,9 @@ export function OnlineAttendanceView({
         hour12: true,
       });
 
-      // The student's Google account ID is the authoritative identity used for attendance
+      // The student's permanent account ID is the authoritative identity used for attendance
       const payload = {
-        studentId: user.id,
+        studentId: user.studentId || user.id,
         studentEmail: user.email,
         studentName: user.name, // Authenticated verified student name
         spokenOrEnteredName: finalName,
@@ -467,7 +467,7 @@ export function OnlineAttendanceView({
         'Present',
         r.time,
         r.method || 'manual',
-        r.verifiedBy || 'google_auth',
+        r.verifiedBy || 'school_auth',
         `"${r.remarks || ''}"`,
       ]);
     });
@@ -655,14 +655,14 @@ export function OnlineAttendanceView({
                     </span>
                     <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-100 text-blue-800">
                       <Lock className="w-3 h-3 text-blue-600" />
-                      <span>Google ID Identity Locked</span>
+                      <span>Student ID Identity Locked</span>
                     </span>
                   </div>
                   <h2 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
                     <span>आज आपकी Attendance पहले ही लग चुकी है।</span>
                   </h2>
                   <p className="text-xs text-slate-500 mt-0.5">
-                    Your attendance for today ({activeTodayRecord.date}) is permanently recorded in the school database for your Google account.
+                    Your attendance for today ({activeTodayRecord.date}) is permanently recorded in the school database for your student account.
                   </p>
                 </div>
               </div>
@@ -728,7 +728,7 @@ export function OnlineAttendanceView({
                 <div className="flex items-center gap-2">
                   <Shield className="w-4 h-4 text-blue-700 shrink-0" />
                   <span className="font-medium">
-                    Google Identity: <span className="font-mono text-slate-900 font-bold">{user?.email || activeTodayRecord.studentEmail}</span>
+                    Student Identity: <span className="font-mono text-slate-900 font-bold">{user?.studentId || user?.id || user?.email || activeTodayRecord.studentEmail}</span>
                   </span>
                 </div>
                 <div className="text-[11px] text-blue-800">
@@ -834,10 +834,10 @@ export function OnlineAttendanceView({
               <ShieldAlert className="w-4 h-4 text-blue-700 shrink-0 mt-0.5" />
               <div className="space-y-0.5">
                 <p className="font-bold text-slate-800">
-                  प्रमाणीकृत गूगल खाता सुरक्षा (Google Account Identity Security)
+                  प्रमाणीकृत छात्र खाता सुरक्षा (Student Account Identity Security)
                 </p>
                 <p className="text-[11px] text-slate-500">
-                  उपस्थिति आपके पंजीकृत गूगल खाते (<span className="font-semibold text-slate-800">{user?.email || 'Logged in account'}</span>) से जुड़ी है। किसी अन्य छात्र के नाम से या किसी अन्य वर्ग में उपस्थिति दर्ज करना प्रतिबंधित है।
+                  उपस्थिति आपके पंजीकृत छात्र खाते (<span className="font-semibold text-slate-800">{user?.studentId || user?.name || 'Logged in account'}</span>) से जुड़ी है। किसी अन्य छात्र के नाम से या किसी अन्य वर्ग में उपस्थिति दर्ज करना प्रतिबंधित है।
                 </p>
               </div>
             </div>

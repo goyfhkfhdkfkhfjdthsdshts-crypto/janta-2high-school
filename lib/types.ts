@@ -4,12 +4,16 @@ export type UserRole = 'student' | 'teacher' | 'admin' | 'principal' | 'parent';
 
 export interface UserProfile {
   id: string;
+  studentId?: string;
+  loginId?: string;
   email: string;
   name: string;
   picture?: string;
   role: UserRole;
   selectedClass: SchoolClass;
+  section?: string;
   rollNo?: string;
+  passwordHash?: string;
   stream?: 'Science' | 'Commerce' | 'Arts' | 'General';
   phone?: string;
   childId?: string;
@@ -338,12 +342,24 @@ export interface BookmarkItem {
 
 export interface TestAttemptRecord {
   id: string;
+  studentId?: string;
+  class?: SchoolClass;
   subject: string;
   chapter?: string;
   totalQuestions: number;
   correctAnswers: number;
   scorePercentage: number;
   date: string;
+}
+
+export interface StudentNote {
+  id: string;
+  studentId: string;
+  title: string;
+  content: string;
+  subject?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface StudentProgressData {

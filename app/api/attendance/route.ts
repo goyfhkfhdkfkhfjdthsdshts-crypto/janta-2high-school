@@ -132,7 +132,7 @@ export async function POST(req: NextRequest) {
       time: authoritativeTime,
       status: 'Present',
       method: method === 'voice' ? 'voice' : 'manual',
-      verifiedBy: 'google_auth',
+      verifiedBy: 'school_auth',
     });
 
     if (!result.success) {

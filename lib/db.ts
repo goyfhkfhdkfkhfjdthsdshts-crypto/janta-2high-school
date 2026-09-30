@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import crypto from 'crypto';
 import {
   UserProfile,
   SchoolClass,
@@ -24,8 +25,21 @@ import {
   ChatMessage,
   ChatConversation,
   UserRole,
+  BookmarkItem,
+  TestAttemptRecord,
+  StudentNote,
 } from './types';
 import { initialAboutSchoolData } from './aboutData';
+
+// Secure Password Hashing Helper
+export function hashPassword(password: string): string {
+  const salt = 'janta_khalari_salt_2026';
+  return crypto.createHash('sha256').update(password + salt).digest('hex');
+}
+
+export function verifyPassword(password: string, hash: string): boolean {
+  return hashPassword(password) === hash;
+}
 
 interface DatabaseSchema {
   users: UserProfile[];
@@ -49,6 +63,9 @@ interface DatabaseSchema {
   writtenSubmissions?: WrittenSubmission[];
   chatConversations?: ChatConversation[];
   chatMessages?: ChatMessage[];
+  testAttempts?: TestAttemptRecord[];
+  studentBookmarks?: BookmarkItem[];
+  studentNotes?: StudentNote[];
 }
 
 const DB_FILE_PATH = path.join(process.cwd(), 'data', 'school_database.json');
@@ -691,21 +708,29 @@ function ensureDataDirectory() {
 }
 
 const initialEnrolledStudents: UserProfile[] = [
-  { id: 'std-10-1', name: 'Amit Kumar Singh', email: 'amit.singh@student.janta.edu', role: 'student', selectedClass: '10', rollNo: '1001', createdAt: '2026-04-01T00:00:00.000Z', updatedAt: '2026-04-01T00:00:00.000Z' },
-  { id: 'std-10-2', name: 'Pooja Kumari Oraon', email: 'pooja.oraon@student.janta.edu', role: 'student', selectedClass: '10', rollNo: '1002', createdAt: '2026-04-01T00:00:00.000Z', updatedAt: '2026-04-01T00:00:00.000Z' },
-  { id: 'std-10-3', name: 'Rahul Soren', email: 'rahul.soren@student.janta.edu', role: 'student', selectedClass: '10', rollNo: '1003', createdAt: '2026-04-01T00:00:00.000Z', updatedAt: '2026-04-01T00:00:00.000Z' },
-  { id: 'std-10-4', name: 'Anjali Kumari', email: 'anjali.kumari@student.janta.edu', role: 'student', selectedClass: '10', rollNo: '1004', createdAt: '2026-04-01T00:00:00.000Z', updatedAt: '2026-04-01T00:00:00.000Z' },
-  { id: 'std-10-5', name: 'Rohit Kumar', email: 'rohit.kumar@student.janta.edu', role: 'student', selectedClass: '10', rollNo: '1005', createdAt: '2026-04-01T00:00:00.000Z', updatedAt: '2026-04-01T00:00:00.000Z' },
-  { id: 'std-10-6', name: 'Neha Sharma', email: 'neha.sharma@student.janta.edu', role: 'student', selectedClass: '10', rollNo: '1006', createdAt: '2026-04-01T00:00:00.000Z', updatedAt: '2026-04-01T00:00:00.000Z' },
-  { id: 'std-10-7', name: 'Deepak Mahto', email: 'deepak.mahto@student.janta.edu', role: 'student', selectedClass: '10', rollNo: '1007', createdAt: '2026-04-01T00:00:00.000Z', updatedAt: '2026-04-01T00:00:00.000Z' },
-  { id: 'std-10-8', name: 'Priya Kumari', email: 'priya.kumari@student.janta.edu', role: 'student', selectedClass: '10', rollNo: '1008', createdAt: '2026-04-01T00:00:00.000Z', updatedAt: '2026-04-01T00:00:00.000Z' },
-  { id: 'std-9-1', name: 'Vicky Kumar', email: 'vicky.kumar@student.janta.edu', role: 'student', selectedClass: '9', rollNo: '901', createdAt: '2026-04-01T00:00:00.000Z', updatedAt: '2026-04-01T00:00:00.000Z' },
-  { id: 'std-9-2', name: 'Sunita Munda', email: 'sunita.munda@student.janta.edu', role: 'student', selectedClass: '9', rollNo: '902', createdAt: '2026-04-01T00:00:00.000Z', updatedAt: '2026-04-01T00:00:00.000Z' },
-  { id: 'std-9-3', name: 'Ajay Oraon', email: 'ajay.oraon@student.janta.edu', role: 'student', selectedClass: '9', rollNo: '903', createdAt: '2026-04-01T00:00:00.000Z', updatedAt: '2026-04-01T00:00:00.000Z' },
-  { id: 'std-11-1', name: 'Rohan Karmali', email: 'rohan.karmali@student.janta.edu', role: 'student', selectedClass: '11', rollNo: '1101', stream: 'Science', createdAt: '2026-04-01T00:00:00.000Z', updatedAt: '2026-04-01T00:00:00.000Z' },
-  { id: 'std-11-2', name: 'Meena Kumari', email: 'meena.kumari@student.janta.edu', role: 'student', selectedClass: '11', rollNo: '1102', stream: 'Arts', createdAt: '2026-04-01T00:00:00.000Z', updatedAt: '2026-04-01T00:00:00.000Z' },
-  { id: 'std-12-1', name: 'Manish Verma', email: 'manish.verma@student.janta.edu', role: 'student', selectedClass: '12', rollNo: '1201', stream: 'Science', createdAt: '2026-04-01T00:00:00.000Z', updatedAt: '2026-04-01T00:00:00.000Z' },
-  { id: 'std-12-2', name: 'Sunita Kumari', email: 'sunita.k12@student.janta.edu', role: 'student', selectedClass: '12', rollNo: '1202', stream: 'Commerce', createdAt: '2026-04-01T00:00:00.000Z', updatedAt: '2026-04-01T00:00:00.000Z' },
+  { id: 'std-10-1', studentId: 'std-10-1', loginId: '1001', name: 'Amit Kumar Singh', email: 'amit.singh@student.janta.edu', role: 'student', selectedClass: '10', section: 'A', rollNo: '1001', createdAt: '2026-04-01T00:00:00.000Z', updatedAt: '2026-04-01T00:00:00.000Z' },
+  { id: 'std-10-2', studentId: 'std-10-2', loginId: '1002', name: 'Pooja Kumari Oraon', email: 'pooja.oraon@student.janta.edu', role: 'student', selectedClass: '10', section: 'A', rollNo: '1002', createdAt: '2026-04-01T00:00:00.000Z', updatedAt: '2026-04-01T00:00:00.000Z' },
+  { id: 'std-10-3', studentId: 'std-10-3', loginId: '1003', name: 'Rahul Soren', email: 'rahul.soren@student.janta.edu', role: 'student', selectedClass: '10', section: 'A', rollNo: '1003', createdAt: '2026-04-01T00:00:00.000Z', updatedAt: '2026-04-01T00:00:00.000Z' },
+  { id: 'std-10-4', studentId: 'std-10-4', loginId: '1004', name: 'Anjali Kumari', email: 'anjali.kumari@student.janta.edu', role: 'student', selectedClass: '10', section: 'A', rollNo: '1004', createdAt: '2026-04-01T00:00:00.000Z', updatedAt: '2026-04-01T00:00:00.000Z' },
+  { id: 'std-10-5', studentId: 'std-10-5', loginId: '1005', name: 'Rohit Kumar', email: 'rohit.kumar@student.janta.edu', role: 'student', selectedClass: '10', section: 'B', rollNo: '1005', createdAt: '2026-04-01T00:00:00.000Z', updatedAt: '2026-04-01T00:00:00.000Z' },
+  { id: 'std-10-6', studentId: 'std-10-6', loginId: '1006', name: 'Neha Sharma', email: 'neha.sharma@student.janta.edu', role: 'student', selectedClass: '10', section: 'B', rollNo: '1006', createdAt: '2026-04-01T00:00:00.000Z', updatedAt: '2026-04-01T00:00:00.000Z' },
+  { id: 'std-10-7', studentId: 'std-10-7', loginId: '1007', name: 'Deepak Mahto', email: 'deepak.mahto@student.janta.edu', role: 'student', selectedClass: '10', section: 'B', rollNo: '1007', createdAt: '2026-04-01T00:00:00.000Z', updatedAt: '2026-04-01T00:00:00.000Z' },
+  { id: 'std-10-8', studentId: 'std-10-8', loginId: '1008', name: 'Priya Kumari', email: 'priya.kumari@student.janta.edu', role: 'student', selectedClass: '10', section: 'B', rollNo: '1008', createdAt: '2026-04-01T00:00:00.000Z', updatedAt: '2026-04-01T00:00:00.000Z' },
+  { id: 'std-9-1', studentId: 'std-9-1', loginId: '901', name: 'Vicky Kumar', email: 'vicky.kumar@student.janta.edu', role: 'student', selectedClass: '9', section: 'A', rollNo: '901', createdAt: '2026-04-01T00:00:00.000Z', updatedAt: '2026-04-01T00:00:00.000Z' },
+  { id: 'std-9-2', studentId: 'std-9-2', loginId: '902', name: 'Sunita Munda', email: 'sunita.munda@student.janta.edu', role: 'student', selectedClass: '9', section: 'A', rollNo: '902', createdAt: '2026-04-01T00:00:00.000Z', updatedAt: '2026-04-01T00:00:00.000Z' },
+  { id: 'std-9-3', studentId: 'std-9-3', loginId: '903', name: 'Ajay Oraon', email: 'ajay.oraon@student.janta.edu', role: 'student', selectedClass: '9', section: 'B', rollNo: '903', createdAt: '2026-04-01T00:00:00.000Z', updatedAt: '2026-04-01T00:00:00.000Z' },
+  { id: 'std-11-1', studentId: 'std-11-1', loginId: '1101', name: 'Rohan Karmali', email: 'rohan.karmali@student.janta.edu', role: 'student', selectedClass: '11', section: 'A', rollNo: '1101', stream: 'Science', createdAt: '2026-04-01T00:00:00.000Z', updatedAt: '2026-04-01T00:00:00.000Z' },
+  { id: 'std-11-2', studentId: 'std-11-2', loginId: '1102', name: 'Meena Kumari', email: 'meena.kumari@student.janta.edu', role: 'student', selectedClass: '11', section: 'B', rollNo: '1102', stream: 'Arts', createdAt: '2026-04-01T00:00:00.000Z', updatedAt: '2026-04-01T00:00:00.000Z' },
+  { id: 'std-12-1', studentId: 'std-12-1', loginId: '1201', name: 'Manish Verma', email: 'manish.verma@student.janta.edu', role: 'student', selectedClass: '12', section: 'A', rollNo: '1201', stream: 'Science', createdAt: '2026-04-01T00:00:00.000Z', updatedAt: '2026-04-01T00:00:00.000Z' },
+  { id: 'std-12-2', studentId: 'std-12-2', loginId: '1202', name: 'Sunita Kumari', email: 'sunita.k12@student.janta.edu', role: 'student', selectedClass: '12', section: 'A', rollNo: '1202', stream: 'Commerce', createdAt: '2026-04-01T00:00:00.000Z', updatedAt: '2026-04-01T00:00:00.000Z' },
+];
+
+export const initialStaffUsers: UserProfile[] = [
+  { id: 'tch-101', loginId: 'TCH-101', name: 'Dr. Rameshwar Mahto', email: 'rameshwar.mahto@janta.edu', role: 'teacher', selectedClass: '10', createdAt: '2026-01-01T00:00:00.000Z', updatedAt: '2026-01-01T00:00:00.000Z' },
+  { id: 'tch-102', loginId: 'TCH-102', name: 'Sunita Devi', email: 'sunita.devi@janta.edu', role: 'teacher', selectedClass: '9', createdAt: '2026-01-01T00:00:00.000Z', updatedAt: '2026-01-01T00:00:00.000Z' },
+  { id: 'adm-001', loginId: 'ADM-001', name: 'Senior School Administrator', email: 'admin@janta.edu', role: 'admin', selectedClass: '10', createdAt: '2026-01-01T00:00:00.000Z', updatedAt: '2026-01-01T00:00:00.000Z' },
+  { id: 'prn-001', loginId: 'PRN-001', name: 'Principal Dr. Arvind Kumar', email: 'principal@janta.edu', role: 'principal', selectedClass: '10', createdAt: '2026-01-01T00:00:00.000Z', updatedAt: '2026-01-01T00:00:00.000Z' },
+  { id: 'prt-1001', loginId: 'PRT-1001', name: 'Rajesh Kumar Singh (Guardian of Amit)', email: 'rajesh.singh@parents.janta.edu', role: 'parent', selectedClass: '10', childId: 'std-10-1', childName: 'Amit Kumar Singh', childRollNo: '1001', childClass: '10', createdAt: '2026-01-01T00:00:00.000Z', updatedAt: '2026-01-01T00:00:00.000Z' },
 ];
 
 const initialNotifications: NotificationItem[] = [
@@ -1152,7 +1177,7 @@ const initialChatMessages: ChatMessage[] = [
 export function getDatabase(): DatabaseSchema {
   if (inMemoryDb) {
     if (!inMemoryDb.attendance) inMemoryDb.attendance = [];
-    if (!inMemoryDb.users || inMemoryDb.users.length === 0) inMemoryDb.users = [...initialEnrolledStudents];
+    if (!inMemoryDb.users || inMemoryDb.users.length === 0) inMemoryDb.users = [...initialEnrolledStudents, ...initialStaffUsers];
     if (!inMemoryDb.notifications) inMemoryDb.notifications = [...initialNotifications];
     if (!inMemoryDb.homework) inMemoryDb.homework = [...initialHomework];
     if (!inMemoryDb.calendarEvents) inMemoryDb.calendarEvents = [...initialCalendarEvents];
@@ -1163,6 +1188,9 @@ export function getDatabase(): DatabaseSchema {
     if (!inMemoryDb.writtenSubmissions) inMemoryDb.writtenSubmissions = [];
     if (!inMemoryDb.chatConversations) inMemoryDb.chatConversations = [...initialChatConversations];
     if (!inMemoryDb.chatMessages) inMemoryDb.chatMessages = [...initialChatMessages];
+    if (!inMemoryDb.testAttempts) inMemoryDb.testAttempts = [];
+    if (!inMemoryDb.studentBookmarks) inMemoryDb.studentBookmarks = [];
+    if (!inMemoryDb.studentNotes) inMemoryDb.studentNotes = [];
     return inMemoryDb;
   }
 
@@ -1173,7 +1201,16 @@ export function getDatabase(): DatabaseSchema {
       const content = fs.readFileSync(DB_FILE_PATH, 'utf-8');
       inMemoryDb = JSON.parse(content);
       if (!inMemoryDb!.attendance) inMemoryDb!.attendance = [];
-      if (!inMemoryDb!.users || inMemoryDb!.users.length === 0) inMemoryDb!.users = [...initialEnrolledStudents];
+      if (!inMemoryDb!.users || inMemoryDb!.users.length === 0) {
+        inMemoryDb!.users = [...initialEnrolledStudents, ...initialStaffUsers];
+      } else {
+        // Ensure staff accounts exist without overwriting student accounts
+        for (const staff of initialStaffUsers) {
+          if (!inMemoryDb!.users.some((u) => u.id === staff.id || (staff.loginId && u.loginId === staff.loginId))) {
+            inMemoryDb!.users.push(staff);
+          }
+        }
+      }
       if (!inMemoryDb!.notifications) inMemoryDb!.notifications = [...initialNotifications];
       if (!inMemoryDb!.homework) inMemoryDb!.homework = [...initialHomework];
       if (!inMemoryDb!.calendarEvents) inMemoryDb!.calendarEvents = [...initialCalendarEvents];
@@ -1184,6 +1221,9 @@ export function getDatabase(): DatabaseSchema {
       if (!inMemoryDb!.writtenSubmissions) inMemoryDb!.writtenSubmissions = [];
       if (!inMemoryDb!.chatConversations) inMemoryDb!.chatConversations = [...initialChatConversations];
       if (!inMemoryDb!.chatMessages) inMemoryDb!.chatMessages = [...initialChatMessages];
+      if (!inMemoryDb!.testAttempts) inMemoryDb!.testAttempts = [];
+      if (!inMemoryDb!.studentBookmarks) inMemoryDb!.studentBookmarks = [];
+      if (!inMemoryDb!.studentNotes) inMemoryDb!.studentNotes = [];
       return inMemoryDb!;
     } catch (err) {
       console.error('Error reading database file, resetting to initial seed:', err);
@@ -1191,7 +1231,7 @@ export function getDatabase(): DatabaseSchema {
   }
 
   inMemoryDb = {
-    users: [...initialEnrolledStudents],
+    users: [...initialEnrolledStudents, ...initialStaffUsers],
     liveClassSessions: initialLiveSessions,
     mcqQuestions: initialMcqQuestions,
     books: initialBooks,
@@ -1207,6 +1247,9 @@ export function getDatabase(): DatabaseSchema {
     reportedSafetyItems: [],
     auditLogs: [...initialAuditLogs],
     aboutSchool: initialAboutSchoolData,
+    testAttempts: [],
+    studentBookmarks: [],
+    studentNotes: [],
   };
 
   saveDatabase(inMemoryDb);
@@ -1225,47 +1268,494 @@ export function saveDatabase(db: DatabaseSchema) {
 
 // Entity helper functions
 export const db = {
-  // Users & Profiles
-  findUserByEmail(email: string): UserProfile | undefined {
-    const data = getDatabase();
-    return data.users.find((u) => u.email.toLowerCase() === email.toLowerCase());
-  },
-  findUserById(id: string): UserProfile | undefined {
-    const data = getDatabase();
-    return data.users.find((u) => u.id === id);
-  },
-  upsertUser(user: Partial<UserProfile> & { email: string; name: string }): UserProfile {
-    const data = getDatabase();
-    const existingIndex = data.users.findIndex((u) => u.email.toLowerCase() === user.email.toLowerCase());
+  // Authentication & Passwords
+  authenticateUser(
+    role: UserRole,
+    loginId: string,
+    password: string,
+    selectedClass?: string
+  ): { success: boolean; user?: UserProfile; message?: string } {
+    if (!loginId || !password) {
+      return { success: false, message: 'Login ID and password are required.' };
+    }
 
+    const data = getDatabase();
+    const cleanId = loginId.trim().toLowerCase();
+
+    // Find user matching role and identifier
+    const user = data.users.find((u) => {
+      if (u.role !== role) {
+        if (!(role === 'admin' && u.role === 'principal')) {
+          return false;
+        }
+      }
+
+      const matchId = u.id && u.id.toLowerCase() === cleanId;
+      const matchStudentId = u.studentId && u.studentId.toLowerCase() === cleanId;
+      const matchLoginId = u.loginId && u.loginId.toLowerCase() === cleanId;
+      const matchEmail = u.email && u.email.toLowerCase() === cleanId;
+      const matchRoll =
+        u.role === 'student' &&
+        u.rollNo &&
+        u.rollNo.toLowerCase() === cleanId &&
+        (!selectedClass || u.selectedClass === selectedClass);
+
+      return matchId || matchStudentId || matchLoginId || matchEmail || matchRoll;
+    });
+
+    if (!user) {
+      return { success: false, message: 'Invalid Login ID or Password.' };
+    }
+
+    // Verify Password
+    let isPasswordValid = false;
+    if (user.passwordHash) {
+      isPasswordValid = verifyPassword(password, user.passwordHash);
+    } else {
+      // Fallback verification for initial seed accounts
+      if (user.role === 'student') {
+        isPasswordValid =
+          password === (user.rollNo || 'student123') ||
+          password === 'student123' ||
+          password === '123456';
+      } else if (user.role === 'teacher') {
+        isPasswordValid = password === 'teacher123';
+      } else if (user.role === 'admin') {
+        isPasswordValid = password === 'admin12345678';
+      } else if (user.role === 'principal') {
+        isPasswordValid = password === 'principal123';
+      } else if (user.role === 'parent') {
+        isPasswordValid = password === 'parent123';
+      }
+
+      if (isPasswordValid) {
+        user.passwordHash = hashPassword(password);
+        saveDatabase(data);
+      }
+    }
+
+    if (!isPasswordValid) {
+      return { success: false, message: 'Invalid Login ID or Password.' };
+    }
+
+    return {
+      success: true,
+      user,
+    };
+  },
+
+  changeUserPassword(
+    userId: string,
+    currentPassword: string,
+    newPassword: string
+  ): { success: boolean; message: string } {
+    if (!userId || !currentPassword || !newPassword) {
+      return { success: false, message: 'All password fields are required.' };
+    }
+
+    if (newPassword.length < 4) {
+      return { success: false, message: 'New password must be at least 4 characters.' };
+    }
+
+    const data = getDatabase();
+    const clean = userId.trim().toLowerCase();
+    const user = data.users.find(
+      (u) =>
+        (u.id && u.id.toLowerCase() === clean) ||
+        (u.studentId && u.studentId.toLowerCase() === clean) ||
+        (u.loginId && u.loginId.toLowerCase() === clean) ||
+        (u.email && u.email.toLowerCase() === clean) ||
+        (u.rollNo && u.rollNo.toLowerCase() === clean)
+    );
+
+    if (!user) {
+      return { success: false, message: 'Account not found.' };
+    }
+
+    // Verify current password
+    let isCurrentValid = false;
+    if (user.passwordHash) {
+      isCurrentValid = verifyPassword(currentPassword, user.passwordHash);
+    } else {
+      if (user.role === 'student') {
+        isCurrentValid =
+          currentPassword === (user.rollNo || 'student123') || currentPassword === 'student123';
+      } else if (user.role === 'teacher') {
+        isCurrentValid = currentPassword === 'teacher123';
+      } else if (user.role === 'admin') {
+        isCurrentValid = currentPassword === 'admin12345678';
+      } else if (user.role === 'principal') {
+        isCurrentValid = currentPassword === 'principal123';
+      } else if (user.role === 'parent') {
+        isCurrentValid = currentPassword === 'parent123';
+      }
+    }
+
+    if (!isCurrentValid) {
+      return { success: false, message: 'Current password is incorrect.' };
+    }
+
+    user.passwordHash = hashPassword(newPassword);
+    user.updatedAt = new Date().toISOString();
+    saveDatabase(data);
+
+    return { success: true, message: 'Password changed successfully.' };
+  },
+
+  // Users & Profiles: Permanent identification & secure persistence
+  findUser(identifier: string): UserProfile | undefined {
+    if (!identifier) return undefined;
+    const data = getDatabase();
+    const clean = identifier.trim().toLowerCase();
+    return data.users.find(
+      (u) =>
+        (u.id && u.id.toLowerCase() === clean) ||
+        (u.studentId && u.studentId.toLowerCase() === clean) ||
+        (u.loginId && u.loginId.toLowerCase() === clean) ||
+        (u.email && u.email.toLowerCase() === clean) ||
+        (u.rollNo && u.rollNo.toLowerCase() === clean)
+    );
+  },
+
+  findUserByEmail(email: string): UserProfile | undefined {
+    if (!email) return undefined;
+    const data = getDatabase();
+    return data.users.find((u) => u.email && u.email.toLowerCase() === email.trim().toLowerCase());
+  },
+
+  findUserById(id: string): UserProfile | undefined {
+    if (!id) return undefined;
+    const data = getDatabase();
+    return data.users.find((u) => u.id === id || u.studentId === id || u.loginId === id);
+  },
+
+  findStudentByRoll(rollNo: string, selectedClass?: SchoolClass): UserProfile | undefined {
+    if (!rollNo) return undefined;
+    const data = getDatabase();
+    const cleanRoll = rollNo.trim().toLowerCase();
+    return data.users.find(
+      (u) =>
+        u.role === 'student' &&
+        u.rollNo &&
+        u.rollNo.toLowerCase() === cleanRoll &&
+        (!selectedClass || u.selectedClass === selectedClass)
+    );
+  },
+
+  // SAFE Upsert: Never overwrite existing data on login/reopen
+  upsertUser(user: Partial<UserProfile> & { name: string }): UserProfile {
+    const data = getDatabase();
     const now = new Date().toISOString();
+
+    const lookupId = (user.id || user.studentId || user.loginId || '').trim().toLowerCase();
+    const lookupEmail = (user.email || '').trim().toLowerCase();
+    const lookupRoll = (user.rollNo || '').trim().toLowerCase();
+    const lookupClass = user.selectedClass;
+
+    // 1. Locate existing account by permanent unique identifiers
+    let existingIndex = -1;
+    if (lookupId) {
+      existingIndex = data.users.findIndex(
+        (u) =>
+          (u.id && u.id.toLowerCase() === lookupId) ||
+          (u.studentId && u.studentId.toLowerCase() === lookupId) ||
+          (u.loginId && u.loginId.toLowerCase() === lookupId)
+      );
+    }
+
+    if (existingIndex < 0 && lookupEmail) {
+      existingIndex = data.users.findIndex(
+        (u) => u.email && u.email.toLowerCase() === lookupEmail
+      );
+    }
+
+    if (existingIndex < 0 && lookupRoll && user.role === 'student') {
+      existingIndex = data.users.findIndex(
+        (u) =>
+          u.role === 'student' &&
+          u.rollNo &&
+          u.rollNo.toLowerCase() === lookupRoll &&
+          (!lookupClass || u.selectedClass === lookupClass)
+      );
+    }
+
+    // 2. EXISTING ACCOUNT FOUND: Safe Partial Update
     if (existingIndex >= 0) {
+      const existing = data.users[existingIndex];
       const updated: UserProfile = {
-        ...data.users[existingIndex],
-        ...user,
+        ...existing,
+        name: user.name || existing.name,
+        picture: user.picture !== undefined ? user.picture : existing.picture,
+        selectedClass: user.selectedClass || existing.selectedClass,
+        section: user.section || existing.section || 'A',
+        rollNo: user.rollNo || existing.rollNo,
+        stream: user.stream || existing.stream,
+        phone: user.phone || existing.phone,
+        childId: user.childId || existing.childId,
+        childName: user.childName || existing.childName,
+        childRollNo: user.childRollNo || existing.childRollNo,
+        childClass: user.childClass || existing.childClass,
+        studentId: existing.studentId || user.studentId || existing.id,
+        loginId: existing.loginId || user.loginId,
         updatedAt: now,
       };
+
+      if (user.passwordHash) {
+        updated.passwordHash = user.passwordHash;
+      }
+
       data.users[existingIndex] = updated;
       saveDatabase(data);
       return updated;
-    } else {
-      const newUser: UserProfile = {
-        id: user.id || `user_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
-        email: user.email,
-        name: user.name,
-        picture: user.picture || '',
-        role: user.role || 'student',
-        selectedClass: user.selectedClass || '10',
-        rollNo: user.rollNo || '',
-        stream: user.stream || 'General',
-        phone: user.phone || '',
-        createdAt: now,
-        updatedAt: now,
-      };
-      data.users.push(newUser);
-      saveDatabase(data);
-      return newUser;
     }
+
+    // 3. NEW ACCOUNT: Create permanent student identity
+    const studentClass = user.selectedClass || '10';
+    const cleanRollNum = (user.rollNo || '').trim().replace(/[^a-zA-Z0-9]/g, '');
+    const permanentStudentId =
+      user.studentId?.trim() ||
+      user.id?.trim() ||
+      (user.role === 'student' && cleanRollNum
+        ? `std-${studentClass}-${cleanRollNum}`
+        : `usr-${user.role || 'std'}-${Date.now().toString(36)}`);
+
+    const permanentLoginId =
+      user.loginId?.trim() ||
+      (user.role === 'student' ? user.rollNo?.trim() || permanentStudentId : permanentStudentId);
+
+    const generatedEmail =
+      user.email?.trim() ||
+      `${permanentLoginId.toLowerCase()}@student.janta.edu`;
+
+    const newUser: UserProfile = {
+      id: permanentStudentId,
+      studentId: permanentStudentId,
+      loginId: permanentLoginId,
+      email: generatedEmail,
+      name: user.name.trim(),
+      picture: user.picture || '',
+      role: user.role || 'student',
+      selectedClass: studentClass,
+      section: user.section?.trim().toUpperCase() || 'A',
+      rollNo: user.rollNo?.trim() || '',
+      stream: user.stream || 'General',
+      phone: user.phone?.trim() || '',
+      childId: user.childId,
+      childName: user.childName,
+      childRollNo: user.childRollNo,
+      childClass: user.childClass,
+      passwordHash: user.passwordHash || (user.rollNo ? hashPassword(user.rollNo) : undefined),
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    data.users.push(newUser);
+    saveDatabase(data);
+    return newUser;
+  },
+
+  // Safe Profile Update
+  updateUserProfile(
+    userId: string,
+    updates: Partial<UserProfile>
+  ): { success: boolean; user?: UserProfile; message?: string } {
+    if (!userId) return { success: false, message: 'User ID is required' };
+    const data = getDatabase();
+    const clean = userId.trim().toLowerCase();
+    const index = data.users.findIndex(
+      (u) =>
+        (u.id && u.id.toLowerCase() === clean) ||
+        (u.studentId && u.studentId.toLowerCase() === clean) ||
+        (u.loginId && u.loginId.toLowerCase() === clean)
+    );
+
+    if (index < 0) {
+      return { success: false, message: 'Student account not found in database.' };
+    }
+
+    const current = data.users[index];
+    // Guard against unauthorized role escalation
+    const safeUpdates: Partial<UserProfile> = { ...updates };
+    delete safeUpdates.role;
+    delete safeUpdates.id;
+    delete safeUpdates.studentId;
+    delete safeUpdates.createdAt;
+
+    const updatedUser: UserProfile = {
+      ...current,
+      ...safeUpdates,
+      updatedAt: new Date().toISOString(),
+    };
+
+    data.users[index] = updatedUser;
+    saveDatabase(data);
+
+    return {
+      success: true,
+      user: updatedUser,
+      message: 'Profile updated and verified in database.',
+    };
+  },
+
+  // Admin Delete Student Account (Requirement 9)
+  deleteStudentAccount(
+    studentId: string,
+    adminRole: string
+  ): { success: boolean; message: string } {
+    if (adminRole !== 'admin' && adminRole !== 'principal') {
+      return { success: false, message: 'Unauthorized. Admin permission required.' };
+    }
+
+    const data = getDatabase();
+    const clean = studentId.trim().toLowerCase();
+    const initialCount = data.users.length;
+    data.users = data.users.filter(
+      (u) =>
+        u.id.toLowerCase() !== clean &&
+        (!u.studentId || u.studentId.toLowerCase() !== clean)
+    );
+
+    if (data.users.length === initialCount) {
+      return { success: false, message: 'Student account not found.' };
+    }
+
+    // Clean linked data
+    if (data.testAttempts) {
+      data.testAttempts = data.testAttempts.filter((t) => t.studentId?.toLowerCase() !== clean);
+    }
+    if (data.studentBookmarks) {
+      data.studentBookmarks = data.studentBookmarks.filter(
+        (b) => (b.metadata as any)?.studentId?.toLowerCase() !== clean
+      );
+    }
+    if (data.studentNotes) {
+      data.studentNotes = data.studentNotes.filter((n) => n.studentId.toLowerCase() !== clean);
+    }
+
+    saveDatabase(data);
+    return { success: true, message: `Student account ${studentId} permanently deleted.` };
+  },
+
+  // Test Attempt Records linked to permanent Student ID
+  saveTestAttempt(attempt: Omit<TestAttemptRecord, 'id' | 'date'> & { studentId: string }): TestAttemptRecord {
+    const data = getDatabase();
+    if (!data.testAttempts) data.testAttempts = [];
+
+    const record: TestAttemptRecord = {
+      ...attempt,
+      id: `attempt_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+      date: new Date().toISOString(),
+    };
+
+    data.testAttempts.unshift(record);
+    saveDatabase(data);
+    return record;
+  },
+
+  getTestAttempts(studentId: string): TestAttemptRecord[] {
+    const data = getDatabase();
+    if (!data.testAttempts) return [];
+    const clean = studentId.trim().toLowerCase();
+    return data.testAttempts.filter(
+      (a) => a.studentId && a.studentId.toLowerCase() === clean
+    );
+  },
+
+  // Bookmarks linked to permanent Student ID
+  saveBookmark(studentId: string, bookmark: Omit<BookmarkItem, 'savedAt'>): BookmarkItem {
+    const data = getDatabase();
+    if (!data.studentBookmarks) data.studentBookmarks = [];
+
+    const fullBookmark: BookmarkItem = {
+      ...bookmark,
+      savedAt: new Date().toISOString(),
+      metadata: { ...(bookmark.metadata || {}), studentId },
+    };
+
+    data.studentBookmarks = data.studentBookmarks.filter(
+      (b) => !(b.itemId === bookmark.itemId && (b.metadata as any)?.studentId === studentId)
+    );
+    data.studentBookmarks.unshift(fullBookmark);
+    saveDatabase(data);
+    return fullBookmark;
+  },
+
+  removeBookmark(studentId: string, itemId: string): boolean {
+    const data = getDatabase();
+    if (!data.studentBookmarks) return false;
+    const initialLen = data.studentBookmarks.length;
+    data.studentBookmarks = data.studentBookmarks.filter(
+      (b) => !(b.itemId === itemId && (b.metadata as any)?.studentId === studentId)
+    );
+    if (data.studentBookmarks.length !== initialLen) {
+      saveDatabase(data);
+      return true;
+    }
+    return false;
+  },
+
+  getBookmarks(studentId: string): BookmarkItem[] {
+    const data = getDatabase();
+    if (!data.studentBookmarks) return [];
+    return data.studentBookmarks.filter((b) => (b.metadata as any)?.studentId === studentId);
+  },
+
+  // Student Notes linked to permanent Student ID
+  saveStudentNote(
+    studentId: string,
+    note: { title: string; content: string; subject?: string; id?: string }
+  ): StudentNote {
+    const data = getDatabase();
+    if (!data.studentNotes) data.studentNotes = [];
+    const now = new Date().toISOString();
+
+    if (note.id) {
+      const idx = data.studentNotes.findIndex((n) => n.id === note.id && n.studentId === studentId);
+      if (idx >= 0) {
+        data.studentNotes[idx] = {
+          ...data.studentNotes[idx],
+          title: note.title,
+          content: note.content,
+          subject: note.subject || data.studentNotes[idx].subject,
+          updatedAt: now,
+        };
+        saveDatabase(data);
+        return data.studentNotes[idx];
+      }
+    }
+
+    const newNote: StudentNote = {
+      id: `note_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+      studentId,
+      title: note.title,
+      content: note.content,
+      subject: note.subject || 'General',
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    data.studentNotes.unshift(newNote);
+    saveDatabase(data);
+    return newNote;
+  },
+
+  deleteStudentNote(studentId: string, noteId: string): boolean {
+    const data = getDatabase();
+    if (!data.studentNotes) return false;
+    const initialLen = data.studentNotes.length;
+    data.studentNotes = data.studentNotes.filter((n) => !(n.id === noteId && n.studentId === studentId));
+    if (data.studentNotes.length !== initialLen) {
+      saveDatabase(data);
+      return true;
+    }
+    return false;
+  },
+
+  getStudentNotes(studentId: string): StudentNote[] {
+    const data = getDatabase();
+    if (!data.studentNotes) return [];
+    const clean = studentId.trim().toLowerCase();
+    return data.studentNotes.filter((n) => n.studentId.toLowerCase() === clean);
   },
 
   // Live Sessions

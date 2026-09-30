@@ -1,6 +1,6 @@
 {
   "name": "Janta +2 High School – Khalari",
-  "description": "Official mobile-first school app for Janta +2 High School, Khalari featuring Google Sign-In, AI Class, Live Video Classroom, JAC MCQ Practice, Study Books, Timetables, Notices, and Results.",
+  "description": "Official mobile-first school app for Janta +2 High School, Khalari featuring Secure School Login, AI Class, Live Video Classroom, JAC MCQ Practice, Study Books, Timetables, Notices, and Results.",
   "requestFramePermissions": [
     "camera",
     "microphone"

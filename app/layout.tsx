@@ -1,12 +1,13 @@
 import type {Metadata, Viewport} from 'next';
+import Script from 'next/script';
 import './globals.css';
 
 export const metadata: Metadata = {
   title: 'Janta +2 High School – Khalari',
-  description: 'Official mobile-first school app for Janta +2 High School, Khalari. Featuring Google Sign-In, AI Class, Live Video Classes, JAC MCQ Practice, Timetable, Study Books, Notices, and Results.',
+  description: 'Official mobile-first school app for Janta +2 High School, Khalari. Featuring Secure School Login, AI Class, Live Video Classes, JAC MCQ Practice, Timetable, Study Books, Notices, and Results.',
   openGraph: {
     title: 'Janta +2 High School – Khalari',
-    description: 'Official mobile-first school app for Janta +2 High School, Khalari. Featuring Google Sign-In, AI Class, Live Video Classes, JAC MCQ Practice, Timetable, Study Books, Notices, and Results.',
+    description: 'Official mobile-first school app for Janta +2 High School, Khalari. Featuring Secure School Login, AI Class, Live Video Classes, JAC MCQ Practice, Timetable, Study Books, Notices, and Results.',
     type: 'website',
   },
   twitter: {
@@ -27,11 +28,11 @@ export const viewport: Viewport = {
 export default function RootLayout({children}: {children: React.ReactNode}) {
   return (
     <html lang="en">
-      <head>
-        <script src="https://accounts.google.com/gsi/client" async defer />
-        <script src="https://meet.jit.si/external_api.js" async defer />
-      </head>
       <body className="bg-slate-50 text-slate-900 antialiased selection:bg-blue-600 selection:text-white" suppressHydrationWarning>
+        <Script
+          src="https://meet.jit.si/external_api.js"
+          strategy="lazyOnload"
+        />
         {children}
       </body>
     </html>

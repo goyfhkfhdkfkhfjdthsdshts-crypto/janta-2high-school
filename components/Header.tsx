@@ -168,7 +168,7 @@ export function Header({
             <button
               onClick={onOpenProfile}
               className="p-1.5 rounded-full bg-blue-600 text-white hover:bg-blue-700 shadow-xs"
-              title="Sign In with Google"
+              title="Sign In to School Portal"
             >
               <User className="w-4 h-4" />
             </button>

@@ -17,65 +17,47 @@ import {
 import { BookmarkItem, BookmarkType } from '@/lib/types';
 
 interface BookmarksViewProps {
+  user?: UserProfile | null;
   onNavigateToSection: (section: string) => void;
   language: 'hi' | 'en';
 }
 
-const STORAGE_KEY = 'janta_school_bookmarks_v1';
-
-// Seed initial saved items if student hasn't saved yet
-const initialSavedItems: BookmarkItem[] = [
-  {
-    id: 'bm-1',
-    itemId: 'b-10-1',
-    type: 'book',
-    title: 'NCERT Mathematics (गणित) Class 10',
-    subtitle: 'JCERT / NCERT Complete Hindi & English Editions',
-    section: 'study',
-    savedAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
-  },
-  {
-    id: 'bm-2',
-    itemId: 'mcq-1',
-    type: 'mcq',
-    title: 'Real Numbers: Fundamental Theorem of Arithmetic',
-    subtitle: 'Every composite number can be expressed as a product of primes uniquely.',
-    section: 'mcq',
-    savedAt: new Date(Date.now() - 1000 * 60 * 60 * 12).toISOString(),
-  },
-  {
-    id: 'bm-3',
-    itemId: 'n-1',
-    type: 'notice',
-    title: 'JAC Board Matric & Intermediate Examination Form Fill-up',
-    subtitle: 'Official circular for regular & private candidates registration.',
-    section: 'notice',
-    savedAt: new Date(Date.now() - 1000 * 60 * 60 * 6).toISOString(),
-  },
-];
-
-export function BookmarksView({ onNavigateToSection, language }: BookmarksViewProps) {
+export function BookmarksView({ user, onNavigateToSection, language }: BookmarksViewProps) {
   const [bookmarks, setBookmarks] = useState<BookmarkItem[]>([]);
   const [activeType, setActiveType] = useState<string>('all');
+  const studentAccountId = user?.studentId || user?.id || 'default_student';
+  const storageKey = `janta_bookmarks_${studentAccountId}`;
 
   useEffect(() => {
     try {
-      const stored = localStorage.getItem(STORAGE_KEY);
+      const stored = localStorage.getItem(storageKey);
       if (stored) {
         setBookmarks(JSON.parse(stored));
       } else {
         setBookmarks(initialSavedItems);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(initialSavedItems));
+      }
+
+      // Fetch from persistent database
+      if (studentAccountId && studentAccountId !== 'default_student') {
+        fetch(`/api/student/activity?studentId=${encodeURIComponent(studentAccountId)}`)
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.success && data.data?.bookmarks && data.data.bookmarks.length > 0) {
+              setBookmarks(data.data.bookmarks);
+              localStorage.setItem(storageKey, JSON.stringify(data.data.bookmarks));
+            }
+          })
+          .catch(() => {});
       }
     } catch {
       setBookmarks(initialSavedItems);
     }
-  }, []);
+  }, [studentAccountId, storageKey]);
 
   const saveBookmarks = (items: BookmarkItem[]) => {
     setBookmarks(items);
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+      localStorage.setItem(storageKey, JSON.stringify(items));
     } catch (e) {
       console.error(e);
     }
@@ -83,8 +65,21 @@ export function BookmarksView({ onNavigateToSection, language }: BookmarksViewPr
 
   const handleRemove = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
+    const itemToRemove = bookmarks.find((b) => b.id === id);
     const updated = bookmarks.filter((b) => b.id !== id);
     saveBookmarks(updated);
+
+    if (itemToRemove && studentAccountId !== 'default_student') {
+      fetch('/api/student/activity', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'remove_bookmark',
+          studentId: studentAccountId,
+          itemId: itemToRemove.itemId || itemToRemove.id,
+        }),
+      }).catch(() => {});
+    }
   };
 
   const handleClearAll = () => {

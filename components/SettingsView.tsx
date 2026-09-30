@@ -15,6 +15,10 @@ import {
   Trash2,
   KeyRound,
   ExternalLink,
+  Lock,
+  Eye,
+  EyeOff,
+  AlertCircle,
 } from 'lucide-react';
 import { SchoolClass, UserProfile } from '@/lib/types';
 
@@ -49,8 +53,76 @@ export function SettingsView({
 
   const [cacheCleared, setCacheCleared] = useState(false);
 
+  // Change Password State (Requirement 13)
+  const [showPasswordForm, setShowPasswordForm] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [passwordLoading, setPasswordLoading] = useState(false);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [passwordSuccess, setPasswordSuccess] = useState<string | null>(null);
+
   const toggleNotif = (key: keyof typeof notifPreferences) => {
     setNotifPreferences((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) {
+      setPasswordError('Please login to change password.');
+      return;
+    }
+    if (!currentPassword.trim() || !newPassword.trim() || !confirmPassword.trim()) {
+      setPasswordError('All fields (Current Password, New Password, Confirm New Password) are required.');
+      return;
+    }
+    if (newPassword.length < 4) {
+      setPasswordError('New password must be at least 4 characters long.');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordError('New password and Confirm password do not match.');
+      return;
+    }
+
+    setPasswordLoading(true);
+    setPasswordError(null);
+    setPasswordSuccess(null);
+
+    try {
+      const res = await fetch('/api/auth/change-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: user.id || user.studentId || user.loginId || user.email,
+          currentPassword: currentPassword.trim(),
+          newPassword: newPassword.trim(),
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setPasswordSuccess(
+          language === 'hi'
+            ? 'पासवर्ड सफलतापूर्वक बदल दिया गया है! पुराना पासवर्ड अब अमान्य है।'
+            : 'Password changed successfully! Old password is now disabled.'
+        );
+        setCurrentPassword('');
+        setNewPassword('');
+        setConfirmPassword('');
+        setTimeout(() => {
+          setPasswordSuccess(null);
+          setShowPasswordForm(false);
+        }, 2200);
+      } else {
+        setPasswordError(data.message || 'Unable to update password. Please check your current password.');
+      }
+    } catch {
+      setPasswordError('School server is temporarily unavailable. Please try again.');
+    } finally {
+      setPasswordLoading(false);
+    }
   };
 
   const handleClearCache = () => {
@@ -182,8 +254,12 @@ export function SettingsView({
             <span className="font-bold text-slate-900">{user?.name || 'Student / Guest'}</span>
           </div>
           <div className="flex items-center justify-between">
+            <span className="text-slate-500">{language === 'hi' ? 'लॉगिन आईडी' : 'Login / Student ID'}:</span>
+            <span className="font-bold font-mono text-slate-900">{user?.studentId || user?.id || user?.loginId || 'N/A'}</span>
+          </div>
+          <div className="flex items-center justify-between">
             <span className="text-slate-500">{language === 'hi' ? 'ईमेल' : 'Email'}:</span>
-            <span className="font-bold text-slate-900">{user?.email || 'student@jantahighschool.edu.in'}</span>
+            <span className="font-bold text-slate-900">{user?.email || 'N/A'}</span>
           </div>
           <div className="flex items-center justify-between">
             <span className="text-slate-500">{language === 'hi' ? 'नामांकित कक्षा' : 'Class'}:</span>
@@ -193,6 +269,133 @@ export function SettingsView({
             <span className="text-slate-500">{language === 'hi' ? 'भूमिका' : 'Role'}:</span>
             <span className="font-bold text-blue-700">{isAdmin ? 'Teacher / Admin' : 'Student (छात्र)'}</span>
           </div>
+        </div>
+
+        {/* Change Password inside Account Settings (Requirement 13) */}
+        <div className="pt-2 border-t border-slate-100">
+          {!showPasswordForm ? (
+            <button
+              type="button"
+              onClick={() => setShowPasswordForm(true)}
+              className="w-full py-2.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer"
+            >
+              <KeyRound className="w-4 h-4 text-blue-700" />
+              <span>{language === 'hi' ? 'पासवर्ड बदलें (Change Password)' : 'Change Password'}</span>
+            </button>
+          ) : (
+            <form onSubmit={handleChangePassword} className="space-y-3 p-4 bg-blue-50/50 rounded-2xl border border-blue-200 animate-in fade-in">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <KeyRound className="w-4 h-4 text-blue-700" />
+                  <span className="text-xs font-bold text-slate-900 uppercase tracking-wide">
+                    {language === 'hi' ? 'खाता पासवर्ड बदलें' : 'Change Account Password'}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowPasswordForm(false)}
+                  className="text-xs text-slate-400 hover:text-slate-600 font-semibold cursor-pointer"
+                >
+                  {language === 'hi' ? 'रद्द करें' : 'Cancel'}
+                </button>
+              </div>
+
+              {passwordError && (
+                <div className="p-2.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>{passwordError}</span>
+                </div>
+              )}
+
+              {passwordSuccess && (
+                <div className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 shrink-0" />
+                  <span>{passwordSuccess}</span>
+                </div>
+              )}
+
+              {/* Current Password */}
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                  {language === 'hi' ? 'वर्तमान पासवर्ड (Current Password)' : 'Current Password'}
+                </label>
+                <div className="relative">
+                  <input
+                    type={showCurrentPassword ? 'text' : 'password'}
+                    required
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    placeholder="Enter current password"
+                    className="w-full px-3 py-2 pr-9 bg-white border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                    className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600 cursor-pointer"
+                  >
+                    {showCurrentPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                  </button>
+                </div>
+              </div>
+
+              {/* New Password */}
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                  {language === 'hi' ? 'नया पासवर्ड (New Password)' : 'New Password'}
+                </label>
+                <div className="relative">
+                  <input
+                    type={showNewPassword ? 'text' : 'password'}
+                    required
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="At least 4 characters"
+                    className="w-full px-3 py-2 pr-9 bg-white border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                    className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600 cursor-pointer"
+                  >
+                    {showNewPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Confirm New Password */}
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                  {language === 'hi' ? 'नए पासवर्ड की पुष्टि करें (Confirm New Password)' : 'Confirm New Password'}
+                </label>
+                <input
+                  type="password"
+                  required
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Re-enter new password"
+                  className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
+                />
+              </div>
+
+              <div className="pt-1 flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowPasswordForm(false)}
+                  className="px-3 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-semibold cursor-pointer"
+                >
+                  {language === 'hi' ? 'रद्द करें' : 'Cancel'}
+                </button>
+                <button
+                  type="submit"
+                  disabled={passwordLoading}
+                  className="px-4 py-2 bg-blue-700 hover:bg-blue-800 text-white rounded-xl text-xs font-bold shadow-xs disabled:opacity-50 cursor-pointer flex items-center gap-1.5"
+                >
+                  <Lock className="w-3.5 h-3.5" />
+                  <span>{passwordLoading ? (language === 'hi' ? 'सहेजा जा रहा है...' : 'Saving...') : (language === 'hi' ? 'पासवर्ड अपडेट करें' : 'Update Password')}</span>
+                </button>
+              </div>
+            </form>
+          )}
         </div>
       </div>
 
