@@ -1,5 +1,4 @@
 import type {Metadata, Viewport} from 'next';
-import Script from 'next/script';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -28,15 +27,11 @@ export const viewport: Viewport = {
 export default function RootLayout({children}: {children: React.ReactNode}) {
   return (
     <html lang="en">
+      <head>
+        <script src="https://accounts.google.com/gsi/client" async defer />
+        <script src="https://meet.jit.si/external_api.js" async defer />
+      </head>
       <body className="bg-slate-50 text-slate-900 antialiased selection:bg-blue-600 selection:text-white" suppressHydrationWarning>
-        <Script
-          src="https://accounts.google.com/gsi/client"
-          strategy="afterInteractive"
-        />
-        <Script
-          src="https://meet.jit.si/external_api.js"
-          strategy="lazyOnload"
-        />
         {children}
       </body>
     </html>

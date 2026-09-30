@@ -1,8 +1,8 @@
 import { db } from '@/lib/db';
 import { SchoolPortalClient } from '@/components/SchoolPortalClient';
 
-// Server rendering strategy: Ensure dynamic server-side rendering compatibility for production hosting
-export const dynamic = 'force-dynamic';
+// Server rendering strategy: Prerenders initial database state statically for instant FCP and static export
+export const dynamic = 'auto';
 
 export default async function Page() {
   // Pre-fetch initial data server-side from local database

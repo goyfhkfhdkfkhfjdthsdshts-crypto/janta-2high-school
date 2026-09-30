@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:gh-pages": "node scripts/build-gh-pages.js",
     "start": "next start",
     "lint": "eslint ."
   },

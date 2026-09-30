@@ -1,0 +1,17 @@
+.gcloudignore
+.git
+.gitignore
+
+# Dependencies
+node_modules/
+
+# Next.js build outputs
+.next/
+.next-dev/
+
+# Logs and environment
+coverage/
+.DS_Store
+*.log
+.env*
+!.env.example
