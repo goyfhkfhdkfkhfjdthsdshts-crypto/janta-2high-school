@@ -153,6 +153,77 @@
       "stream": "Commerce",
       "createdAt": "2026-04-01T00:00:00.000Z",
       "updatedAt": "2026-04-01T00:00:00.000Z"
+    },
+    {
+      "id": "tch-101",
+      "loginId": "TCH-101",
+      "name": "Dr. Rameshwar Mahto",
+      "email": "rameshwar.mahto@janta.edu",
+      "role": "teacher",
+      "selectedClass": "10",
+      "createdAt": "2026-01-01T00:00:00.000Z",
+      "updatedAt": "2026-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "tch-102",
+      "loginId": "TCH-102",
+      "name": "Sunita Devi",
+      "email": "sunita.devi@janta.edu",
+      "role": "teacher",
+      "selectedClass": "9",
+      "createdAt": "2026-01-01T00:00:00.000Z",
+      "updatedAt": "2026-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "adm-001",
+      "loginId": "ADM-001",
+      "name": "Senior School Administrator",
+      "email": "admin@janta.edu",
+      "role": "admin",
+      "selectedClass": "10",
+      "createdAt": "2026-01-01T00:00:00.000Z",
+      "updatedAt": "2026-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "prn-001",
+      "loginId": "PRN-001",
+      "name": "Principal Dr. Arvind Kumar",
+      "email": "principal@janta.edu",
+      "role": "principal",
+      "selectedClass": "10",
+      "createdAt": "2026-01-01T00:00:00.000Z",
+      "updatedAt": "2026-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "prt-1001",
+      "loginId": "PRT-1001",
+      "name": "Rajesh Kumar Singh (Guardian of Amit)",
+      "email": "rajesh.singh@parents.janta.edu",
+      "role": "parent",
+      "selectedClass": "10",
+      "childId": "std-10-1",
+      "childName": "Amit Kumar Singh",
+      "childRollNo": "1001",
+      "childClass": "10",
+      "createdAt": "2026-01-01T00:00:00.000Z",
+      "updatedAt": "2026-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "std-10-1015",
+      "studentId": "std-10-1015",
+      "loginId": "1015",
+      "email": "1015@student.janta.edu",
+      "name": "Anil chouhan",
+      "picture": "",
+      "role": "student",
+      "selectedClass": "10",
+      "section": "A",
+      "rollNo": "1015",
+      "stream": "General",
+      "phone": "8709035531",
+      "passwordHash": "964200ee25315d0c33d53b3c11f7e1113c02a7df0e1c5edf331d2ff12599ecbd",
+      "createdAt": "2026-09-30T08:08:57.504Z",
+      "updatedAt": "2026-09-30T08:08:57.508Z"
     }
   ],
   "liveClassSessions": [
@@ -3383,5 +3454,8 @@
         ]
       }
     }
-  ]
+  ],
+  "testAttempts": [],
+  "studentBookmarks": [],
+  "studentNotes": []
 }

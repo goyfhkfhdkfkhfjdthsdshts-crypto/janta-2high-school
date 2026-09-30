@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db';
+import { db, hashPassword } from '@/lib/db';
 import { UserRole } from '@/lib/types';
 
 // GET: Retrieve authenticated student/user profile from real persistent database
@@ -89,6 +89,12 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    const initialHash = password
+      ? hashPassword(password)
+      : rollNo
+      ? hashPassword(rollNo.trim())
+      : undefined;
+
     const user = db.upsertUser({
       name: name.trim(),
       selectedClass: selectedClass || '10',
@@ -99,16 +105,8 @@ export async function POST(req: NextRequest) {
       email: email?.trim() || '',
       stream: stream || 'General',
       phone: phone?.trim() || '',
-      passwordHash: password ? db.changeUserPassword ? undefined : undefined : undefined,
+      passwordHash: initialHash,
     });
-
-    if (password) {
-      db.changeUserPassword(user.id, 'temp', password);
-      // or directly hash and save
-      const data = (db as any);
-      user.passwordHash = (require('@/lib/db').hashPassword)(password);
-      db.upsertUser(user);
-    }
 
     const response = NextResponse.json({
       success: true,

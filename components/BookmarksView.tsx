@@ -14,7 +14,19 @@ import {
   ChevronRight,
   Sparkles,
 } from 'lucide-react';
-import { BookmarkItem, BookmarkType } from '@/lib/types';
+import { BookmarkItem, BookmarkType, UserProfile } from '@/lib/types';
+
+const DEFAULT_SAVED_ITEMS: BookmarkItem[] = [
+  {
+    id: 'default_notice_1',
+    itemId: 'notice_1',
+    type: 'notice',
+    title: 'School Academic Calendar & Guidelines',
+    subtitle: 'Important guidelines for JAC examinations and attendance',
+    section: 'notices',
+    savedAt: new Date().toISOString(),
+  },
+];
 
 interface BookmarksViewProps {
   user?: UserProfile | null;
@@ -34,7 +46,7 @@ export function BookmarksView({ user, onNavigateToSection, language }: Bookmarks
       if (stored) {
         setBookmarks(JSON.parse(stored));
       } else {
-        setBookmarks(initialSavedItems);
+        setBookmarks(DEFAULT_SAVED_ITEMS);
       }
 
       // Fetch from persistent database
@@ -50,7 +62,7 @@ export function BookmarksView({ user, onNavigateToSection, language }: Bookmarks
           .catch(() => {});
       }
     } catch {
-      setBookmarks(initialSavedItems);
+      setBookmarks(DEFAULT_SAVED_ITEMS);
     }
   }, [studentAccountId, storageKey]);
 

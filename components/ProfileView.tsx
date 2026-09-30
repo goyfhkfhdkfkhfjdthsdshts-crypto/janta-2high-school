@@ -161,6 +161,19 @@ export function ProfileView({
     }
   };
 
+  const fetchStudentNotes = async (studentId: string) => {
+    if (!studentId) return;
+    try {
+      const res = await fetch(`/api/student/activity?studentId=${encodeURIComponent(studentId)}`);
+      const data = await res.json();
+      if (data.success && data.data?.notes) {
+        setNotes(data.data.notes);
+      }
+    } catch (e) {
+      console.error('Error fetching notes:', e);
+    }
+  };
+
   // Sync form data when user changes
   useEffect(() => {
     if (user) {
@@ -176,19 +189,6 @@ export function ProfileView({
       fetchStudentNotes(user.id || user.studentId || '');
     }
   }, [user, selectedClass]);
-
-  const fetchStudentNotes = async (studentId: string) => {
-    if (!studentId) return;
-    try {
-      const res = await fetch(`/api/student/activity?studentId=${encodeURIComponent(studentId)}`);
-      const data = await res.json();
-      if (data.success && data.data?.notes) {
-        setNotes(data.data.notes);
-      }
-    } catch (e) {
-      console.error('Error fetching notes:', e);
-    }
-  };
 
   // Safe Profile Update Handler
   const handleSaveProfile = async (e: React.FormEvent) => {

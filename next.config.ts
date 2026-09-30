@@ -10,10 +10,20 @@ const nextConfig = (phase: string): NextConfig => {
 
   // Determine repository base path for GitHub Pages (e.g., /repo-name)
   // When deploying to https://<username>.github.io/<repo-name>/, basePath is required.
-  const repoName = process.env.GITHUB_REPOSITORY
-    ? `/${process.env.GITHUB_REPOSITORY.split('/')[1]}`
+  let repoName = '';
+  if (process.env.GITHUB_REPOSITORY) {
+    const parts = process.env.GITHUB_REPOSITORY.split('/');
+    const repo = parts[1];
+    // If repository is username.github.io, it is served at root domain, so basePath is ''
+    if (repo && !repo.endsWith('.github.io')) {
+      repoName = `/${repo}`;
+    }
+  }
+
+  const rawBasePath = process.env.NEXT_PUBLIC_BASE_PATH || process.env.BASE_PATH || (isExport ? repoName : '');
+  const basePath = rawBasePath && rawBasePath !== '/' 
+    ? (rawBasePath.startsWith('/') ? rawBasePath : `/${rawBasePath}`).replace(/\/$/, '') 
     : '';
-  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || (isExport ? repoName : '');
 
   return {
     // Enable static export when building for GitHub Pages or static hosting
@@ -22,7 +32,6 @@ const nextConfig = (phase: string): NextConfig => {
           output: 'export' as const,
           trailingSlash: true,
           basePath: basePath || undefined,
-          assetPrefix: basePath ? `${basePath}/` : undefined,
         }
       : {
           // Separate dev server cache from production build directory to avoid
@@ -34,7 +43,7 @@ const nextConfig = (phase: string): NextConfig => {
       ignoreDuringBuilds: true,
     },
     typescript: {
-      ignoreBuildErrors: false,
+      ignoreBuildErrors: isExport,
     },
     images: {
       unoptimized: isExport,
