@@ -62,6 +62,8 @@ interface AboutSchoolViewProps {
   onNavigateToSection: (section: string) => void;
   onOpenAdminModal: () => void;
   language: 'hi' | 'en';
+  initialData?: AboutSchoolData;
+  initialFaculty?: FacultyMember[];
 }
 
 type TabType =
@@ -80,11 +82,13 @@ export function AboutSchoolView({
   onNavigateToSection,
   onOpenAdminModal,
   language,
+  initialData,
+  initialFaculty,
 }: AboutSchoolViewProps) {
-  const [data, setData] = useState<AboutSchoolData | null>(null);
-  const [faculty, setFaculty] = useState<FacultyMember[]>([]);
+  const [data, setData] = useState<AboutSchoolData | null>(() => initialData || null);
+  const [faculty, setFaculty] = useState<FacultyMember[]>(() => initialFaculty || []);
   const [activeTab, setActiveTab] = useState<TabType>('overview');
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(!initialData);
   const [isSaving, setIsSaving] = useState(false);
 
   // Gallery category filter & modal zoom

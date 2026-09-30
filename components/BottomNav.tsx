@@ -1,9 +1,9 @@
 'use client';
 
 import React from 'react';
-import { Home, BookOpen, Video, Bot, User } from 'lucide-react';
+import { Home, BookOpen, Video, FileCheck2, MessageSquare, User } from 'lucide-react';
 
-export type NavTab = 'home' | 'study' | 'live' | 'ai' | 'profile';
+export type NavTab = 'home' | 'study' | 'live' | 'mcq' | 'chat' | 'profile';
 
 interface BottomNavProps {
   activeTab: NavTab;
@@ -25,7 +25,8 @@ export function BottomNav({
       icon: Video,
       badge: hasActiveLiveSession,
     },
-    { id: 'ai' as NavTab, label: 'AI Class', icon: Bot },
+    { id: 'mcq' as NavTab, label: 'MCQ', icon: FileCheck2 },
+    { id: 'chat' as NavTab, label: 'Chat', icon: MessageSquare },
     { id: 'profile' as NavTab, label: 'Profile', icon: User },
   ];
 

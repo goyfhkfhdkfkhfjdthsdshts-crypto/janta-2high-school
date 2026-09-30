@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { SchoolLogo } from './SchoolLogo';
 import { SchoolClass, UserProfile } from '@/lib/types';
+import { TranscribeAudioModal } from './TranscribeAudioModal';
 import {
   Bot,
   Send,
@@ -102,12 +103,12 @@ export function AiClassView({
   const [isLoading, setIsLoading] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
   const [isRecordingVoice, setIsRecordingVoice] = useState(false);
+  const [isTranscribeModalOpen, setIsTranscribeModalOpen] = useState(false);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [currentSpeakingMsgId, setCurrentSpeakingMsgId] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const speechRecognitionRef = useRef<any>(null);
 
   // Update subject when class changes
   useEffect(() => {
@@ -134,58 +135,9 @@ export function AiClassView({
     }
   };
 
-  // Voice Input (Speech-to-Text)
+  // Voice Input via Gemini 3.5 Transcribe
   const handleToggleVoiceInput = () => {
-    if (isRecordingVoice) {
-      if (speechRecognitionRef.current) {
-        speechRecognitionRef.current.stop();
-      }
-      setIsRecordingVoice(false);
-      return;
-    }
-
-    const SpeechRecognition =
-      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-
-    if (!SpeechRecognition) {
-      alert(
-        language === 'hi'
-          ? 'आपके ब्राउज़र में वॉइस इनपुट समर्थित नहीं है। कृपया टाइप करें।'
-          : 'Voice recognition not supported on this browser. Please type your question.'
-      );
-      return;
-    }
-
-    try {
-      const recognition = new SpeechRecognition();
-      recognition.lang = language === 'hi' ? 'hi-IN' : 'en-IN';
-      recognition.interimResults = false;
-      recognition.maxAlternatives = 1;
-
-      recognition.onstart = () => {
-        setIsRecordingVoice(true);
-      };
-
-      recognition.onresult = (event: any) => {
-        const transcript = event.results[0][0].transcript;
-        setQuestion((prev) => (prev ? `${prev} ${transcript}` : transcript));
-      };
-
-      recognition.onerror = (event: any) => {
-        console.error('Speech recognition error:', event.error);
-        setIsRecordingVoice(false);
-      };
-
-      recognition.onend = () => {
-        setIsRecordingVoice(false);
-      };
-
-      speechRecognitionRef.current = recognition;
-      recognition.start();
-    } catch (err) {
-      console.error('Failed to start speech recognition:', err);
-      setIsRecordingVoice(false);
-    }
+    setIsTranscribeModalOpen(true);
   };
 
   // Voice Output (Text-to-Speech)
@@ -342,8 +294,18 @@ export function AiClassView({
           </div>
         </div>
 
-        {/* Language switch & Subject selector */}
+        {/* Language switch & Transcribe Button */}
         <div className="flex items-center gap-2">
+          {/* Audio Transcription Tool */}
+          <button
+            onClick={() => setIsTranscribeModalOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-900 border border-indigo-300 shadow-xs hover:bg-indigo-100 transition-colors"
+            title="Transcribe Audio with Gemini 3.5"
+          >
+            <Mic className="w-3.5 h-3.5 text-indigo-700" />
+            <span>{language === 'hi' ? '🎤 ट्रांसक्राइब' : '🎤 Transcribe Audio'}</span>
+          </button>
+
           {/* Language Toggle: 🇮🇳 हिंदी / 🇬🇧 English */}
           <button
             onClick={onToggleLanguage}
@@ -602,6 +564,16 @@ export function AiClassView({
           ))}
         </div>
       </form>
+
+      {/* Audio Transcription Modal with gemini-3.5-transcribe */}
+      <TranscribeAudioModal
+        isOpen={isTranscribeModalOpen}
+        onClose={() => setIsTranscribeModalOpen(false)}
+        language={language}
+        onUseTranscription={(text) => {
+          setQuestion((prev) => (prev ? `${prev} ${text}` : text));
+        }}
+      />
     </div>
   );
 }

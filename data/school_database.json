@@ -316,6 +316,16 @@
   ],
   "books": [
     {
+      "title": "hindi",
+      "subject": "Mathematics",
+      "class": "10",
+      "medium": "Hindi",
+      "fileUrl": "https://ncert.nic.in/textbook.php",
+      "fileSize": "4.5 MB",
+      "id": "book_1790687420529_r3bl",
+      "uploadedAt": "2026-09-29T13:10:20.529Z"
+    },
+    {
       "id": "b-10-math",
       "class": "10",
       "subject": "Mathematics",
@@ -472,8 +482,8 @@
       "class": "10",
       "day": "Saturday",
       "subject": "Maths",
-      "startTime": "09:00 AM",
-      "endTime": "09:45 AM",
+      "startTime": "09:45 AM",
+      "endTime": "10:45 AM",
       "teacherName": "Mr. R. K. Sharma",
       "room": "Room 101"
     },
@@ -482,8 +492,8 @@
       "class": "10",
       "day": "Saturday",
       "subject": "S.S.T",
-      "startTime": "09:45 AM",
-      "endTime": "10:30 AM",
+      "startTime": "10:45 AM",
+      "endTime": "11:30 AM",
       "teacherName": "Mr. B. Munda",
       "room": "Room 101"
     },
@@ -492,8 +502,8 @@
       "class": "10",
       "day": "Saturday",
       "subject": "English",
-      "startTime": "10:30 AM",
-      "endTime": "11:15 AM",
+      "startTime": "11:30 AM",
+      "endTime": "12:20 PM",
       "teacherName": "Mrs. S. Tirkey",
       "room": "Room 101"
     },
@@ -502,8 +512,8 @@
       "class": "10",
       "day": "Saturday",
       "subject": "Sanskrit",
-      "startTime": "11:30 AM",
-      "endTime": "12:15 PM",
+      "startTime": "01:00 PM",
+      "endTime": "02:00 PM",
       "teacherName": "Acharya R. Mishra",
       "room": "Room 101"
     },
@@ -512,8 +522,8 @@
       "class": "10",
       "day": "Saturday",
       "subject": "Information Technology",
-      "startTime": "12:15 PM",
-      "endTime": "01:00 PM",
+      "startTime": "01:00 PM",
+      "endTime": "02:00 PM",
       "teacherName": "Mr. V. Kumar",
       "room": "Computer Lab"
     },
@@ -850,6 +860,28 @@
       "subject": "English Core / Elective",
       "time": "02:00 PM - 05:15 PM",
       "room": "Designated Examination Center"
+    },
+    {
+      "class": "10",
+      "examName": "JAC Board Annual Examination 2026",
+      "subject": "Mathematics",
+      "date": "2026-03-15",
+      "time": "09:45 AM - 01:00 PM",
+      "shift": "1st Sitting",
+      "room": "Exam Hall A",
+      "instructions": "Entry strictly with JAC Admit Card and School Uniform. No electronic devices permitted.",
+      "id": "ex_1790687340352_zjqv"
+    },
+    {
+      "class": "10",
+      "examName": "JAC Board Annual Examination 2026",
+      "subject": "Mathematics",
+      "date": "2026-03-15",
+      "time": "09:45 AM - 01:00 PM",
+      "shift": "1st Sitting",
+      "room": "Exam Hall A",
+      "instructions": "Entry strictly with JAC Admit Card and School Uniform. No electronic devices permitted.",
+      "id": "ex_1790687353337_p2o6"
     }
   ],
   "results": [
@@ -2431,5 +2463,714 @@
       "method": "voice",
       "verifiedBy": "google_auth"
     }
-  ]
+  ],
+  "notifications": [
+    {
+      "id": "notif-1",
+      "type": "live",
+      "title": "🔴 Live Class Alert",
+      "message": "Dr. A. K. Verma has scheduled a live revision session for Class 10 Science.",
+      "targetClass": "10",
+      "linkSection": "live",
+      "urgent": true,
+      "createdAt": "2026-09-29T12:38:24.964Z",
+      "readByStudentIds": []
+    },
+    {
+      "id": "notif-2",
+      "type": "notice",
+      "title": "📢 JAC Board Registration Notice",
+      "message": "Official circular regarding JAC Matric & Intermediate Annual Examination Form submission.",
+      "targetClass": "All",
+      "linkSection": "notice",
+      "urgent": true,
+      "createdAt": "2026-09-29T11:08:24.964Z",
+      "readByStudentIds": []
+    },
+    {
+      "id": "notif-3",
+      "type": "homework",
+      "title": "📚 New Assignment Assigned",
+      "message": "Mathematics: Chapter 8 Introduction to Trigonometry Exercise 8.4 problem set.",
+      "targetClass": "10",
+      "linkSection": "homework",
+      "urgent": false,
+      "createdAt": "2026-09-29T09:08:24.964Z",
+      "readByStudentIds": []
+    },
+    {
+      "id": "notif-4",
+      "type": "exam",
+      "title": "📅 Pre-Board Exam Datesheet",
+      "message": "Pre-Board Examination date sheet published for Classes 10 & 12. Check shift timings.",
+      "targetClass": "All",
+      "linkSection": "exam",
+      "urgent": false,
+      "createdAt": "2026-09-29T03:08:24.964Z",
+      "readByStudentIds": []
+    },
+    {
+      "id": "notif-5",
+      "type": "attendance",
+      "title": "✅ Attendance Confirmation",
+      "message": "Daily attendance portal is active. Verify your morning attendance before 10:00 AM.",
+      "targetClass": "All",
+      "linkSection": "attendance",
+      "urgent": false,
+      "createdAt": "2026-09-29T01:08:24.964Z",
+      "readByStudentIds": []
+    },
+    {
+      "id": "notif-6",
+      "type": "result",
+      "title": "📊 Terminal Result Published",
+      "message": "Mid-term evaluation results have been uploaded. Enter your Roll Code and Roll No to view.",
+      "targetClass": "All",
+      "linkSection": "results",
+      "urgent": false,
+      "createdAt": "2026-09-28T13:08:24.964Z",
+      "readByStudentIds": []
+    },
+    {
+      "id": "notif-7",
+      "type": "study",
+      "title": "📖 New Study Material Uploaded",
+      "message": "Science & Sanskrit e-books and previous year question bank updated for session 2026-27.",
+      "targetClass": "All",
+      "linkSection": "study",
+      "urgent": false,
+      "createdAt": "2026-09-27T13:08:24.964Z",
+      "readByStudentIds": []
+    }
+  ],
+  "homework": [
+    {
+      "id": "hw-1",
+      "class": "10",
+      "subject": "Mathematics",
+      "title": "Trigonometric Identities & Applications",
+      "description": "Solve textbook NCERT Chapter 8 Exercise 8.4 questions 1 to 5 in your homework notebook with complete proof steps.",
+      "dueDate": "2026-10-01",
+      "attachmentUrl": "https://ncert.nic.in/textbook/pdf/jemh108.pdf",
+      "attachmentName": "NCERT_Maths_Ch8_Exercise.pdf",
+      "assignedBy": "Mr. R. K. Sharma (PGT Mathematics)",
+      "createdAt": "2026-09-29T01:08:24.964Z",
+      "completions": [
+        {
+          "studentId": "student_101",
+          "studentName": "Aman Kumar Verma",
+          "completedAt": "2026-09-29T11:08:24.964Z",
+          "notes": "Completed in notebook, questions verified."
+        }
+      ]
+    },
+    {
+      "id": "hw-2",
+      "class": "10",
+      "subject": "Science (Physics)",
+      "title": "Light - Reflection and Refraction Ray Diagrams",
+      "description": "Draw ray diagrams for concave and convex mirrors showing all 6 object positions and write the sign convention table.",
+      "dueDate": "2026-10-02",
+      "attachmentUrl": "https://ncert.nic.in/textbook/pdf/jesc110.pdf",
+      "attachmentName": "Science_Light_RayDiagrams.pdf",
+      "assignedBy": "Dr. A. K. Verma (Physics)",
+      "createdAt": "2026-09-28T17:08:24.964Z",
+      "completions": []
+    },
+    {
+      "id": "hw-3",
+      "class": "10",
+      "subject": "Social Science (Geography)",
+      "title": "Resources and Development - Soil Map of India",
+      "description": "Mark and shade major soil types of Jharkhand and India (Alluvial, Black, Red and Laterite soil) on an outline political map.",
+      "dueDate": "2026-10-03",
+      "assignedBy": "Mr. B. Munda (SST)",
+      "createdAt": "2026-09-28T07:08:24.964Z",
+      "completions": []
+    },
+    {
+      "id": "hw-4",
+      "class": "9",
+      "subject": "Mathematics",
+      "title": "Number Systems - Rationalising the Denominator",
+      "description": "Complete NCERT Chapter 1 Exercise 1.5 all sub-parts on irrational numbers and real number operations.",
+      "dueDate": "2026-10-01",
+      "assignedBy": "Mr. S. K. Gupta",
+      "createdAt": "2026-09-28T19:08:24.964Z",
+      "completions": []
+    },
+    {
+      "id": "hw-5",
+      "class": "11",
+      "subject": "Physics",
+      "title": "Laws of Motion & Friction Numerical Problems",
+      "description": "Solve questions on banking of roads and conservation of linear momentum with free-body diagrams.",
+      "dueDate": "2026-10-02",
+      "assignedBy": "Senior Physics Faculty",
+      "createdAt": "2026-09-28T13:08:24.964Z",
+      "completions": []
+    },
+    {
+      "id": "hw-6",
+      "class": "12",
+      "subject": "Chemistry",
+      "title": "Electrochemistry - Nernst Equation Calculations",
+      "description": "Calculate standard EMF and equilibrium constants for galvanic cell questions 1 to 8.",
+      "dueDate": "2026-10-01",
+      "assignedBy": "Dr. M. K. Roy",
+      "createdAt": "2026-09-28T15:08:24.964Z",
+      "completions": []
+    }
+  ],
+  "calendarEvents": [
+    {
+      "id": "cal-1",
+      "title": "Gandhi Jayanti Holiday",
+      "description": "National Holiday celebrating Mahatma Gandhi Jayanti. School remains closed.",
+      "startDate": "2026-10-02",
+      "endDate": "2026-10-02",
+      "category": "holiday",
+      "isHoliday": true,
+      "createdBy": "Principal Office",
+      "createdAt": "2026-09-01T10:00:00Z"
+    },
+    {
+      "id": "cal-2",
+      "title": "Durga Puja / Dussehra Vacation",
+      "description": "Autumn festive break for Durga Puja and Dussehra celebrations across Jharkhand.",
+      "startDate": "2026-10-18",
+      "endDate": "2026-10-24",
+      "category": "holiday",
+      "isHoliday": true,
+      "createdBy": "School Administration",
+      "createdAt": "2026-09-01T10:00:00Z"
+    },
+    {
+      "id": "cal-3",
+      "title": "Diwali & Chhath Puja Holidays",
+      "description": "Festive holidays for Deepawali, Govardhan Puja, Bhai Dooj and Chhath Mahaparv.",
+      "startDate": "2026-11-08",
+      "endDate": "2026-11-15",
+      "category": "holiday",
+      "isHoliday": true,
+      "createdBy": "Principal Office",
+      "createdAt": "2026-09-01T10:00:00Z"
+    },
+    {
+      "id": "cal-4",
+      "title": "Annual Science & IT Exhibition 2026",
+      "description": "Inter-class science and vocational technology working model exhibition in the school auditorium.",
+      "startDate": "2026-11-28",
+      "endDate": "2026-11-29",
+      "category": "event",
+      "isHoliday": false,
+      "createdBy": "Science Department",
+      "createdAt": "2026-09-05T10:00:00Z"
+    },
+    {
+      "id": "cal-5",
+      "title": "Class 10 & 12 Pre-Board Examination",
+      "description": "JAC Board model pattern pre-board examination for matric and intermediate candidates.",
+      "startDate": "2026-12-10",
+      "endDate": "2026-12-22",
+      "category": "exam",
+      "isHoliday": false,
+      "createdBy": "Examination In-charge",
+      "createdAt": "2026-09-10T10:00:00Z"
+    },
+    {
+      "id": "cal-6",
+      "title": "Annual Sports Day & Athletics Meet",
+      "description": "Track and field events, relay races, football tournament, and prize distribution ceremony.",
+      "startDate": "2027-01-12",
+      "endDate": "2027-01-13",
+      "category": "activity",
+      "isHoliday": false,
+      "createdBy": "Physical Education Dept",
+      "createdAt": "2026-09-12T10:00:00Z"
+    },
+    {
+      "id": "cal-7",
+      "title": "Republic Day Celebration",
+      "description": "Flag hoisting at 08:30 AM, national anthem, parade and cultural presentations.",
+      "startDate": "2027-01-26",
+      "endDate": "2027-01-26",
+      "category": "event",
+      "isHoliday": false,
+      "createdBy": "Principal Office",
+      "createdAt": "2026-09-12T10:00:00Z"
+    },
+    {
+      "id": "cal-8",
+      "title": "JAC Annual Board Examination 2027",
+      "description": "Jharkhand Academic Council official matric and intermediate board examinations commence.",
+      "startDate": "2027-02-15",
+      "endDate": "2027-03-05",
+      "category": "exam",
+      "isHoliday": false,
+      "createdBy": "JAC Examination Cell",
+      "createdAt": "2026-09-15T10:00:00Z"
+    }
+  ],
+  "reportedSafetyItems": [],
+  "auditLogs": [
+    {
+      "id": "audit-1790687420530-iswy",
+      "action": "UPLOAD_STUDY_MATERIAL",
+      "performedBy": "Admin / Faculty",
+      "targetType": "Book / Material",
+      "details": "Uploaded book: \"hindi\" for Class 10",
+      "timestamp": "2026-09-29T13:10:20.530Z"
+    },
+    {
+      "id": "audit-1790687353338-1riy",
+      "action": "CREATE_EXAM",
+      "performedBy": "Admin / Faculty",
+      "targetType": "Exam Schedule",
+      "details": "Scheduled JAC Board Annual Examination 2026 for Class 10 (Mathematics)",
+      "timestamp": "2026-09-29T13:09:13.338Z"
+    },
+    {
+      "id": "audit-1790687340354-h8nl",
+      "action": "CREATE_EXAM",
+      "performedBy": "Admin / Faculty",
+      "targetType": "Exam Schedule",
+      "details": "Scheduled JAC Board Annual Examination 2026 for Class 10 (Mathematics)",
+      "timestamp": "2026-09-29T13:09:00.355Z"
+    },
+    {
+      "id": "audit-1",
+      "action": "CREATE_NOTICE",
+      "performedBy": "Principal / Admin",
+      "targetType": "Notice",
+      "details": "Published JAC Board Form submission circular with registration guidelines.",
+      "timestamp": "2026-09-27T13:08:24.964Z"
+    },
+    {
+      "id": "audit-2",
+      "action": "CREATE_HOMEWORK",
+      "performedBy": "Mr. R. K. Sharma",
+      "targetType": "Homework",
+      "details": "Created Mathematics Class 10 assignment: Trigonometric Identities.",
+      "timestamp": "2026-09-29T01:08:24.964Z"
+    },
+    {
+      "id": "audit-3",
+      "action": "UPDATE_CALENDAR",
+      "performedBy": "Examination Cell",
+      "targetType": "Calendar",
+      "details": "Added Pre-Board and Annual Examination dates to school master calendar.",
+      "timestamp": "2026-09-29T05:08:24.964Z"
+    },
+    {
+      "id": "audit-4",
+      "action": "UPDATE_ATTENDANCE",
+      "performedBy": "Attendance Supervisor",
+      "targetType": "Attendance",
+      "details": "Verified morning check-ins and locked attendance database for today.",
+      "timestamp": "2026-09-29T10:08:24.964Z"
+    }
+  ],
+  "aboutSchool": {
+    "schoolName": "Janta +2 High School – Khalari",
+    "tagline": "शिक्षा • अनुशासन • सफलता (Education • Discipline • Success)",
+    "motto": "तमसो मा ज्योतिर्गमय (Lead us from darkness to light)",
+    "establishedYear": "1978",
+    "affiliation": "Government-Recognized +2 High School, Dept. of School Education & Literacy, Govt. of Jharkhand",
+    "schoolCode": "23045",
+    "udiseCode": "20210403502",
+    "board": "Jharkhand Academic Council (JAC), Ranchi",
+    "introductionHindi": "जनता +2 उच्च विद्यालय, खलारी (रांची) झारखंड का एक प्रतिष्ठित शैक्षणिक संस्थान है, जो ग्रामीण एवं उपनगरीय क्षेत्र के विद्यार्थियों को कक्षा 9 से 12वीं तक गुणवत्तापूर्ण, नैतिक एवं आधुनिक शिक्षा प्रदान करता है। विद्यालय में आधुनिक कंप्यूटर लैब, सुसज्जित विज्ञान प्रयोगशालाएं, समृद्ध पुस्तकालय और खेल मैदान उपलब्ध हैं।",
+    "introductionEnglish": "Janta +2 High School, Khalari (Ranchi) is a premier academic institution affiliated with the Jharkhand Academic Council (JAC), dedicated to providing quality, ethical, and holistic education to secondary (Class 9-10) and higher secondary (+2 Class 11-12 in Science, Commerce, and Arts) students.",
+    "principalMessage": {
+      "name": "Dr. Rameshwar Mahto",
+      "designation": "Principal & Senior Educational Administrator",
+      "qualification": "M.Sc. (Physics), M.Ed., Ph.D. in Education",
+      "photoUrl": "https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&q=80&w=400",
+      "messageHindi": "प्रिय विद्यार्थियों, अभिभावकों एवं शुभचिंतकों, जनता +2 उच्च विद्यालय, खलारी में हमारा उद्देश्य केवल परीक्षा उत्तीर्ण कराना नहीं, बल्कि प्रत्येक विद्यार्थी में चरित्र, वैज्ञानिक सोच और अनुशासन का संचार करना है। हमारे समर्पित शिक्षकगण और आधुनिक डिजिटल सुविधाएं ग्रामीण क्षेत्र के विद्यार्थियों को राष्ट्रीय स्तर पर प्रतिस्पर्धा करने योग्य बनाती हैं।",
+      "messageEnglish": "Dear students, parents, and community members, at Janta +2 High School, Khalari, our steadfast purpose is not merely academic attainment, but the cultivation of integrity, scientific temperament, and disciplined character. We take immense pride in nurturing students from Khalari and surrounding regions into responsible nation-builders."
+    },
+    "location": {
+      "address": "Janta +2 High School, P.O. & P.S. Khalari, District Ranchi, Jharkhand",
+      "landmark": "Near Khalari Railway Station & Block Administrative Office, CCL Piparwar/NK Area Road",
+      "pinCode": "829205",
+      "district": "Ranchi",
+      "state": "Jharkhand",
+      "mapCoordinates": "23.6621° N, 85.0062° E",
+      "googleMapsUrl": "https://maps.google.com/?q=Khalari+Ranchi+Jharkhand+829205",
+      "howToReach": "The school is located 1.5 km from Khalari Railway Station. Readily accessible by road from Ranchi (approx. 65 km via Kanke-Pithoria-Bijupara-Khalari Highway) and from Daltonganj/Chandwa route."
+    },
+    "highlights": [
+      {
+        "id": "hl-1",
+        "title": "100% Pass Rate in JAC Board Exams",
+        "description": "Consistent high first-division results in Class 10 and Class 12 JAC Board examinations.",
+        "category": "Academic Excellence",
+        "iconName": "Award",
+        "isFeatured": true,
+        "displayOrder": 1
+      },
+      {
+        "id": "hl-2",
+        "title": "ICT Computer Lab & Digital Classroom",
+        "description": "24 networked desktops with broadband internet, projectors, and digital study materials.",
+        "category": "Technology",
+        "iconName": "Laptop",
+        "isFeatured": true,
+        "displayOrder": 2
+      },
+      {
+        "id": "hl-3",
+        "title": "Central Library with 4,500+ Books",
+        "description": "Extensive collection of NCERT/JCERT books, reference materials, competition guides, and magazines.",
+        "category": "Facilities",
+        "iconName": "BookOpen",
+        "isFeatured": true,
+        "displayOrder": 3
+      },
+      {
+        "id": "hl-4",
+        "title": "Eco Club & Clean Green Campus",
+        "description": "Recognized under Swachh Vidyalaya initiative with 150+ trees, herbal garden, and rainwater harvesting.",
+        "category": "Environment",
+        "iconName": "Leaf",
+        "isFeatured": true,
+        "displayOrder": 4
+      },
+      {
+        "id": "hl-5",
+        "title": "District Sports & Athletics Trophies",
+        "description": "Inter-school champions in Subroto Football Cup (District Round), Kho-Kho, and 400m relay athletics.",
+        "category": "Sports",
+        "iconName": "Trophy",
+        "isFeatured": false,
+        "displayOrder": 5
+      },
+      {
+        "id": "hl-6",
+        "title": "Government Welfare & Scholarship Portals",
+        "description": "Direct DBT support for E-Kalyan Post-Matric and Medhasoft Pre-Matric scholarships.",
+        "category": "Welfare",
+        "iconName": "ShieldCheck",
+        "isFeatured": false,
+        "displayOrder": 6
+      }
+    ],
+    "facilities": [
+      {
+        "id": "fac-1",
+        "title": "Spacious Classrooms (16 Rooms)",
+        "description": "Well-ventilated, well-lit, electrified dual-bench classrooms equipped with green boards and display areas.",
+        "iconName": "GraduationCap",
+        "verifiedStatus": "Verified by District Education Office",
+        "capacityOrDetails": "16 Classrooms • Avg. 55 Seats per room",
+        "isPublished": true
+      },
+      {
+        "id": "fac-2",
+        "title": "Central School Library & Reading Room",
+        "description": "Cataloged repository of NCERT textbooks, JAC question banks, Hindi/English literature, and reference encyclopedias.",
+        "iconName": "BookOpen",
+        "verifiedStatus": "Staff Verified",
+        "capacityOrDetails": "4,500+ Books • 40-Seat Reading Hall",
+        "isPublished": true
+      },
+      {
+        "id": "fac-3",
+        "title": "Composite Science Laboratories",
+        "description": "Specialized working labs for Physics, Chemistry, and Biology JAC Class 9-12 practicals with complete safety equipment.",
+        "iconName": "FlaskConical",
+        "verifiedStatus": "Official JAC Inspection Passed",
+        "capacityOrDetails": "Apparatus for 40 students simultaneously",
+        "isPublished": true
+      },
+      {
+        "id": "fac-4",
+        "title": "Computer & ICT Education Center",
+        "description": "Air-cooled computer laboratory with 24 modern PCs, high-speed optical fiber internet, and teacher demonstration projector.",
+        "iconName": "Monitor",
+        "verifiedStatus": "ICT Phase-II Verified",
+        "capacityOrDetails": "24 Systems • 10 KVA Online Solar Inverter Backup",
+        "isPublished": true
+      },
+      {
+        "id": "fac-5",
+        "title": "Outdoor Sports Grounds & Play Arena",
+        "description": "Full-sized outdoor ground for football, cricket, kabaddi, volleyball, and 200-meter running track.",
+        "iconName": "Activity",
+        "verifiedStatus": "Verified Campus Ground",
+        "capacityOrDetails": "2.5 Acres Open Field",
+        "isPublished": true
+      },
+      {
+        "id": "fac-6",
+        "title": "RO Purified Safe Drinking Water",
+        "description": "Commercial 500 LPH RO water plant with multi-tap stainless steel drinking stations tested regularly for TDS and purity.",
+        "iconName": "Droplet",
+        "verifiedStatus": "Tested & Verified Safe",
+        "capacityOrDetails": "500 Liters/Hour RO System",
+        "isPublished": true
+      },
+      {
+        "id": "fac-7",
+        "title": "Uninterrupted Solar & Grid Power",
+        "description": "Dual electricity grid connection supported by rooftop solar panel array and heavy-duty inverter for continuous learning.",
+        "iconName": "Zap",
+        "verifiedStatus": "Government Solar Scheme Installed",
+        "capacityOrDetails": "5 KW Solar Rooftop Power Plant",
+        "isPublished": true
+      },
+      {
+        "id": "fac-8",
+        "title": "Girls Common Room & First Aid Station",
+        "description": "Private, hygienic rest area for female students equipped with basic medical cot, first aid kits, and sanitary dispenser.",
+        "iconName": "HeartPulse",
+        "verifiedStatus": "Health & Safety Inspected",
+        "capacityOrDetails": "Dedicated Facility with Sanitary Incinerator",
+        "isPublished": true
+      }
+    ],
+    "timings": [
+      {
+        "activity": "Morning Assembly & Prayer (प्रार्थना सभा)",
+        "startTime": "08:45 AM",
+        "endTime": "09:00 AM",
+        "days": "Monday to Saturday",
+        "notes": "National Anthem, State Anthem, Daily News & Moral Thought"
+      },
+      {
+        "activity": "First Session (Periods 1, 2, 3)",
+        "startTime": "09:00 AM",
+        "endTime": "11:15 AM",
+        "days": "Monday to Saturday",
+        "notes": "Core subjects: Mathematics, Physics, English, Science"
+      },
+      {
+        "activity": "Recess & Mid-Day Meal (मध्याह्न भोजन अवकाश)",
+        "startTime": "11:15 AM",
+        "endTime": "11:30 AM",
+        "days": "Monday to Saturday",
+        "notes": "Clean nutritious meal for secondary section & rest break"
+      },
+      {
+        "activity": "Second Session (Periods 4, 5, 6)",
+        "startTime": "11:30 AM",
+        "endTime": "01:00 PM",
+        "days": "Monday to Saturday",
+        "notes": "Social Science, Chemistry, Biology, Hindi, Sanskrit, Accountancy"
+      },
+      {
+        "activity": "Saturday Special Vocational / Remedial Class",
+        "startTime": "01:00 PM",
+        "endTime": "02:00 PM",
+        "days": "Saturdays Only",
+        "notes": "Information Technology, Healthcare, Sanskrit & Board Revision"
+      },
+      {
+        "activity": "Administrative Office Hours (कार्यालय समय)",
+        "startTime": "08:30 AM",
+        "endTime": "03:30 PM",
+        "days": "Monday to Saturday",
+        "notes": "TC, Admissions, Bonafide Certificates & JAC Form Submission"
+      }
+    ],
+    "rules": [
+      {
+        "id": "r-1",
+        "title": "75% Minimum Attendance (न्यूनतम उपस्थिति)",
+        "description": "In accordance with JAC guidelines, students must maintain at least 75% attendance to qualify for JAC board examinations.",
+        "category": "Attendance"
+      },
+      {
+        "id": "r-2",
+        "title": "Official School Uniform (विद्यालय पोशाक)",
+        "description": "All students must attend school in neat, prescribed school uniform with proper ID badge and black school shoes.",
+        "category": "Uniform"
+      },
+      {
+        "id": "r-3",
+        "title": "Punctuality (समय की पाबंदी)",
+        "description": "Students must enter the campus by 08:40 AM. The gate closes at 08:45 AM for morning assembly.",
+        "category": "Campus"
+      },
+      {
+        "id": "r-4",
+        "title": "Mobile Phone Policy (मोबाइल नीति)",
+        "description": "Students are prohibited from using mobile phones during regular class hours unless specifically authorized by the subject teacher for ICT learning.",
+        "category": "Classroom"
+      },
+      {
+        "id": "r-5",
+        "title": "Zero Tolerance for Ragging / Bullying (अनुशासन)",
+        "description": "Any form of indiscipline, bullying, vandalism, or damage to school property will lead to strict disciplinary action.",
+        "category": "Campus"
+      }
+    ],
+    "photos": [
+      {
+        "id": "p-1",
+        "title": "Main Academic Building & Entrance",
+        "category": "Campus",
+        "imageUrl": "https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&q=80&w=800",
+        "caption": "Two-story main building with 16 classrooms and admin block in Khalari.",
+        "date": "2026-08-15",
+        "isFeatured": true,
+        "isPublished": true
+      },
+      {
+        "id": "p-2",
+        "title": "Computer & ICT Technology Lab",
+        "category": "Labs & Library",
+        "imageUrl": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=80&w=800",
+        "caption": "Students engaged in computer literacy and programming practicals.",
+        "date": "2026-09-02",
+        "isFeatured": true,
+        "isPublished": true
+      },
+      {
+        "id": "p-3",
+        "title": "Composite Science Practical Laboratory",
+        "category": "Labs & Library",
+        "imageUrl": "https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&q=80&w=800",
+        "caption": "Physics & Chemistry practical experiments under faculty supervision.",
+        "date": "2026-07-20",
+        "isFeatured": false,
+        "isPublished": true
+      },
+      {
+        "id": "p-4",
+        "title": "Annual Sports Day & Football Tournament",
+        "category": "Sports",
+        "imageUrl": "https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&q=80&w=800",
+        "caption": "Inter-house football matches and athletic track events at the school ground.",
+        "date": "2026-01-20",
+        "isFeatured": true,
+        "isPublished": true
+      },
+      {
+        "id": "p-5",
+        "title": "Independence Day Tricolor Flag Hoisting",
+        "category": "Cultural",
+        "imageUrl": "https://images.unsplash.com/photo-1532375810709-75b1da00537c?auto=format&fit=crop&q=80&w=800",
+        "caption": "79th Independence Day patriotic songs and NCC parade at school campus.",
+        "date": "2026-08-15",
+        "isFeatured": true,
+        "isPublished": true
+      },
+      {
+        "id": "p-6",
+        "title": "Saraswati Puja & Cultural Exhibition",
+        "category": "Cultural",
+        "imageUrl": "https://images.unsplash.com/photo-1511556532299-8f662fc26c06?auto=format&fit=crop&q=80&w=800",
+        "caption": "Traditional puja ceremony, art showcase, and student musical performances.",
+        "date": "2026-02-14",
+        "isFeatured": false,
+        "isPublished": true
+      }
+    ],
+    "faqs": [
+      {
+        "id": "faq-1",
+        "question": "कक्षा 9 एवं 11 में नामांकन की प्रक्रिया क्या है? (How to take admission in Class 9 or 11?)",
+        "answer": "कक्षा 9 में नामांकन कक्षा 8 के उत्तीर्ण प्रमाण-पत्र (TC) एवं अंक पत्र के आधार पर होता है। कक्षा 11 (+2) में नामांकन JAC/CBSE 10वीं बोर्ड के अंकों की मेरिट सूची के आधार पर साइंस, कॉमर्स एवं आर्ट्स संकायों में होता है। कार्यालय से फॉर्म प्राप्त किया जा सकता है।",
+        "category": "Admission"
+      },
+      {
+        "id": "faq-2",
+        "question": "छात्रवृत्ति (Scholarships) के लिए आवेदन कैसे करें?",
+        "answer": "झारखंड सरकार द्वारा ई-कल्याण (E-Kalyan) पोर्टल के माध्यम से एससी/एसटी/ओबीसी विद्यार्थियों को पोस्ट-मैट्रिक छात्रवृत्ति और मेधासॉफ्ट (Medhasoft) के जरिए प्री-मैट्रिक छात्रवृत्ति दी जाती है। विद्यालय कार्यालय द्वारा सभी आवेदन निशुल्क सत्यापित किए जाते हैं।",
+        "category": "Scholarships"
+      },
+      {
+        "id": "faq-3",
+        "question": "विद्यालय का JAC कोड और U-DISE कोड क्या है?",
+        "answer": "जनता +2 उच्च विद्यालय खलारी का आधिकारिक झारखंड अधिविद्य परिषद (JAC) कोड 23045 है, तथा U-DISE कोड 20210403502 है।",
+        "category": "General"
+      },
+      {
+        "id": "faq-4",
+        "question": "शनिवार को विशेष कक्षाएं किन विषयों की होती हैं?",
+        "answer": "शनिवार को सामान्य कक्षा 1:00 बजे तक के बाद 1:00 से 2:00 बजे तक विशेष रूप से इंफॉर्मेशन टेक्नोलॉजी (IT), हेल्थकेयर वोकेशनल प्रैक्टिकल और संस्कृत/बोर्ड परीक्षा रिवीजन कक्षाएं आयोजित की जाती हैं।",
+        "category": "Academic"
+      },
+      {
+        "id": "faq-5",
+        "question": "बोर्ड परीक्षा फॉर्म और एडमिट कार्ड कब प्राप्त होते हैं?",
+        "answer": "JAC बोर्ड परीक्षा फॉर्म सामान्यतः नवंबर-दिसंबर में भरे जाते हैं और एडमिट कार्ड जनवरी के अंतिम सप्ताह में विद्यालय कार्यालय द्वारा वितरित किए जाते हैं। छात्र इस स्मार्ट ऐप के \"Exam Schedule\" सेक्शन में भी देख सकते हैं।",
+        "category": "Exams"
+      }
+    ],
+    "academicInfo": {
+      "medium": "Hindi & English (Bilingual Pedagogy under JAC guidelines)",
+      "streamsOffered": [
+        "Secondary (Classes 9 & 10)",
+        "+2 Science Stream (Physics, Chemistry, Maths, Biology, Computer Science)",
+        "+2 Commerce Stream (Accountancy, Business Studies, Economics, Entrepreneurship)",
+        "+2 Arts / Humanities Stream (History, Political Science, Geography, Economics, Hindi, Sanskrit)"
+      ],
+      "jacAffiliationNumber": "JAC Code: 23045 • Govt. Permanent Recognition",
+      "examinationPattern": "Term-1 (Internal), Pre-Board, and JAC Annual Board Examination with Practical Assessment",
+      "gradingSystem": "JAC Standard: 1st Division (>=60%), 2nd Division (>=45%), 3rd Division (>=33%)"
+    },
+    "studentActivities": [
+      {
+        "title": "Daily Morning Assembly & Character Building",
+        "description": "Prayers, patriotic pledge, daily national news reading by students, and inspiring moral talks.",
+        "category": "Daily Routine"
+      },
+      {
+        "title": "Annual District Science Exhibition (विज्ञान प्रदर्शनी)",
+        "description": "Students craft working models in renewable solar energy, smart irrigation, and robotics.",
+        "category": "Science"
+      },
+      {
+        "title": "Inter-House Sports & Yoga Tournaments",
+        "description": "Year-round competitions in Football, Kabaddi, Kho-Kho, Volleyball, Badminton, and Suryanamaskar.",
+        "category": "Sports"
+      },
+      {
+        "title": "Jharkhand Heritage & Cultural Drama",
+        "description": "Performances celebrating Sohrai, Karam, Sarhul, folk music, and patriotic theatre.",
+        "category": "Cultural"
+      },
+      {
+        "title": "Eco Club Cleanliness Drives (स्वच्छता पखवाड़ा)",
+        "description": "Tree plantation campaigns around Khalari township and plastic elimination awareness drives.",
+        "category": "Environment"
+      }
+    ],
+    "healthAndSafety": [
+      {
+        "title": "CCTV Surveillance & Gated Security",
+        "description": "Continuous monitoring of main entrance gates, academic corridors, and science labs.",
+        "status": "Active 24/7"
+      },
+      {
+        "title": "First Aid Medical Station & PHC Tie-up",
+        "description": "Immediate first response medical kits and official partnership with Primary Health Center (PHC) Khalari.",
+        "status": "Verified & Equipped"
+      },
+      {
+        "title": "Fire Safety Extinguishers",
+        "description": "Certified ABC powder and CO2 fire extinguishers installed at all laboratory and library entrance points.",
+        "status": "Inspected & Serviced"
+      },
+      {
+        "title": "Clean Drinking Water Monitoring",
+        "description": "Quarterly laboratory testing of RO drinking water parameters for safety and purity.",
+        "status": "Certified Potable"
+      }
+    ],
+    "contactInfo": {
+      "officialAddress": "Janta +2 High School, P.O. & P.S. Khalari, Ranchi District, Jharkhand - 829205",
+      "district": "Ranchi",
+      "state": "Jharkhand",
+      "pincode": "829205",
+      "principalOffice": "Principal Chamber, Main Academic Block A, Ground Floor",
+      "schoolOfficeHours": "08:30 AM – 03:30 PM (Monday to Saturday)",
+      "email": "jantahighschoolkhalari@gmail.com"
+    },
+    "updatedAt": "2026-09-22T21:00:00.000Z",
+    "updatedBy": "School Administrator"
+  }
 }

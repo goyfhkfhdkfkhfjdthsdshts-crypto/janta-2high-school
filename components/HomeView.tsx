@@ -27,6 +27,8 @@ import {
   Settings,
   Search,
   School,
+  MessageSquare,
+  Edit3,
 } from 'lucide-react';
 
 interface HomeViewProps {
@@ -36,6 +38,8 @@ interface HomeViewProps {
   onNavigateTab: (tab: any) => void;
   onOpenSection: (section: string) => void;
   language: 'hi' | 'en';
+  initialNotices?: Notice[];
+  initialLiveSessions?: LiveClassSession[];
 }
 
 export function HomeView({
@@ -45,9 +49,15 @@ export function HomeView({
   onNavigateTab,
   onOpenSection,
   language,
+  initialNotices,
+  initialLiveSessions,
 }: HomeViewProps) {
-  const [liveSessions, setLiveSessions] = useState<LiveClassSession[]>([]);
-  const [recentNotices, setRecentNotices] = useState<Notice[]>([]);
+  const [liveSessions, setLiveSessions] = useState<LiveClassSession[]>(() =>
+    initialLiveSessions ? initialLiveSessions.filter((s) => s.status === 'live') : []
+  );
+  const [recentNotices, setRecentNotices] = useState<Notice[]>(() =>
+    initialNotices ? initialNotices.slice(0, 2) : []
+  );
 
   useEffect(() => {
     // Fetch live sessions
@@ -129,6 +139,24 @@ export function HomeView({
       color: 'from-emerald-700 to-teal-800',
       tag: 'Assignments',
       action: () => onOpenSection('homework'),
+    },
+    {
+      id: 'written',
+      title: language === 'hi' ? 'लिखित उत्तर अभ्यास' : 'Written Q&A Practice',
+      subtitle: language === 'hi' ? 'JAC बोर्ड विस्तृत प्रश्न व आदर्श उत्तर' : 'Descriptive Questions & Model Answers',
+      icon: Edit3,
+      color: 'from-teal-700 to-emerald-900',
+      tag: '5 Marks Qs',
+      action: () => onOpenSection('written'),
+    },
+    {
+      id: 'chat',
+      title: language === 'hi' ? 'स्कूल चैट व ग्रुप्स' : 'School Chat & Groups',
+      subtitle: language === 'hi' ? 'कक्षा समूह, शिक्षक संवाद व नोट्स' : 'Class 9-12 Groups, Teachers & Principal Desk',
+      icon: MessageSquare,
+      color: 'from-blue-600 to-indigo-800',
+      tag: 'Community',
+      action: () => onOpenSection('chat'),
     },
     {
       id: 'calendar',

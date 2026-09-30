@@ -11,6 +11,7 @@ interface NoticeBoardViewProps {
   selectedClass: SchoolClass;
   onOpenAdminModal: () => void;
   language: 'hi' | 'en';
+  initialNotices?: Notice[];
 }
 
 export function NoticeBoardView({
@@ -19,8 +20,9 @@ export function NoticeBoardView({
   selectedClass,
   onOpenAdminModal,
   language,
+  initialNotices,
 }: NoticeBoardViewProps) {
-  const [notices, setNotices] = useState<Notice[]>([]);
+  const [notices, setNotices] = useState<Notice[]>(() => initialNotices || []);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingNotice, setEditingNotice] = useState<Notice | null>(null);
 

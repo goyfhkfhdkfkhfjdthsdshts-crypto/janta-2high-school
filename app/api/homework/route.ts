@@ -27,9 +27,9 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { action } = body;
 
-    // Student marking / unmarking completion
+    // Student marking / unmarking completion or submitting homework
     if (action === 'toggle_complete') {
-      const { homeworkId, studentId, studentName, notes } = body;
+      const { homeworkId, studentId, studentName, notes, submissionUrl, submissionName } = body;
       if (!homeworkId || !studentId || !studentName) {
         return NextResponse.json(
           { success: false, error: 'Missing homeworkId, studentId, or studentName' },
@@ -37,7 +37,14 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      const res = db.toggleHomeworkCompletion(homeworkId, studentId, studentName, notes);
+      const res = db.toggleHomeworkCompletion(
+        homeworkId,
+        studentId,
+        studentName,
+        notes,
+        submissionUrl,
+        submissionName
+      );
       return NextResponse.json({
         success: true,
         completed: res.completed,

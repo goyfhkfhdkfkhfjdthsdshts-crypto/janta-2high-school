@@ -19,6 +19,8 @@ import {
   Sparkles,
   Search,
   Check,
+  Upload,
+  Camera,
 } from 'lucide-react';
 import { HomeworkItem, SchoolClass, UserProfile } from '@/lib/types';
 
@@ -58,6 +60,12 @@ export function HomeworkView({
 
   // View Submissions Modal State (for Teacher/Admin)
   const [activeSubmissionsHw, setActiveSubmissionsHw] = useState<HomeworkItem | null>(null);
+
+  // Student Upload Assignment Modal State
+  const [studentUploadHw, setStudentUploadHw] = useState<HomeworkItem | null>(null);
+  const [uploadNotes, setUploadNotes] = useState('');
+  const [uploadAttachment, setUploadAttachment] = useState<{ name: string; url: string } | null>(null);
+  const [isSubmittingUpload, setIsSubmittingUpload] = useState(false);
 
   const studentId = user?.id || 'guest_student';
   const studentName = user?.name || 'Student';
@@ -101,6 +109,41 @@ export function HomeworkView({
       }
     } catch (err) {
       console.error('Error toggling homework completion:', err);
+    }
+  };
+
+  const handleStudentUploadSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!studentUploadHw) return;
+
+    setIsSubmittingUpload(true);
+    try {
+      const res = await fetch('/api/homework', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'toggle_complete',
+          homeworkId: studentUploadHw.id,
+          studentId,
+          studentName,
+          notes: uploadNotes.trim() || 'Assignment submitted by student.',
+          submissionUrl: uploadAttachment?.url,
+          submissionName: uploadAttachment?.name,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setHomeworkList((prev) =>
+          prev.map((h) => (h.id === studentUploadHw.id ? data.item : h))
+        );
+        setStudentUploadHw(null);
+        setUploadNotes('');
+        setUploadAttachment(null);
+      }
+    } catch (err) {
+      console.error('Error submitting homework work:', err);
+    } finally {
+      setIsSubmittingUpload(false);
     }
   };
 

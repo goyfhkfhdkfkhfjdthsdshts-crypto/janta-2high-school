@@ -10,6 +10,7 @@ interface FacultyViewProps {
   isAdmin: boolean;
   onOpenAdminModal: () => void;
   language: 'hi' | 'en';
+  initialFaculty?: Faculty[];
 }
 
 export function FacultyView({
@@ -17,8 +18,9 @@ export function FacultyView({
   isAdmin,
   onOpenAdminModal,
   language,
+  initialFaculty,
 }: FacultyViewProps) {
-  const [facultyList, setFacultyList] = useState<Faculty[]>([]);
+  const [facultyList, setFacultyList] = useState<Faculty[]>(() => initialFaculty || []);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingFaculty, setEditingFaculty] = useState<Faculty | null>(null);
 

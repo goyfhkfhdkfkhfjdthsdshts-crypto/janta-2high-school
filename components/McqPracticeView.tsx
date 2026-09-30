@@ -17,6 +17,9 @@ import {
   Filter,
   Check,
   ChevronRight,
+  ChevronLeft,
+  Bookmark,
+  BookmarkCheck,
   BookOpen,
   ArrowRight,
   AlertCircle,
@@ -31,6 +34,25 @@ interface McqPracticeViewProps {
   language: 'hi' | 'en';
 }
 
+function createAttemptRecord(
+  selectedChapter: string,
+  activeSubject: string,
+  correctCount: number,
+  totalCount: number,
+  percentage: number
+) {
+  return {
+    id: `th-${Date.now()}`,
+    title: `${selectedChapter !== 'All' ? selectedChapter : activeSubject !== 'All' ? activeSubject : 'Mixed'} JAC Practice Test`,
+    subject: activeSubject !== 'All' ? activeSubject : 'General',
+    score: `${correctCount} / ${totalCount}`,
+    percentage,
+    date: new Date().toISOString().split('T')[0],
+    totalQuestions: totalCount,
+    correctCount,
+  };
+}
+
 export function McqPracticeView({
   user,
   isAdmin,
@@ -40,8 +62,11 @@ export function McqPracticeView({
 }: McqPracticeViewProps) {
   const [allQuestions, setAllQuestions] = useState<MCQQuestion[]>([]);
   const [activeSubject, setActiveSubject] = useState('All');
+  const [selectedChapter, setSelectedChapter] = useState('All');
   const [practiceMode, setPracticeMode] = useState<'subject' | 'chapter' | 'mixed' | 'random'>('mixed');
   const [targetQuestionCount, setTargetQuestionCount] = useState<number>(10);
+  const [testHistory, setTestHistory] = useState<any[]>([]);
+  const [bookmarkedIds, setBookmarkedIds] = useState<string[]>([]);
 
   // Active quiz session states
   const [quizActive, setQuizActive] = useState(false);
@@ -82,16 +107,65 @@ export function McqPracticeView({
 
   useEffect(() => {
     fetchMcqs();
+    try {
+      const storedHistory = localStorage.getItem('janta_school_test_history');
+      if (storedHistory) setTestHistory(JSON.parse(storedHistory));
+      const storedBookmarks = localStorage.getItem('janta_school_bookmarks_v1');
+      if (storedBookmarks) {
+        const parsed = JSON.parse(storedBookmarks);
+        setBookmarkedIds(parsed.map((b: any) => b.itemId));
+      }
+    } catch {}
   }, [selectedClass]);
 
-  // Extract unique subjects
+  // Extract unique subjects & chapters
   const availableSubjects = Array.from(new Set(allQuestions.map((q) => q.subject)));
+  const availableChapters = Array.from(
+    new Set(
+      allQuestions
+        .filter((q) => activeSubject === 'All' || q.subject.toLowerCase() === activeSubject.toLowerCase())
+        .map((q) => q.chapter)
+        .filter(Boolean)
+    )
+  );
+
+  // Bookmark toggler
+  const handleToggleBookmark = (q: MCQQuestion) => {
+    try {
+      const key = 'janta_school_bookmarks_v1';
+      const stored = JSON.parse(localStorage.getItem(key) || '[]');
+      const existsIdx = stored.findIndex((b: any) => b.itemId === q.id);
+      let updated: any[];
+      if (existsIdx >= 0) {
+        updated = stored.filter((b: any) => b.itemId !== q.id);
+        setBookmarkedIds((prev) => prev.filter((id) => id !== q.id));
+      } else {
+        const newBm = {
+          id: `bm-${Date.now()}`,
+          itemId: q.id,
+          type: 'mcq',
+          title: q.question,
+          subtitle: `${q.subject} • ${q.chapter} (Option ${q.correctAnswer})`,
+          section: 'mcq',
+          savedAt: new Date().toISOString(),
+        };
+        updated = [newBm, ...stored];
+        setBookmarkedIds((prev) => [...prev, q.id]);
+      }
+      localStorage.setItem(key, JSON.stringify(updated));
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   // Start Practice Quiz
   const handleStartQuiz = () => {
     let pool = [...allQuestions];
     if (activeSubject !== 'All') {
       pool = pool.filter((q) => q.subject.toLowerCase() === activeSubject.toLowerCase());
+    }
+    if (selectedChapter !== 'All') {
+      pool = pool.filter((q) => q.chapter.toLowerCase() === selectedChapter.toLowerCase());
     }
 
     if (practiceMode === 'random') {
@@ -100,7 +174,7 @@ export function McqPracticeView({
 
     const selected = pool.slice(0, targetQuestionCount);
     if (selected.length === 0) {
-      alert('No MCQs available matching this filter. Please choose another subject or generate practice MCQs.');
+      alert('No MCQs available matching this filter. Please choose another subject/chapter or generate practice MCQs.');
       return;
     }
 
@@ -128,7 +202,7 @@ export function McqPracticeView({
     }
   };
 
-  // Complete Quiz & Trigger Celebration
+  // Complete Quiz & Trigger Celebration & Save to History
   const handleFinishQuiz = (answers: Record<number, 'A' | 'B' | 'C' | 'D'>) => {
     setQuizCompleted(true);
     let correctCount = 0;
@@ -137,6 +211,25 @@ export function McqPracticeView({
     });
 
     const percentage = Math.round((correctCount / quizQuestions.length) * 100);
+
+    // Save attempt to student history for progress tracking
+    const newAttempt = createAttemptRecord(
+      selectedChapter,
+      activeSubject,
+      correctCount,
+      quizQuestions.length,
+      percentage
+    );
+
+    try {
+      const existingHistory = JSON.parse(localStorage.getItem('janta_school_test_history') || '[]');
+      const updated = [newAttempt, ...existingHistory].slice(0, 50);
+      localStorage.setItem('janta_school_test_history', JSON.stringify(updated));
+      setTestHistory(updated);
+    } catch (e) {
+      console.error(e);
+    }
+
     if (percentage >= 60) {
       try {
         confetti({
@@ -455,33 +548,63 @@ export function McqPracticeView({
               )}
 
               {/* Navigation controls */}
-              <div className="flex items-center justify-between pt-2 border-t border-slate-100">
-                <button
-                  onClick={() => setQuizActive(false)}
-                  className="px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-500 hover:text-slate-800"
-                >
-                  Exit Practice
-                </button>
+              <div className="flex items-center justify-between pt-3 border-t border-slate-100 flex-wrap gap-2">
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setQuizActive(false)}
+                    className="px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-500 hover:text-slate-800"
+                  >
+                    Exit Practice
+                  </button>
 
-                {currentIndex < quizQuestions.length - 1 ? (
                   <button
-                    onClick={() => setCurrentIndex((prev) => prev + 1)}
-                    disabled={!currentAnswer}
-                    className="px-5 py-2.5 bg-blue-700 hover:bg-blue-800 disabled:bg-slate-200 disabled:text-slate-400 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors shadow-xs"
+                    onClick={() => handleToggleBookmark(currentQ)}
+                    className={`flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold transition-colors border ${
+                      bookmarkedIds.includes(currentQ.id)
+                        ? 'bg-amber-100 text-amber-900 border-amber-300'
+                        : 'bg-slate-50 text-slate-600 hover:bg-slate-100 border-slate-200'
+                    }`}
+                    title="Bookmark this question"
                   >
-                    <span>Next Question</span>
-                    <ChevronRight className="w-4 h-4" />
+                    {bookmarkedIds.includes(currentQ.id) ? (
+                      <BookmarkCheck className="w-3.5 h-3.5 text-amber-700" />
+                    ) : (
+                      <Bookmark className="w-3.5 h-3.5 text-slate-500" />
+                    )}
+                    <span>{bookmarkedIds.includes(currentQ.id) ? 'Saved' : 'Bookmark'}</span>
                   </button>
-                ) : (
+                </div>
+
+                <div className="flex items-center gap-2">
                   <button
-                    onClick={() => handleFinishQuiz(selectedAnswers)}
-                    disabled={!currentAnswer}
-                    className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-200 disabled:text-slate-400 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-xs"
+                    onClick={() => setCurrentIndex((prev) => Math.max(0, prev - 1))}
+                    disabled={currentIndex === 0}
+                    className="px-4 py-2 bg-slate-100 hover:bg-slate-200 disabled:opacity-40 text-slate-700 rounded-xl text-xs font-bold flex items-center gap-1 shadow-2xs cursor-pointer"
                   >
-                    <span>Finish Practice</span>
-                    <Check className="w-4 h-4" />
+                    <ChevronLeft className="w-4 h-4" />
+                    <span>Previous</span>
                   </button>
-                )}
+
+                  {currentIndex < quizQuestions.length - 1 ? (
+                    <button
+                      onClick={() => setCurrentIndex((prev) => prev + 1)}
+                      disabled={!currentAnswer}
+                      className="px-5 py-2.5 bg-blue-700 hover:bg-blue-800 disabled:bg-slate-200 disabled:text-slate-400 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors shadow-xs cursor-pointer"
+                    >
+                      <span>Next Question</span>
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => handleFinishQuiz(selectedAnswers)}
+                      disabled={!currentAnswer}
+                      className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-200 disabled:text-slate-400 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-xs cursor-pointer"
+                    >
+                      <span>Submit & Finish</span>
+                      <Check className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           ) : (
@@ -574,6 +697,44 @@ export function McqPracticeView({
               ))}
             </div>
 
+            {/* Subject and Chapter Selectors */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <div>
+                <label className="block text-[11px] font-semibold text-blue-200 mb-1">
+                  Select Subject:
+                </label>
+                <select
+                  value={activeSubject}
+                  onChange={(e) => {
+                    setActiveSubject(e.target.value);
+                    setSelectedChapter('All');
+                  }}
+                  className="w-full p-2 bg-white/10 border border-white/20 rounded-xl text-xs font-semibold text-white focus:outline-hidden"
+                >
+                  <option value="All" className="text-slate-900">All Subjects ({allQuestions.length})</option>
+                  {availableSubjects.map((s) => (
+                    <option key={s} value={s} className="text-slate-900">{s}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-semibold text-blue-200 mb-1">
+                  Select Chapter:
+                </label>
+                <select
+                  value={selectedChapter}
+                  onChange={(e) => setSelectedChapter(e.target.value)}
+                  className="w-full p-2 bg-white/10 border border-white/20 rounded-xl text-xs font-semibold text-white focus:outline-hidden"
+                >
+                  <option value="All" className="text-slate-900">All Chapters ({availableChapters.length})</option>
+                  {availableChapters.map((ch) => (
+                    <option key={ch} value={ch} className="text-slate-900">{ch}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
             {/* Question Count: 10 / 20 / 30 / 50 */}
             <div>
               <label className="block text-[11px] font-semibold text-blue-200 mb-1.5">
@@ -600,13 +761,42 @@ export function McqPracticeView({
             <div className="pt-2">
               <button
                 onClick={handleStartQuiz}
-                className="w-full py-3 px-4 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black text-sm rounded-2xl shadow-md flex items-center justify-center gap-2 transition-transform active:scale-98"
+                className="w-full py-3 px-4 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black text-sm rounded-2xl shadow-md flex items-center justify-center gap-2 transition-transform active:scale-98 cursor-pointer"
               >
-                <span>Start Practice Quiz Now</span>
+                <span>Start Practice Quiz Now ({selectedChapter !== 'All' ? selectedChapter : activeSubject})</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>
           </div>
+
+          {/* Test Attempt History Card (if exists) */}
+          {testHistory.length > 0 && (
+            <div className="bg-white rounded-3xl p-4.5 border border-slate-200 shadow-xs space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-900 uppercase flex items-center gap-1.5">
+                  <Trophy className="w-4 h-4 text-amber-500" />
+                  <span>Recent Test Attempts & Accuracy</span>
+                </span>
+                <span className="text-[11px] text-slate-500">{testHistory.length} recorded</span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {testHistory.slice(0, 4).map((th) => (
+                  <div key={th.id} className="p-3 bg-slate-50 rounded-2xl border border-slate-200 flex items-center justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold text-slate-900 truncate">{th.title}</p>
+                      <p className="text-[11px] text-slate-500">{th.date} • {th.subject}</p>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <span className={`text-xs font-black ${th.percentage >= 60 ? 'text-emerald-700' : 'text-amber-700'}`}>
+                        {th.percentage}%
+                      </span>
+                      <p className="text-[10px] text-slate-400 font-semibold">{th.score}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Subject Filter Chips */}
           <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">

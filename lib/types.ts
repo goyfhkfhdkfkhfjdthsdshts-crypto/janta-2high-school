@@ -1,6 +1,6 @@
 export type SchoolClass = '9' | '10' | '11' | '12';
 
-export type UserRole = 'student' | 'teacher' | 'admin';
+export type UserRole = 'student' | 'teacher' | 'admin' | 'principal' | 'parent';
 
 export interface UserProfile {
   id: string;
@@ -12,6 +12,10 @@ export interface UserProfile {
   rollNo?: string;
   stream?: 'Science' | 'Commerce' | 'Arts' | 'General';
   phone?: string;
+  childId?: string;
+  childName?: string;
+  childRollNo?: string;
+  childClass?: SchoolClass;
   createdAt: string;
   updatedAt: string;
 }
@@ -203,6 +207,7 @@ export type NotificationType =
   | 'homework'
   | 'attendance'
   | 'calendar'
+  | 'chat'
   | 'system';
 
 export interface NotificationItem {
@@ -222,6 +227,8 @@ export interface HomeworkCompletion {
   studentName: string;
   completedAt: string;
   notes?: string;
+  submissionUrl?: string;
+  submissionName?: string;
 }
 
 export interface HomeworkItem {
@@ -236,6 +243,69 @@ export interface HomeworkItem {
   assignedBy: string;
   createdAt: string;
   completions: HomeworkCompletion[];
+}
+
+export interface WrittenQuestion {
+  id: string;
+  class: SchoolClass;
+  subject: string;
+  chapter: string;
+  question: string;
+  marks: number;
+  wordLimit?: string;
+  modelAnswer: string;
+  markingScheme?: string;
+  createdAt: string;
+}
+
+export interface WrittenSubmission {
+  id: string;
+  questionId: string;
+  studentId: string;
+  studentName: string;
+  class: SchoolClass;
+  subject: string;
+  studentAnswer: string;
+  attachmentUrl?: string;
+  submittedAt: string;
+  marksObtained?: number;
+  teacherRemarks?: string;
+  gradedAt?: string;
+  gradedBy?: string;
+}
+
+export interface ChatMessage {
+  id: string;
+  conversationId: string;
+  senderId: string;
+  senderName: string;
+  senderRole: UserRole;
+  senderAvatar?: string;
+  text: string;
+  mediaUrl?: string;
+  mediaType?: 'image' | 'file' | 'audio';
+  audioDurationSeconds?: number;
+  fileName?: string;
+  replyTo?: {
+    id: string;
+    senderName: string;
+    text: string;
+  };
+  reactions?: Record<string, string[]>;
+  createdAt: string;
+}
+
+export interface ChatConversation {
+  id: string;
+  type: 'group' | 'direct';
+  title: string;
+  subtitle?: string;
+  class?: SchoolClass;
+  participants: string[];
+  participantNames?: Record<string, string>;
+  lastMessage?: string;
+  lastMessageTime?: string;
+  isMuted?: boolean;
 }
 
 export type CalendarEventCategory = 'holiday' | 'exam' | 'event' | 'academic' | 'activity';

@@ -19,6 +19,11 @@ import {
   ReportedSafetyItem,
   AdminAuditLog,
   AboutSchoolData,
+  WrittenQuestion,
+  WrittenSubmission,
+  ChatMessage,
+  ChatConversation,
+  UserRole,
 } from './types';
 import { initialAboutSchoolData } from './aboutData';
 
@@ -40,6 +45,10 @@ interface DatabaseSchema {
   reportedSafetyItems?: ReportedSafetyItem[];
   auditLogs?: AdminAuditLog[];
   aboutSchool?: AboutSchoolData;
+  writtenQuestions?: WrittenQuestion[];
+  writtenSubmissions?: WrittenSubmission[];
+  chatConversations?: ChatConversation[];
+  chatMessages?: ChatMessage[];
 }
 
 const DB_FILE_PATH = path.join(process.cwd(), 'data', 'school_database.json');
@@ -55,13 +64,12 @@ const initialTimetables: TimetableEntry[] = [
   { id: 't-10-mon-6', class: '10', day: 'Monday', subject: 'Sanskrit', startTime: '01:00 PM', endTime: '02:00 PM', teacherName: 'Acharya R. Mishra', room: 'Room 101' },
 
   // Class 10 Saturday (CRITICAL: Preserving Saturday subjects: Maths, S.S.T, English, Sanskrit, IT, Healthcare, including 1:00–2:00 entries)
-  { id: 't-10-sat-1', class: '10', day: 'Saturday', subject: 'Maths', startTime: '09:00 AM', endTime: '09:45 AM', teacherName: 'Mr. R. K. Sharma', room: 'Room 101' },
-  { id: 't-10-sat-2', class: '10', day: 'Saturday', subject: 'S.S.T', startTime: '09:45 AM', endTime: '10:30 AM', teacherName: 'Mr. B. Munda', room: 'Room 101' },
-  { id: 't-10-sat-3', class: '10', day: 'Saturday', subject: 'English', startTime: '10:30 AM', endTime: '11:15 AM', teacherName: 'Mrs. S. Tirkey', room: 'Room 101' },
-  { id: 't-10-sat-4', class: '10', day: 'Saturday', subject: 'Sanskrit', startTime: '11:30 AM', endTime: '12:15 PM', teacherName: 'Acharya R. Mishra', room: 'Room 101' },
-  { id: 't-10-sat-5', class: '10', day: 'Saturday', subject: 'Information Technology', startTime: '12:15 PM', endTime: '01:00 PM', teacherName: 'Mr. V. Kumar', room: 'Computer Lab' },
-  { id: 't-10-sat-6', class: '10', day: 'Saturday', subject: 'Sanskrit / IT / Healthcare Special', startTime: '01:00 PM', endTime: '02:00 PM', teacherName: 'Vocational Faculty & IT Staff', room: 'Skill Center' },
-  { id: 't-10-sat-7', class: '10', day: 'Saturday', subject: 'Healthcare', startTime: '01:00 PM', endTime: '02:00 PM', teacherName: 'Ms. P. Soren (Healthcare Trainer)', room: 'Health Lab' },
+  { id: 't-10-sat-1', class: '10', day: 'Saturday', subject: 'Maths', startTime: '09:45 AM', endTime: '10:45 AM', teacherName: 'Mr. R. K. Sharma', room: 'Room 101' },
+  { id: 't-10-sat-2', class: '10', day: 'Saturday', subject: 'S.S.T', startTime: '10:45 AM', endTime: '11:30 AM', teacherName: 'Mr. B. Munda', room: 'Room 101' },
+  { id: 't-10-sat-3', class: '10', day: 'Saturday', subject: 'English', startTime: '11:30 AM', endTime: '12:20 PM', teacherName: 'Mrs. S. Tirkey', room: 'Room 101' },
+  { id: 't-10-sat-4', class: '10', day: 'Saturday', subject: 'Sanskrit', startTime: '01:00 PM', endTime: '02:00 PM', teacherName: 'Acharya R. Mishra', room: 'Room 101' },
+  { id: 't-10-sat-5', class: '10', day: 'Saturday', subject: 'Information Technology', startTime: '01:00 PM', endTime: '02:00 PM', teacherName: 'Mr. V. Kumar', room: 'Computer Lab' },
+  { id: 't-10-sat-6', class: '10', day: 'Saturday', subject: 'Healthcare', startTime: '01:00 PM', endTime: '02:00 PM', teacherName: 'Ms. P. Soren (Healthcare Trainer)', room: 'Health Lab' },
 
   // Class 9 Saturday
   { id: 't-9-sat-1', class: '9', day: 'Saturday', subject: 'Maths', startTime: '09:00 AM', endTime: '09:45 AM', teacherName: 'Mr. S. K. Gupta', room: 'Room 91' },
@@ -981,6 +989,166 @@ const initialAuditLogs: AdminAuditLog[] = [
   },
 ];
 
+const initialWrittenQuestions: WrittenQuestion[] = [
+  {
+    id: 'wq-10-sci-1',
+    class: '10',
+    subject: 'Science (Physics)',
+    chapter: 'Light - Reflection and Refraction',
+    question: 'State Snell’s law of refraction and derive the relation between refractive index, speed of light in vacuum, and speed of light in the medium. Also state the conditions for total internal reflection. [5 Marks]',
+    marks: 5,
+    wordLimit: '150 - 200 words',
+    modelAnswer: '1. Snell’s Law: The ratio of the sine of the angle of incidence (i) to the sine of the angle of refraction (r) is a constant for a given pair of media and color of light: sin(i) / sin(r) = constant (n₂₁).\n2. Refractive Index formula: Absolute refractive index n = c / v, where c is speed of light in vacuum (3 × 10⁸ m/s) and v is speed of light in the medium.\n3. Conditions for Total Internal Reflection (TIR):\n   a) Light must travel from an optically denser medium to an optically rarer medium.\n   b) The angle of incidence in the denser medium must be greater than the critical angle (i > c) for the pair of media.',
+    markingScheme: '2 marks for Snell’s law statement and formula; 1.5 marks for refractive index relation; 1.5 marks for the two TIR conditions.',
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'wq-10-math-1',
+    class: '10',
+    subject: 'Mathematics',
+    chapter: 'Trigonometry',
+    question: 'Prove the trigonometric identity: (sin θ - 2 sin³ θ) / (2 cos³ θ - cos θ) = tan θ. [4 Marks]',
+    marks: 4,
+    wordLimit: 'Step-by-step mathematical proof',
+    modelAnswer: 'LHS = (sin θ - 2 sin³ θ) / (2 cos³ θ - cos θ)\n= [sin θ (1 - 2 sin² θ)] / [cos θ (2 cos² θ - 1)]\nSince 1 = sin² θ + cos² θ:\nNumerator = sin θ (sin² θ + cos² θ - 2 sin² θ) = sin θ (cos² θ - sin² θ)\nDenominator = cos θ (2 cos² θ - (sin² θ + cos² θ)) = cos θ (cos² θ - sin² θ)\nCanceling (cos² θ - sin² θ):\nLHS = sin θ / cos θ = tan θ = RHS. Hence proved.',
+    markingScheme: '1 mark for factoring sin θ and cos θ; 2 marks for expanding/substituting 1 = sin²θ + cos²θ; 1 mark for simplification to tan θ.',
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'wq-10-sst-1',
+    class: '10',
+    subject: 'Social Science',
+    chapter: 'Nationalism in India & Jharkhand Movement',
+    question: 'Explain the significance of the Non-Cooperation Movement in the Chotanagpur region of Jharkhand. Mention the role of Tana Bhagats and tribal leadership. [5 Marks]',
+    marks: 5,
+    wordLimit: '150 - 200 words',
+    modelAnswer: '1. Tribal Participation: The Tana Bhagats under Jatra Bhagat followed Mahatma Gandhi’s non-violence principles and actively refused to pay chowkidari tax and British rent.\n2. Ranchi & Hazaribagh Centers: Palamu, Ranchi, and Hazaribagh became major agitation zones. Boycott of foreign cloth and British liquor shops was led by tribal women and local volunteers.\n3. National Unity: The movement united urban leaders with rural and forest-dwelling communities across Jharkhand, elevating the local struggle into the national freedom movement.',
+    markingScheme: '2 marks for Tana Bhagats movement details; 1.5 marks for boycott movement across districts; 1.5 marks for national integration impact.',
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'wq-9-sci-1',
+    class: '9',
+    subject: 'Science',
+    chapter: 'Force and Laws of Motion',
+    question: 'State Newton’s Second Law of Motion and deduce the mathematical formula F = ma. [4 Marks]',
+    marks: 4,
+    wordLimit: '100 - 150 words',
+    modelAnswer: 'Newton’s Second Law states that the rate of change of momentum of an object is proportional to the applied unbalanced force in the direction of force.\nDerivation:\nInitial momentum p₁ = mu, Final momentum p₂ = mv.\nChange in momentum Δp = m(v - u).\nRate of change = m(v - u) / t = ma (since acceleration a = (v - u)/t).\nTherefore, Force F ∝ ma => F = k·ma. In SI units where k = 1, F = ma.',
+    markingScheme: '1.5 marks for statement; 2 marks for step-by-step derivation; 0.5 marks for unit definition.',
+    createdAt: new Date().toISOString(),
+  },
+];
+
+const initialChatConversations: ChatConversation[] = [
+  {
+    id: 'group-10',
+    type: 'group',
+    title: 'Class 10 - Academic Discussion',
+    subtitle: 'Official Classroom & Board Exam Doubt Group',
+    class: '10',
+    participants: ['all-class-10'],
+    lastMessage: 'Dr. A. K. Verma: Remember to revise ray diagrams for the pre-board exam.',
+    lastMessageTime: '10:45 AM',
+  },
+  {
+    id: 'group-9',
+    type: 'group',
+    title: 'Class 9 - Student Study Circle',
+    subtitle: 'Daily Homework, Science & Maths Discussions',
+    class: '9',
+    participants: ['all-class-9'],
+    lastMessage: 'Mr. S. K. Gupta: Mathematics exercises 8.1 questions 1 to 5 to be completed today.',
+    lastMessageTime: '09:15 AM',
+  },
+  {
+    id: 'group-11',
+    type: 'group',
+    title: 'Class 11 - Science & Commerce',
+    subtitle: 'Physics, Chemistry, Accountancy & Economics',
+    class: '11',
+    participants: ['all-class-11'],
+    lastMessage: 'Acharya R. Mishra: Sanskrit practical recitation notes are uploaded.',
+    lastMessageTime: 'Yesterday',
+  },
+  {
+    id: 'group-12',
+    type: 'group',
+    title: 'Class 12 - JAC Board Focus',
+    subtitle: 'Inter-Science, Arts & Commerce Board Preparation',
+    class: '12',
+    participants: ['all-class-12'],
+    lastMessage: 'Dr. Rameshwar Mahto: Model question papers for 2026 examination are available.',
+    lastMessageTime: 'Yesterday',
+  },
+  {
+    id: 'dm-teacher-math',
+    type: 'direct',
+    title: 'Mr. R. K. Sharma (Mathematics PGT)',
+    subtitle: 'Direct Teacher Academic Consultation',
+    participants: ['teacher-math', 'student'],
+    lastMessage: 'Great job solving the quadratic equation exercise. Keep practicing!',
+    lastMessageTime: '11:20 AM',
+  },
+  {
+    id: 'dm-principal',
+    type: 'direct',
+    title: 'Dr. Rameshwar Mahto (Principal Office)',
+    subtitle: 'Official Student & Parent Guidance Desk',
+    participants: ['principal', 'student', 'parent'],
+    lastMessage: 'Welcome to Janta +2 High School academic portal. Feel free to contact for school guidance.',
+    lastMessageTime: 'Sep 25',
+  },
+];
+
+const initialChatMessages: ChatMessage[] = [
+  {
+    id: 'msg-1',
+    conversationId: 'group-10',
+    senderId: 'faculty-verma',
+    senderName: 'Dr. A. K. Verma (Physics)',
+    senderRole: 'teacher',
+    text: 'Dear Class 10 students, please revise Chapter 10 Light (Reflection & Refraction) numericals tonight. Focus on convex lens magnification formula.',
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 3).toISOString(),
+    reactions: { '👍': ['Student Aman', 'Priya Kumari'], '💡': ['Rohit Kumar'] },
+  },
+  {
+    id: 'msg-2',
+    conversationId: 'group-10',
+    senderId: 'student-aman',
+    senderName: 'Aman Kumar (Roll 101)',
+    senderRole: 'student',
+    text: 'Sir, what is the sign convention for object distance (u) in concave mirror problems?',
+    createdAt: new Date(Date.now() - 1000 * 60 * 50).toISOString(),
+    reactions: { '❓': ['Kavita Soren'] },
+  },
+  {
+    id: 'msg-3',
+    conversationId: 'group-10',
+    senderId: 'faculty-verma',
+    senderName: 'Dr. A. K. Verma (Physics)',
+    senderRole: 'teacher',
+    text: 'Object distance (u) is ALWAYS negative in Cartesian sign conventions because the object is placed to the left of the mirror.',
+    replyTo: {
+      id: 'msg-2',
+      senderName: 'Aman Kumar (Roll 101)',
+      text: 'Sir, what is the sign convention for object distance (u)...',
+    },
+    createdAt: new Date(Date.now() - 1000 * 60 * 40).toISOString(),
+    reactions: { '👏': ['Aman Kumar (Roll 101)', 'Rahul Oraon', 'Pooja Kumari'] },
+  },
+  {
+    id: 'msg-4',
+    conversationId: 'group-10',
+    senderId: 'faculty-sharma',
+    senderName: 'Mr. R. K. Sharma (Maths)',
+    senderRole: 'teacher',
+    text: 'Class 10 Saturday special schedule: Maths period is 9:45 AM - 10:45 AM followed by S.S.T at 10:45 AM. Be punctual!',
+    createdAt: new Date(Date.now() - 1000 * 60 * 20).toISOString(),
+    reactions: { '👍': ['Dr. Rameshwar Mahto', 'Aman Kumar (Roll 101)'] },
+  },
+];
+
 export function getDatabase(): DatabaseSchema {
   if (inMemoryDb) {
     if (!inMemoryDb.attendance) inMemoryDb.attendance = [];
@@ -991,6 +1159,10 @@ export function getDatabase(): DatabaseSchema {
     if (!inMemoryDb.reportedSafetyItems) inMemoryDb.reportedSafetyItems = [];
     if (!inMemoryDb.auditLogs) inMemoryDb.auditLogs = [...initialAuditLogs];
     if (!inMemoryDb.aboutSchool) inMemoryDb.aboutSchool = initialAboutSchoolData;
+    if (!inMemoryDb.writtenQuestions) inMemoryDb.writtenQuestions = [...initialWrittenQuestions];
+    if (!inMemoryDb.writtenSubmissions) inMemoryDb.writtenSubmissions = [];
+    if (!inMemoryDb.chatConversations) inMemoryDb.chatConversations = [...initialChatConversations];
+    if (!inMemoryDb.chatMessages) inMemoryDb.chatMessages = [...initialChatMessages];
     return inMemoryDb;
   }
 
@@ -1008,6 +1180,10 @@ export function getDatabase(): DatabaseSchema {
       if (!inMemoryDb!.reportedSafetyItems) inMemoryDb!.reportedSafetyItems = [];
       if (!inMemoryDb!.auditLogs) inMemoryDb!.auditLogs = [...initialAuditLogs];
       if (!inMemoryDb!.aboutSchool) inMemoryDb!.aboutSchool = initialAboutSchoolData;
+      if (!inMemoryDb!.writtenQuestions) inMemoryDb!.writtenQuestions = [...initialWrittenQuestions];
+      if (!inMemoryDb!.writtenSubmissions) inMemoryDb!.writtenSubmissions = [];
+      if (!inMemoryDb!.chatConversations) inMemoryDb!.chatConversations = [...initialChatConversations];
+      if (!inMemoryDb!.chatMessages) inMemoryDb!.chatMessages = [...initialChatMessages];
       return inMemoryDb!;
     } catch (err) {
       console.error('Error reading database file, resetting to initial seed:', err);
@@ -1679,7 +1855,9 @@ export const db = {
     homeworkId: string,
     studentId: string,
     studentName: string,
-    notes?: string
+    notes?: string,
+    submissionUrl?: string,
+    submissionName?: string
   ): { completed: boolean; item?: HomeworkItem } {
     const data = getDatabase();
     data.homework = data.homework || [];
@@ -1690,18 +1868,25 @@ export const db = {
     const existingIndex = hw.completions.findIndex((c) => c.studentId === studentId);
 
     let completed = false;
-    if (existingIndex >= 0) {
-      // Un-complete
+    if (existingIndex >= 0 && !submissionUrl && !notes) {
+      // Toggle off / Un-complete only when no upload was provided
       hw.completions.splice(existingIndex, 1);
       completed = false;
     } else {
-      // Mark complete
-      hw.completions.push({
+      // Mark complete or update submission
+      const record = {
         studentId,
         studentName,
         completedAt: new Date().toISOString(),
         notes: notes || 'Marked as completed by student.',
-      });
+        submissionUrl,
+        submissionName,
+      };
+      if (existingIndex >= 0) {
+        hw.completions[existingIndex] = record;
+      } else {
+        hw.completions.push(record);
+      }
       completed = true;
     }
 
@@ -1866,7 +2051,20 @@ export const db = {
 
     type SearchResultItem = {
       id: string;
-      category: 'Notices' | 'Books' | 'MCQs' | 'Timetable' | 'Exams' | 'Results' | 'Homework' | 'Calendar' | 'About School';
+      category:
+        | 'Notices'
+        | 'Books'
+        | 'MCQs'
+        | 'Timetable'
+        | 'Exams'
+        | 'Results'
+        | 'Homework'
+        | 'Calendar'
+        | 'About School'
+        | 'Faculty'
+        | 'Written Q&A'
+        | 'Chat & Groups'
+        | 'Help Articles';
       title: string;
       subtitle: string;
       section: string;
@@ -2036,6 +2234,86 @@ export const db = {
       });
     }
 
+    // 10. Faculty / Teachers
+    (data.faculty || []).forEach((f) => {
+      if (
+        f.name.toLowerCase().includes(q) ||
+        f.designation.toLowerCase().includes(q) ||
+        f.subject.toLowerCase().includes(q)
+      ) {
+        results.push({
+          id: f.id,
+          category: 'Faculty',
+          title: f.name,
+          subtitle: `${f.designation} • ${f.subject} • ${f.classesTaught || ''}`,
+          section: 'faculty',
+          badge: f.subject,
+        });
+      }
+    });
+
+    // 11. Written Q&A
+    (data.writtenQuestions || []).forEach((wq) => {
+      if (
+        wq.question.toLowerCase().includes(q) ||
+        wq.subject.toLowerCase().includes(q) ||
+        wq.chapter.toLowerCase().includes(q)
+      ) {
+        results.push({
+          id: wq.id,
+          category: 'Written Q&A',
+          title: wq.question,
+          subtitle: `Class ${wq.class} • ${wq.subject} • ${wq.chapter} (${wq.marks} Marks)`,
+          section: 'written',
+          badge: `${wq.marks} Marks`,
+        });
+      }
+    });
+
+    // 12. Chat & Study Groups
+    (data.chatConversations || []).forEach((cc) => {
+      if (cc.title.toLowerCase().includes(q) || (cc.subtitle && cc.subtitle.toLowerCase().includes(q))) {
+        results.push({
+          id: cc.id,
+          category: 'Chat & Groups',
+          title: cc.title,
+          subtitle: cc.subtitle || 'School Study & Academic Group',
+          section: 'chat',
+          badge: cc.type === 'group' ? 'GROUP' : 'DIRECT',
+        });
+      }
+    });
+
+    // 13. Help & Support Articles
+    const helpArticles = [
+      { id: 'h-1', title: '1. 🔐 LOGIN & GOOGLE AUTHENTICATION', subtitle: 'How to sign in with Google account and restore sessions' },
+      { id: 'h-2', title: '2. 🕒 SCHOOL TIMETABLE & ROUTINE', subtitle: 'Viewing daily classes, periods, and Saturday 1:00-2:00 vocational schedule' },
+      { id: 'h-3', title: '3. 📚 JAC & NCERT STUDY BOOKS', subtitle: 'Reading and downloading Class 9-12 textbooks' },
+      { id: 'h-4', title: '4. 📝 JAC MCQ PRACTICE TESTS', subtitle: 'Taking chapter-wise objective tests and tracking scores' },
+      { id: 'h-5', title: '5. ✍️ WRITTEN Q&A PRACTICE', subtitle: 'Submitting descriptive answers and viewing official model answers' },
+      { id: 'h-6', title: '6. 🤖 24/7 AI STUDY ASSISTANT', subtitle: 'Asking doubts via voice, photo upload, and Hindi/English tutor' },
+      { id: 'h-7', title: '7. 📹 LIVE VIDEO CLASSES', subtitle: 'Joining online classrooms, mic, camera, and attendance' },
+      { id: 'h-8', title: '8. 📋 ONLINE DAILY ATTENDANCE', subtitle: 'Marking daily attendance and checking monthly percentages' },
+      { id: 'h-9', title: '9. 📅 EXAM SCHEDULE & DATESHEET', subtitle: 'JAC Board and terminal examination dates and timings' },
+      { id: 'h-10', title: '10. 🏆 PUBLISHED RESULTS & MARKSHEETS', subtitle: 'Searching marksheet with Roll Code and Roll Number' },
+      { id: 'h-11', title: '11. 🔔 OFFICIAL NOTICE BOARD', subtitle: 'Viewing circulars, orders, and exam form dates' },
+      { id: 'h-12', title: '12. 📑 HOMEWORK & ASSIGNMENTS', subtitle: 'Downloading teacher assignments and uploading student submissions' },
+      { id: 'h-13', title: '13. 🗓️ ANNUAL ACADEMIC CALENDAR', subtitle: 'Holiday lists, sports days, and exam periods' },
+      { id: 'h-14', title: '14. 💬 CHAT & STUDY GROUPS', subtitle: 'Class groups, teacher chat, voice notes, and media sharing' },
+    ];
+    helpArticles.forEach((h) => {
+      if (h.title.toLowerCase().includes(q) || h.subtitle.toLowerCase().includes(q)) {
+        results.push({
+          id: h.id,
+          category: 'Help Articles',
+          title: h.title,
+          subtitle: h.subtitle,
+          section: 'help',
+          badge: 'GUIDE',
+        });
+      }
+    });
+
     return { results, total: results.length };
   },
 
@@ -2061,6 +2339,214 @@ export const db = {
     data.aboutSchool = updated;
     saveDatabase(data);
     return updated;
+  },
+
+  // 10. WRITTEN Q&A (DESCRIPTIVE QUESTIONS & MODEL ANSWERS)
+  getWrittenQuestions(classNum?: string, subject?: string): WrittenQuestion[] {
+    const data = getDatabase();
+    data.writtenQuestions = data.writtenQuestions || initialWrittenQuestions;
+    let list = [...data.writtenQuestions];
+    if (classNum && classNum !== 'All') {
+      list = list.filter((q) => q.class === classNum);
+    }
+    if (subject && subject !== 'All') {
+      list = list.filter((q) => q.subject.toLowerCase().includes(subject.toLowerCase()));
+    }
+    return list;
+  },
+
+  addWrittenQuestion(question: Omit<WrittenQuestion, 'id' | 'createdAt'>): WrittenQuestion {
+    const data = getDatabase();
+    data.writtenQuestions = data.writtenQuestions || initialWrittenQuestions;
+    const newQ: WrittenQuestion = {
+      ...question,
+      id: `wq-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      createdAt: new Date().toISOString(),
+    };
+    data.writtenQuestions.unshift(newQ);
+    saveDatabase(data);
+    return newQ;
+  },
+
+  deleteWrittenQuestion(id: string): boolean {
+    const data = getDatabase();
+    data.writtenQuestions = data.writtenQuestions || initialWrittenQuestions;
+    const initialLen = data.writtenQuestions.length;
+    data.writtenQuestions = data.writtenQuestions.filter((q) => q.id !== id);
+    if (data.writtenQuestions.length !== initialLen) {
+      saveDatabase(data);
+      return true;
+    }
+    return false;
+  },
+
+  submitWrittenAnswer(submission: Omit<WrittenSubmission, 'id' | 'submittedAt'>): WrittenSubmission {
+    const data = getDatabase();
+    data.writtenSubmissions = data.writtenSubmissions || [];
+    const newSub: WrittenSubmission = {
+      ...submission,
+      id: `wsub-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      submittedAt: new Date().toISOString(),
+    };
+    // Replace if already submitted for this question by same student, else prepend
+    const existingIdx = data.writtenSubmissions.findIndex(
+      (s) => s.questionId === submission.questionId && s.studentId === submission.studentId
+    );
+    if (existingIdx >= 0) {
+      data.writtenSubmissions[existingIdx] = newSub;
+    } else {
+      data.writtenSubmissions.unshift(newSub);
+    }
+    saveDatabase(data);
+    return newSub;
+  },
+
+  getWrittenSubmissions(questionId?: string, studentId?: string, classNum?: string): WrittenSubmission[] {
+    const data = getDatabase();
+    data.writtenSubmissions = data.writtenSubmissions || [];
+    let list = [...data.writtenSubmissions];
+    if (questionId) list = list.filter((s) => s.questionId === questionId);
+    if (studentId) list = list.filter((s) => s.studentId === studentId);
+    if (classNum) list = list.filter((s) => s.class === classNum);
+    return list;
+  },
+
+  gradeWrittenSubmission(submissionId: string, marks: number, remarks?: string, teacherName?: string): WrittenSubmission | null {
+    const data = getDatabase();
+    data.writtenSubmissions = data.writtenSubmissions || [];
+    const sub = data.writtenSubmissions.find((s) => s.id === submissionId);
+    if (!sub) return null;
+    sub.marksObtained = marks;
+    sub.teacherRemarks = remarks;
+    sub.gradedAt = new Date().toISOString();
+    sub.gradedBy = teacherName || 'Subject Teacher';
+    saveDatabase(data);
+    return sub;
+  },
+
+  // 11. SCHOOL CHAT & STUDY GROUPS
+  getChatConversations(user?: UserProfile | null): ChatConversation[] {
+    const data = getDatabase();
+    data.chatConversations = data.chatConversations || initialChatConversations;
+    // Authorized view: students see their class group, teacher/principal chats, and any dm they are part of
+    const userClass = user?.selectedClass || '10';
+    const userId = user?.id || 'guest_student';
+    const userRole = user?.role || 'student';
+
+    if (userRole === 'admin' || userRole === 'principal') {
+      return data.chatConversations;
+    }
+
+    return data.chatConversations.filter((c) => {
+      if (c.type === 'group') {
+        // Group chats for Class 9, 10, 11, 12: accessible to students/teachers
+        return true;
+      }
+      // Direct chats: only exposed to actual participants (or teachers/principal)
+      if (userRole === 'teacher') return true;
+      return c.participants.includes(userId) || c.participants.includes('student');
+    });
+  },
+
+  getChatMessages(conversationId: string, requestingUserId?: string, requestingRole?: UserRole): ChatMessage[] {
+    const data = getDatabase();
+    data.chatMessages = data.chatMessages || initialChatMessages;
+    data.chatConversations = data.chatConversations || initialChatConversations;
+
+    // Check authorization for private chats
+    if (conversationId.startsWith('dm-')) {
+      const conv = data.chatConversations.find((c) => c.id === conversationId);
+      if (conv && requestingUserId && requestingRole !== 'admin' && requestingRole !== 'principal' && requestingRole !== 'teacher') {
+        const isParticipant = conv.participants.includes(requestingUserId) || conv.participants.includes('student');
+        if (!isParticipant) {
+          return [];
+        }
+      }
+    }
+
+    return data.chatMessages.filter((m) => m.conversationId === conversationId);
+  },
+
+  sendChatMessage(msg: Omit<ChatMessage, 'id' | 'createdAt'>): ChatMessage {
+    const data = getDatabase();
+    data.chatMessages = data.chatMessages || initialChatMessages;
+    data.chatConversations = data.chatConversations || initialChatConversations;
+
+    const newMsg: ChatMessage = {
+      ...msg,
+      id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      createdAt: new Date().toISOString(),
+    };
+    data.chatMessages.push(newMsg);
+
+    // Update conversation lastMessage & lastMessageTime
+    const conv = data.chatConversations.find((c) => c.id === msg.conversationId);
+    if (conv) {
+      conv.lastMessage = `${msg.senderName.split(' ')[0]}: ${msg.text.substring(0, 45)}`;
+      conv.lastMessageTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+
+    // Keep max 2000 messages to avoid unbound file growth
+    if (data.chatMessages.length > 2000) {
+      data.chatMessages = data.chatMessages.slice(-2000);
+    }
+
+    saveDatabase(data);
+    return newMsg;
+  },
+
+  deleteChatMessage(messageId: string, requestingUserId?: string, requestingRole?: UserRole): boolean {
+    const data = getDatabase();
+    data.chatMessages = data.chatMessages || initialChatMessages;
+    const msg = data.chatMessages.find((m) => m.id === messageId);
+    if (!msg) return false;
+
+    // Only sender, teacher, admin or principal can delete
+    if (
+      requestingRole === 'admin' ||
+      requestingRole === 'principal' ||
+      requestingRole === 'teacher' ||
+      msg.senderId === requestingUserId
+    ) {
+      data.chatMessages = data.chatMessages.filter((m) => m.id !== messageId);
+      saveDatabase(data);
+      return true;
+    }
+    return false;
+  },
+
+  addChatReaction(messageId: string, emoji: string, userId: string, userName: string): ChatMessage | null {
+    const data = getDatabase();
+    data.chatMessages = data.chatMessages || initialChatMessages;
+    const msg = data.chatMessages.find((m) => m.id === messageId);
+    if (!msg) return null;
+
+    msg.reactions = msg.reactions || {};
+    msg.reactions[emoji] = msg.reactions[emoji] || [];
+
+    const existingIdx = msg.reactions[emoji].indexOf(userName);
+    if (existingIdx >= 0) {
+      // Toggle off
+      msg.reactions[emoji].splice(existingIdx, 1);
+      if (msg.reactions[emoji].length === 0) {
+        delete msg.reactions[emoji];
+      }
+    } else {
+      // Add reaction
+      msg.reactions[emoji].push(userName);
+    }
+    saveDatabase(data);
+    return msg;
+  },
+
+  toggleMuteConversation(conversationId: string, userId: string): boolean {
+    const data = getDatabase();
+    data.chatConversations = data.chatConversations || initialChatConversations;
+    const conv = data.chatConversations.find((c) => c.id === conversationId);
+    if (!conv) return false;
+    conv.isMuted = !conv.isMuted;
+    saveDatabase(data);
+    return conv.isMuted;
   },
 };
 
