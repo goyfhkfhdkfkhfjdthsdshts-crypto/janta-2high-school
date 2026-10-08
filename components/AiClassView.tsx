@@ -50,8 +50,8 @@ export function AiClassView({
 }: AiClassViewProps) {
   // Subjects by Class
   const subjectsByClass: Record<SchoolClass, string[]> = {
-    '9': ['Mathematics', 'Science', 'Social Science', 'Hindi', 'English', 'Sanskrit', 'Information Technology'],
-    '10': ['Mathematics', 'Science', 'Social Science', 'Hindi', 'English', 'Sanskrit', 'Information Technology'],
+    '9': ['Mathematics', 'Science', 'Social Science', 'Hindi', 'English', 'Sanskrit', 'Information Technology', 'Healthcare'],
+    '10': ['Mathematics', 'Science', 'Social Science', 'Hindi', 'English', 'Sanskrit', 'Information Technology', 'Healthcare'],
     '11': [
       'Physics (Science)',
       'Chemistry (Science)',
@@ -65,6 +65,8 @@ export function AiClassView({
       'Geography (Arts)',
       'English Core',
       'Hindi Core',
+      'Information Technology',
+      'Healthcare / Vocational',
     ],
     '12': [
       'Physics (Science)',
@@ -79,6 +81,8 @@ export function AiClassView({
       'Geography (Arts)',
       'English Core',
       'Hindi Core',
+      'Information Technology',
+      'Healthcare / Vocational',
     ],
   };
 

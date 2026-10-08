@@ -2776,7 +2776,7 @@ export const db = {
 
     // 13. Help & Support Articles
     const helpArticles = [
-      { id: 'h-1', title: '1. 🔐 LOGIN & GOOGLE AUTHENTICATION', subtitle: 'How to sign in with Google account and restore sessions' },
+      { id: 'h-1', title: '1. 🔐 SECURE SCHOOL LOGIN & REGISTRATION', subtitle: 'How to sign in with Student ID / Roll Number and restore permanent session' },
       { id: 'h-2', title: '2. 🕒 SCHOOL TIMETABLE & ROUTINE', subtitle: 'Viewing daily classes, periods, and Saturday 1:00-2:00 vocational schedule' },
       { id: 'h-3', title: '3. 📚 JAC & NCERT STUDY BOOKS', subtitle: 'Reading and downloading Class 9-12 textbooks' },
       { id: 'h-4', title: '4. 📝 JAC MCQ PRACTICE TESTS', subtitle: 'Taking chapter-wise objective tests and tracking scores' },

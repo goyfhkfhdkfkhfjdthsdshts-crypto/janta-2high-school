@@ -219,12 +219,11 @@ export function SchoolPortalClient({
     localStorage.setItem('janta_school_lang', next);
   };
 
-  // If user is not logged in, render the official Google Sign-In screen
+  // If user is not logged in, render the secure school authentication login & registration screen
   if (!isInitializing && !user) {
     return (
       <LoginScreen
         onLoginSuccess={handleLoginSuccess}
-        defaultEmail="goyfhkfhdkfkhfjdthsdshts@gmail.com"
       />
     );
   }
