@@ -1442,6 +1442,142 @@ export const db = {
     );
   },
 
+  // Dedicated Student Registration with Strict Validation & Verification
+  registerStudent(input: {
+    name: string;
+    selectedClass: SchoolClass;
+    section?: string;
+    rollNo: string;
+    phone?: string;
+    studentId?: string;
+    password: string;
+    stream?: 'Science' | 'Commerce' | 'Arts' | 'General';
+  }): {
+    success: boolean;
+    user?: UserProfile;
+    errorType?: 'validation' | 'duplicate_id' | 'duplicate_roll' | 'password_format' | 'database_error';
+    message: string;
+  } {
+    // 1. Validate required fields
+    if (!input.name || !input.name.trim()) {
+      return { success: false, errorType: 'validation', message: 'Student Full Name is required.' };
+    }
+    if (!input.rollNo || !input.rollNo.trim()) {
+      return { success: false, errorType: 'validation', message: 'Roll Number is required.' };
+    }
+    if (!input.password) {
+      return { success: false, errorType: 'password_format', message: 'Password is required.' };
+    }
+    if (input.password.length < 4) {
+      return { success: false, errorType: 'password_format', message: 'Password must be at least 4 characters.' };
+    }
+
+    // 2. Check Database connection
+    let data: DatabaseSchema;
+    try {
+      data = getDatabase();
+      if (!data || !Array.isArray(data.users)) {
+        return { success: false, errorType: 'database_error', message: 'School database is temporarily unavailable. Please try again.' };
+      }
+    } catch {
+      return { success: false, errorType: 'database_error', message: 'School database is temporarily unavailable. Please try again.' };
+    }
+
+    const cleanRoll = input.rollNo.trim();
+    const cleanSection = (input.section || 'A').trim().toUpperCase();
+    const targetClass = input.selectedClass || '10';
+    const targetStudentId = (
+      input.studentId?.trim() ||
+      `std-${targetClass}-${cleanRoll.replace(/[^a-zA-Z0-9]/g, '')}`
+    ).toLowerCase();
+
+    // 3. Check for Duplicate Student ID
+    const duplicateId = data.users.find(
+      (u) =>
+        (u.id && u.id.toLowerCase() === targetStudentId) ||
+        (u.studentId && u.studentId.toLowerCase() === targetStudentId) ||
+        (u.loginId && u.loginId.toLowerCase() === targetStudentId)
+    );
+    if (duplicateId) {
+      return {
+        success: false,
+        errorType: 'duplicate_id',
+        message: 'This Student ID is already registered.',
+      };
+    }
+
+    // 4. Check for Duplicate Roll in same Class and Section
+    const duplicateRoll = data.users.find(
+      (u) =>
+        u.role === 'student' &&
+        u.rollNo &&
+        u.rollNo.trim().toLowerCase() === cleanRoll.toLowerCase() &&
+        u.selectedClass === targetClass &&
+        (u.section || 'A').trim().toUpperCase() === cleanSection
+    );
+    if (duplicateRoll) {
+      return {
+        success: false,
+        errorType: 'duplicate_roll',
+        message: `A student with Roll No. ${cleanRoll} is already registered in Class ${targetClass} Section ${cleanSection}.`,
+      };
+    }
+
+    // 5. Secure password hashing & permanent ID creation
+    const now = new Date().toISOString();
+    const permanentAccountId = `std-${targetClass}-${cleanRoll.replace(/[^a-zA-Z0-9]/g, '')}`;
+    const generatedEmail = `${permanentAccountId.toLowerCase()}@student.janta.edu`;
+    const passwordHash = hashPassword(input.password);
+
+    const newStudent: UserProfile = {
+      id: permanentAccountId,
+      studentAccountId: permanentAccountId,
+      studentId: permanentAccountId,
+      loginId: permanentAccountId,
+      email: generatedEmail,
+      name: input.name.trim(),
+      picture: '',
+      role: 'student',
+      selectedClass: targetClass,
+      section: cleanSection,
+      rollNo: cleanRoll,
+      stream: input.stream || 'General',
+      phone: input.phone?.trim() || '',
+      passwordHash,
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    // 6. Save account permanently to database
+    try {
+      data.users.push(newStudent);
+      saveDatabase(data);
+
+      // Verify persistence in database
+      const verifyData = getDatabase();
+      const verified = verifyData.users.find((u) => u.id === permanentAccountId);
+      if (!verified) {
+        return {
+          success: false,
+          errorType: 'database_error',
+          message: 'School database is temporarily unavailable. Please try again.',
+        };
+      }
+
+      return {
+        success: true,
+        user: verified,
+        message: 'Account created successfully.',
+      };
+    } catch {
+      return {
+        success: false,
+        errorType: 'database_error',
+        message: 'School database is temporarily unavailable. Please try again.',
+      };
+    }
+  },
+
   // SAFE Upsert: Never overwrite existing data on login/reopen
   upsertUser(user: Partial<UserProfile> & { name: string }): UserProfile {
     const data = getDatabase();

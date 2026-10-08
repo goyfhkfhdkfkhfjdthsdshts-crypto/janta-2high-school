@@ -4,6 +4,7 @@ export type UserRole = 'student' | 'teacher' | 'admin' | 'principal' | 'parent';
 
 export interface UserProfile {
   id: string;
+  studentAccountId?: string;
   studentId?: string;
   loginId?: string;
   email: string;

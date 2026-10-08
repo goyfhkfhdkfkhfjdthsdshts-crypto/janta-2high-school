@@ -68,6 +68,16 @@ export async function POST(req: NextRequest) {
     if (checkId) {
       const existing = db.findUser(checkId);
       if (existing) {
+        if (password) {
+          return NextResponse.json(
+            {
+              success: false,
+              errorType: 'duplicate_id',
+              message: 'This Student ID is already registered.',
+            },
+            { status: 409 }
+          );
+        }
         return NextResponse.json({
           success: true,
           user: existing,
@@ -80,6 +90,16 @@ export async function POST(req: NextRequest) {
     if (rollNo && selectedClass) {
       const existingRoll = db.findStudentByRoll(rollNo, selectedClass);
       if (existingRoll) {
+        if (password) {
+          return NextResponse.json(
+            {
+              success: false,
+              errorType: 'duplicate_roll',
+              message: `A student with Roll No. ${rollNo} is already registered in Class ${selectedClass}.`,
+            },
+            { status: 409 }
+          );
+        }
         return NextResponse.json({
           success: true,
           user: existingRoll,

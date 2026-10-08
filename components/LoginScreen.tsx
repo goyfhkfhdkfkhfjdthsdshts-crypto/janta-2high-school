@@ -20,6 +20,7 @@ import {
   UserCheck,
   Building2,
   Users,
+  RotateCw,
 } from 'lucide-react';
 
 interface LoginScreenProps {
@@ -115,6 +116,13 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
     setErrorMessage(null);
     setSuccessMessage(null);
 
+    // Network availability pre-check
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      setErrorMessage('Internet connection problem. Please check your connection and try again.');
+      setIsLoading(false);
+      return;
+    }
+
     try {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
@@ -127,17 +135,58 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
         }),
       });
 
-      const data = await res.json();
-      if (res.ok && data.success && data.user) {
+      let data: any = null;
+      try {
+        data = await res.json();
+      } catch {
+        // Response was not JSON
+      }
+
+      if (res.ok && data?.success && data?.user) {
         setSuccessMessage(`Login successful! Loading ${data.user.name}...`);
         setTimeout(() => {
           onLoginSuccess(data.user);
         }, 300);
+      } else if (res.status === 401 || (data && !data.success)) {
+        setErrorMessage(data?.message || 'Invalid Login ID or Password.');
+      } else if (res.status === 503) {
+        setErrorMessage('School database is temporarily unavailable. Please try again.');
+      } else if (res.status >= 500) {
+        setErrorMessage('School server is temporarily unavailable. Please try again.');
       } else {
-        setErrorMessage(data.message || 'Invalid Login ID or Password.');
+        setErrorMessage(data?.message || 'Authentication failed. Please verify your credentials.');
       }
     } catch {
-      setErrorMessage('School server is temporarily unavailable. Please try again.');
+      // Check if client is offline or in a static export deployment (e.g., GitHub Pages)
+      if (typeof navigator !== 'undefined' && !navigator.onLine) {
+        setErrorMessage('Internet connection problem. Please check your connection and try again.');
+      } else {
+        // Fallback for static hosting / offline sync: check locally registered student accounts
+        try {
+          const registeredRaw = localStorage.getItem('janta_school_registered_students');
+          if (registeredRaw) {
+            const list: Array<UserProfile & { password?: string }> = JSON.parse(registeredRaw);
+            const cleanInput = loginId.trim().toLowerCase();
+            const found = list.find(
+              (u) =>
+                (u.id && u.id.toLowerCase() === cleanInput) ||
+                (u.studentId && u.studentId.toLowerCase() === cleanInput) ||
+                (u.loginId && u.loginId.toLowerCase() === cleanInput) ||
+                (u.rollNo && u.rollNo.toLowerCase() === cleanInput)
+            );
+            if (found && (!found.password || found.password === password.trim())) {
+              setSuccessMessage(`Login successful! Loading ${found.name}...`);
+              setTimeout(() => {
+                onLoginSuccess(found);
+              }, 300);
+              return;
+            }
+          }
+        } catch {
+          // Ignore parse errors
+        }
+        setErrorMessage('School server is temporarily unavailable. Please try again.');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -168,51 +217,177 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
 
     setIsLoading(true);
     setErrorMessage(null);
+    setSuccessMessage(null);
 
+    // Network availability pre-check
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      setErrorMessage('Internet connection problem. Please check your connection and try again.');
+      setIsLoading(false);
+      return;
+    }
+
+    const cleanRoll = registerData.rollNo.trim();
+    const cleanSection = (registerData.section || 'A').trim().toUpperCase();
     const generatedId =
       registerData.studentId.trim() ||
-      `std-${registerData.selectedClass}-${registerData.rollNo.trim().replace(/[^a-zA-Z0-9]/g, '')}`;
+      `std-${registerData.selectedClass}-${cleanRoll.replace(/[^a-zA-Z0-9]/g, '')}`;
+
+    const payload = {
+      name: registerData.name.trim(),
+      fullName: registerData.name.trim(),
+      selectedClass: registerData.selectedClass,
+      class: registerData.selectedClass,
+      section: cleanSection,
+      rollNo: cleanRoll,
+      rollNumber: cleanRoll,
+      studentId: generatedId,
+      studentAccountId: generatedId,
+      password: registerData.password,
+      stream: registerData.stream,
+      phone: registerData.phone.trim(),
+      mobileNumber: registerData.phone.trim(),
+    };
 
     try {
-      const res = await fetch('/api/auth/profile', {
+      // Connect to the real backend registration endpoint
+      let res = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: registerData.name.trim(),
-          selectedClass: registerData.selectedClass,
-          section: registerData.section.trim().toUpperCase(),
-          rollNo: registerData.rollNo.trim(),
-          studentId: generatedId,
-          password: registerData.password,
-          stream: registerData.stream,
-          phone: registerData.phone.trim(),
-        }),
+        body: JSON.stringify(payload),
       });
 
-      const data = await res.json();
-      if (res.ok && data.success && data.user) {
-        // Now authenticate with newly created credentials
-        const loginRes = await fetch('/api/auth/login', {
+      // If /api/auth/register returned 404, fallback to /api/auth/profile
+      if (res.status === 404) {
+        res = await fetch('/api/auth/profile', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            role: 'student',
-            loginId: generatedId,
-            password: registerData.password,
-            selectedClass: registerData.selectedClass,
-          }),
+          body: JSON.stringify(payload),
         });
-        const loginData = await loginRes.json();
-        if (loginData.success && loginData.user) {
-          onLoginSuccess(loginData.user);
-        } else {
-          onLoginSuccess(data.user);
+      }
+
+      let data: any = null;
+      try {
+        data = await res.json();
+      } catch {
+        // Non-JSON response
+      }
+
+      if (res.ok && data?.success && data?.user) {
+        setSuccessMessage('Account created successfully! Loading your student profile...');
+
+        // Mirror to local student registry for offline resilience
+        try {
+          const registeredRaw = localStorage.getItem('janta_school_registered_students');
+          const list: Array<UserProfile & { password?: string }> = registeredRaw
+            ? JSON.parse(registeredRaw)
+            : [];
+          const idx = list.findIndex((u) => u.id === data.user.id || u.studentId === data.user.studentId);
+          const studentEntry = { ...data.user, password: registerData.password };
+          if (idx >= 0) {
+            list[idx] = studentEntry;
+          } else {
+            list.push(studentEntry);
+          }
+          localStorage.setItem('janta_school_registered_students', JSON.stringify(list));
+        } catch {
+          // ignore localStorage error
         }
+
+        // Authenticate session and redirect to Home/Dashboard
+        setTimeout(() => {
+          onLoginSuccess(data.user);
+        }, 350);
+        return;
+      }
+
+      // Specific Backend / Database Error Mapping (Requirement 2 & 4)
+      if (res.status === 409 || data?.errorType === 'duplicate_id' || data?.errorType === 'duplicate_roll') {
+        setErrorMessage(data?.message || 'This Student ID is already registered.');
+      } else if (res.status === 503 || data?.errorType === 'database_error') {
+        setErrorMessage('School database is temporarily unavailable. Please try again.');
+      } else if (res.status === 400 || data?.errorType === 'validation' || data?.errorType === 'password_format') {
+        setErrorMessage(data?.message || 'Please check the entered information.');
+      } else if (data?.message) {
+        setErrorMessage(data.message);
+      } else if (res.status >= 500) {
+        setErrorMessage('School server is temporarily unavailable. Please try again.');
       } else {
-        setErrorMessage(data.message || 'Unable to register student account.');
+        setErrorMessage('Unable to register student account. Please check the entered information.');
       }
     } catch {
-      setErrorMessage('School server is temporarily unavailable. Please try again.');
+      // Network failure or static environment without Node server
+      if (typeof navigator !== 'undefined' && !navigator.onLine) {
+        setErrorMessage('Internet connection problem. Please check your connection and try again.');
+      } else {
+        // Fallback for static hosting / GitHub Pages: save to persistent browser store
+        const isStaticHost =
+          typeof window !== 'undefined' &&
+          (window.location.hostname.endsWith('github.io') ||
+            window.location.protocol === 'file:' ||
+            process.env.NEXT_PUBLIC_STATIC_EXPORT === 'true');
+
+        if (isStaticHost) {
+          try {
+            const registeredRaw = localStorage.getItem('janta_school_registered_students');
+            const list: Array<UserProfile & { password?: string }> = registeredRaw
+              ? JSON.parse(registeredRaw)
+              : [];
+
+            // Duplicate checks
+            const duplicate = list.find(
+              (u) =>
+                (u.id && u.id.toLowerCase() === generatedId.toLowerCase()) ||
+                (u.studentId && u.studentId.toLowerCase() === generatedId.toLowerCase())
+            );
+            if (duplicate) {
+              setErrorMessage('This Student ID is already registered.');
+              return;
+            }
+
+            const dupRoll = list.find(
+              (u) =>
+                u.selectedClass === registerData.selectedClass &&
+                (u.section || 'A').toUpperCase() === cleanSection &&
+                u.rollNo &&
+                u.rollNo.trim().toLowerCase() === cleanRoll.toLowerCase()
+            );
+            if (dupRoll) {
+              setErrorMessage(`A student with Roll No. ${cleanRoll} is already registered in Class ${registerData.selectedClass} Section ${cleanSection}.`);
+              return;
+            }
+
+            const newLocalUser: UserProfile = {
+              id: generatedId,
+              studentAccountId: generatedId,
+              studentId: generatedId,
+              loginId: generatedId,
+              name: registerData.name.trim(),
+              email: `${generatedId.toLowerCase()}@student.janta.edu`,
+              role: 'student',
+              selectedClass: registerData.selectedClass,
+              section: cleanSection,
+              rollNo: cleanRoll,
+              stream: registerData.stream,
+              phone: registerData.phone.trim(),
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            };
+
+            list.push({ ...newLocalUser, password: registerData.password });
+            localStorage.setItem('janta_school_registered_students', JSON.stringify(list));
+
+            setSuccessMessage('Account created successfully! Loading your student profile...');
+            setTimeout(() => {
+              onLoginSuccess(newLocalUser);
+            }, 350);
+            return;
+          } catch {
+            setErrorMessage('School database is temporarily unavailable. Please try again.');
+          }
+        } else {
+          setErrorMessage('School server is temporarily unavailable. Please try again.');
+        }
+      }
     } finally {
       setIsLoading(false);
     }
@@ -370,9 +545,20 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
             </div>
 
             {errorMessage && (
-              <div className="p-2.5 bg-red-50 border border-red-200 rounded-xl flex items-center gap-2 text-xs text-red-700">
-                <AlertCircle className="w-4 h-4 shrink-0 text-red-600" />
-                <p className="font-semibold">{errorMessage}</p>
+              <div className="p-2.5 bg-red-50 border border-red-200 rounded-xl flex items-center justify-between gap-2 text-xs text-red-700">
+                <div className="flex items-center gap-2 min-w-0">
+                  <AlertCircle className="w-4 h-4 shrink-0 text-red-600" />
+                  <p className="font-semibold text-xs leading-snug">{errorMessage}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={(e) => handleRegisterStudent(e)}
+                  disabled={isLoading}
+                  className="px-2.5 py-1 text-[11px] font-bold bg-red-100 hover:bg-red-200 text-red-800 rounded-lg shrink-0 flex items-center gap-1 cursor-pointer transition-colors"
+                >
+                  <RotateCw className="w-3 h-3" />
+                  <span>Retry</span>
+                </button>
               </div>
             )}
 
@@ -474,9 +660,20 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
 
             {/* Error & Success Messages */}
             {errorMessage && (
-              <div className="p-2.5 bg-red-50 border border-red-200 rounded-xl flex items-start gap-2 text-xs text-red-700">
-                <AlertCircle className="w-4 h-4 shrink-0 text-red-600 mt-0.5" />
-                <p className="font-semibold">{errorMessage}</p>
+              <div className="p-2.5 bg-red-50 border border-red-200 rounded-xl flex items-center justify-between gap-2 text-xs text-red-700">
+                <div className="flex items-center gap-2 min-w-0">
+                  <AlertCircle className="w-4 h-4 shrink-0 text-red-600" />
+                  <p className="font-semibold text-xs leading-snug">{errorMessage}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={(e) => handleLogin(e)}
+                  disabled={isLoading}
+                  className="px-2.5 py-1 text-[11px] font-bold bg-red-100 hover:bg-red-200 text-red-800 rounded-lg shrink-0 flex items-center gap-1 cursor-pointer transition-colors"
+                >
+                  <RotateCw className="w-3 h-3" />
+                  <span>Retry</span>
+                </button>
               </div>
             )}
 

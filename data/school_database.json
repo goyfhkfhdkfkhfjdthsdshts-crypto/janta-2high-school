@@ -224,6 +224,41 @@
       "passwordHash": "964200ee25315d0c33d53b3c11f7e1113c02a7df0e1c5edf331d2ff12599ecbd",
       "createdAt": "2026-09-30T08:08:57.504Z",
       "updatedAt": "2026-09-30T08:08:57.508Z"
+    },
+    {
+      "id": "std-10-999",
+      "studentId": "std-10-999",
+      "loginId": "999",
+      "email": "999@student.janta.edu",
+      "name": "Amit Kumar Test",
+      "picture": "",
+      "role": "student",
+      "selectedClass": "10",
+      "section": "A",
+      "rollNo": "999",
+      "stream": "General",
+      "phone": "9876543210",
+      "passwordHash": "hash123",
+      "createdAt": "2026-10-08T13:03:41.527Z",
+      "updatedAt": "2026-10-08T13:03:41.527Z"
+    },
+    {
+      "id": "std-10-888332",
+      "studentAccountId": "std-10-888332",
+      "studentId": "std-10-888332",
+      "loginId": "std-10-888332",
+      "email": "std-10-888332@student.janta.edu",
+      "name": "Deepak Sharma",
+      "picture": "",
+      "role": "student",
+      "selectedClass": "10",
+      "section": "B",
+      "rollNo": "888332",
+      "stream": "General",
+      "phone": "9876543210",
+      "passwordHash": "6e73aea56f2fd5cd01df7081ec31c3a98c7e7ba4d871ffb64f7688c259d40667",
+      "createdAt": "2026-10-08T13:08:54.875Z",
+      "updatedAt": "2026-10-08T13:08:54.875Z"
     }
   ],
   "liveClassSessions": [
@@ -1184,6 +1219,21 @@
     }
   ],
   "attendance": [
+    {
+      "studentId": "std-10-1015",
+      "studentEmail": "1015@student.janta.edu",
+      "studentName": "Anil chouhan",
+      "spokenOrEnteredName": "Anil chouhan",
+      "class": "10",
+      "rollNo": "1015",
+      "date": "2026-10-08",
+      "time": "06:32 PM",
+      "status": "Present",
+      "method": "voice",
+      "verifiedBy": "school_auth",
+      "id": "att_1791464463813_u9lqh",
+      "timestamp": "2026-10-08T13:01:03.813Z"
+    },
     {
       "studentId": "std-10-1071",
       "studentEmail": "std-10-1071@student.janta.edu",
