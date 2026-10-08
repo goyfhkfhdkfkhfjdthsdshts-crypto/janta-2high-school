@@ -1254,22 +1254,6 @@ export function ProfileView({
         </div>
       </div>
 
-      {/* Logout Action (Requirement 3: Ends session only, never deletes data) */}
-      <div className="pt-2">
-        <button
-          onClick={onLogout}
-          className="w-full py-3.5 px-4 bg-red-50 hover:bg-red-100 active:bg-red-200 text-red-700 rounded-2xl text-xs sm:text-sm font-bold transition-all border border-red-200 flex items-center justify-center gap-2 cursor-pointer"
-        >
-          <LogOut className="w-4 h-4" />
-          <span>{language === 'hi' ? 'सत्र समाप्त करें (Sign Out of School Portal)' : 'Sign Out of School Portal'}</span>
-        </button>
-        <p className="text-[11px] text-slate-400 text-center mt-1.5">
-          {language === 'hi'
-            ? 'लॉगआउट केवल आपका वर्तमान सत्र समाप्त करता है। आपका प्रोफ़ाइल व रिकॉर्ड सुरक्षित रहता है।'
-            : 'Signing out ends your current session only. All your profile data & academic progress remain permanently stored.'}
-        </p>
-      </div>
-
       {/* Printable Certificate Modal Dialog (Requirement 38) */}
       {selectedCertificate && (
         <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-xs p-4 overflow-y-auto flex items-center justify-center animate-in fade-in">

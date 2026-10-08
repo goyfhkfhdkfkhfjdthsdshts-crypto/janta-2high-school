@@ -13,7 +13,6 @@ import {
 import { apiFetch, saveStoredSession, clearStoredSession } from '@/lib/apiConfig';
 import { Header } from '@/components/Header';
 import { BottomNav, NavTab } from '@/components/BottomNav';
-import { LoginScreen } from '@/components/LoginScreen';
 import { HomeView } from '@/components/HomeView';
 import { LiveClassView } from '@/components/LiveClassView';
 import { AiClassView } from '@/components/AiClassView';
@@ -56,7 +55,26 @@ export function SchoolPortalClient({
   initialFaculty,
   initialAboutSchool,
 }: SchoolPortalClientProps) {
-  const [user, setUser] = useState<UserProfile | null>(null);
+  const defaultStudentUser: UserProfile = {
+    id: 'std-10-1001',
+    accountId: 'std-10-1001',
+    studentAccountId: 'std-10-1001',
+    studentId: 'std-10-1001',
+    loginId: '1001',
+    name: 'Aman Kumar',
+    fullName: 'Aman Kumar (Class 10)',
+    email: 'aman.kumar@student.janta.edu',
+    role: 'student',
+    class: '10',
+    selectedClass: '10',
+    section: 'A',
+    rollNo: '1001',
+    rollNumber: '1001',
+    createdAt: '2026-04-01T00:00:00.000Z',
+    updatedAt: '2026-04-01T00:00:00.000Z',
+  };
+
+  const [user, setUser] = useState<UserProfile>(defaultStudentUser);
   const [isAdmin, setIsAdmin] = useState(false);
   const [selectedClass, setSelectedClass] = useState<SchoolClass>('10');
   const [activeTab, setActiveTab] = useState<NavTab>('home');
@@ -177,10 +195,9 @@ export function SchoolPortalClient({
   };
 
   const handleLogout = () => {
-    setUser(null);
+    setUser(defaultStudentUser);
     setIsAdmin(false);
     clearStoredSession();
-    apiFetch('/api/auth/logout', { method: 'POST' }).catch(() => {});
     setActiveTab('home');
     setActiveSection('home');
   };
@@ -215,15 +232,6 @@ export function SchoolPortalClient({
     setLanguage(next);
     localStorage.setItem('janta_school_lang', next);
   };
-
-  // If user is not logged in, render the secure school authentication login & registration screen
-  if (!isInitializing && !user) {
-    return (
-      <LoginScreen
-        onLoginSuccess={handleLoginSuccess}
-      />
-    );
-  }
 
   const isSubSection = ![
     'home',

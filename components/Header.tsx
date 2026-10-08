@@ -128,29 +128,12 @@ export function Header({
             <span>{language === 'hi' ? '🇮🇳 हिंदी' : '🇬🇧 EN'}</span>
           </button>
 
-          {/* Admin Shield Badge / Trigger */}
-          <button
-            onClick={onOpenAdminModal}
-            className={`p-1.5 rounded-full border transition-all ${
-              isAdmin
-                ? 'bg-amber-100 text-amber-900 border-amber-300 ring-2 ring-amber-400/50'
-                : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200'
-            }`}
-            title={isAdmin ? 'Teacher/Admin Mode Active' : 'Teacher/Admin Login'}
-          >
-            {isAdmin ? (
-              <ShieldCheck className="w-4 h-4 text-amber-700" />
-            ) : (
-              <Shield className="w-4 h-4 text-slate-500" />
-            )}
-          </button>
-
           {/* User Avatar / Profile Button */}
           {user ? (
             <button
               onClick={onOpenProfile}
-              className="flex items-center gap-1.5 pl-1.5 pr-2.5 py-1 rounded-full bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-900 transition-all max-w-[130px]"
-              title={`Logged in as ${user.name}`}
+              className="flex items-center gap-1.5 pl-1.5 pr-2.5 py-1 rounded-full bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-900 transition-all max-w-[130px] cursor-pointer"
+              title={`Student: ${user.name}`}
             >
               <div className="w-6 h-6 rounded-full bg-blue-700 text-white font-bold text-xs flex items-center justify-center shrink-0 overflow-hidden shadow-xs">
                 {user.picture ? (
@@ -167,8 +150,8 @@ export function Header({
           ) : (
             <button
               onClick={onOpenProfile}
-              className="p-1.5 rounded-full bg-blue-600 text-white hover:bg-blue-700 shadow-xs"
-              title="Sign In to School Portal"
+              className="p-1.5 rounded-full bg-blue-600 text-white hover:bg-blue-700 shadow-xs cursor-pointer"
+              title="Student Profile"
             >
               <User className="w-4 h-4" />
             </button>
