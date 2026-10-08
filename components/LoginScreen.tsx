@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { SchoolLogo } from './SchoolLogo';
 import { UserProfile, SchoolClass, UserRole } from '@/lib/types';
+import { apiFetch, saveStoredSession } from '@/lib/apiConfig';
 import {
   AlertCircle,
   GraduationCap,
@@ -124,9 +125,8 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
     }
 
     try {
-      const res = await fetch('/api/auth/login', {
+      const { res, data } = await apiFetch('/api/auth/login', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           role: selectedRole,
           loginId: loginId.trim(),
@@ -135,57 +135,29 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
         }),
       });
 
-      let data: any = null;
-      try {
-        data = await res.json();
-      } catch {
-        // Response was not JSON
-      }
-
       if (res.ok && data?.success && data?.user) {
-        setSuccessMessage(`Login successful! Loading ${data.user.name}...`);
+        setSuccessMessage(`Login successful! Welcome, ${data.user.name || data.user.fullName}...`);
+        saveStoredSession(data.user, data.token);
         setTimeout(() => {
           onLoginSuccess(data.user);
         }, 300);
       } else if (res.status === 401 || (data && !data.success)) {
         setErrorMessage(data?.message || 'Invalid Login ID or Password.');
       } else if (res.status === 503) {
-        setErrorMessage('School database is temporarily unavailable. Please try again.');
+        setErrorMessage(data?.message || 'School database is temporarily unavailable. Please try again.');
       } else if (res.status >= 500) {
-        setErrorMessage('School server is temporarily unavailable. Please try again.');
+        setErrorMessage(data?.message || 'School server is temporarily unavailable. Please try again.');
       } else {
         setErrorMessage(data?.message || 'Authentication failed. Please verify your credentials.');
       }
-    } catch {
-      // Check if client is offline or in a static export deployment (e.g., GitHub Pages)
+    } catch (err: any) {
       if (typeof navigator !== 'undefined' && !navigator.onLine) {
         setErrorMessage('Internet connection problem. Please check your connection and try again.');
       } else {
-        // Fallback for static hosting / offline sync: check locally registered student accounts
-        try {
-          const registeredRaw = localStorage.getItem('janta_school_registered_students');
-          if (registeredRaw) {
-            const list: Array<UserProfile & { password?: string }> = JSON.parse(registeredRaw);
-            const cleanInput = loginId.trim().toLowerCase();
-            const found = list.find(
-              (u) =>
-                (u.id && u.id.toLowerCase() === cleanInput) ||
-                (u.studentId && u.studentId.toLowerCase() === cleanInput) ||
-                (u.loginId && u.loginId.toLowerCase() === cleanInput) ||
-                (u.rollNo && u.rollNo.toLowerCase() === cleanInput)
-            );
-            if (found && (!found.password || found.password === password.trim())) {
-              setSuccessMessage(`Login successful! Loading ${found.name}...`);
-              setTimeout(() => {
-                onLoginSuccess(found);
-              }, 300);
-              return;
-            }
-          }
-        } catch {
-          // Ignore parse errors
-        }
-        setErrorMessage('School server is temporarily unavailable. Please try again.');
+        setErrorMessage(
+          err?.message ||
+          'Unable to reach the school login server. Please verify your internet connection.'
+        );
       }
     } finally {
       setIsLoading(false);
@@ -194,11 +166,21 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
 
   const handleRegisterStudent = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!registerData.name.trim()) {
+    const cleanName = registerData.name.trim();
+    const cleanRoll = registerData.rollNo.trim();
+    const cleanPhone = registerData.phone.trim();
+    const cleanSection = (registerData.section || 'A').trim().toUpperCase();
+
+    // Client-side field validations with exact messages
+    if (!cleanName) {
       setErrorMessage('Student Full Name is required.');
       return;
     }
-    if (!registerData.rollNo.trim()) {
+    if (cleanName.length < 2) {
+      setErrorMessage('Please enter a valid Full Name (at least 2 characters).');
+      return;
+    }
+    if (!cleanRoll) {
       setErrorMessage('Roll Number is required.');
       return;
     }
@@ -226,167 +208,78 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
       return;
     }
 
-    const cleanRoll = registerData.rollNo.trim();
-    const cleanSection = (registerData.section || 'A').trim().toUpperCase();
-    const generatedId =
-      registerData.studentId.trim() ||
-      `std-${registerData.selectedClass}-${cleanRoll.replace(/[^a-zA-Z0-9]/g, '')}`;
-
+    // Prepare unified payload matching backend schema exactly (Requirement 2 & 8)
     const payload = {
-      name: registerData.name.trim(),
-      fullName: registerData.name.trim(),
-      selectedClass: registerData.selectedClass,
+      fullName: cleanName,
+      name: cleanName,
       class: registerData.selectedClass,
+      selectedClass: registerData.selectedClass,
       section: cleanSection,
-      rollNo: cleanRoll,
       rollNumber: cleanRoll,
-      studentId: generatedId,
-      studentAccountId: generatedId,
+      rollNo: cleanRoll,
+      mobileNumber: cleanPhone,
+      phone: cleanPhone,
       password: registerData.password,
       stream: registerData.stream,
-      phone: registerData.phone.trim(),
-      mobileNumber: registerData.phone.trim(),
     };
 
     try {
-      // Connect to the real backend registration endpoint
-      let res = await fetch('/api/auth/register', {
+      // Connect to the real backend registration endpoint via apiFetch
+      const { res, data } = await apiFetch('/api/auth/register', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
 
-      // If /api/auth/register returned 404, fallback to /api/auth/profile
-      if (res.status === 404) {
-        res = await fetch('/api/auth/profile', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        });
-      }
-
-      let data: any = null;
-      try {
-        data = await res.json();
-      } catch {
-        // Non-JSON response
-      }
-
-      if (res.ok && data?.success && data?.user) {
+      if (res.ok && data?.success && (data?.user || data?.student)) {
+        const studentUser: UserProfile = data.user || data.student;
         setSuccessMessage('Account created successfully! Loading your student profile...');
+        saveStoredSession(studentUser, data.token);
 
-        // Mirror to local student registry for offline resilience
-        try {
-          const registeredRaw = localStorage.getItem('janta_school_registered_students');
-          const list: Array<UserProfile & { password?: string }> = registeredRaw
-            ? JSON.parse(registeredRaw)
-            : [];
-          const idx = list.findIndex((u) => u.id === data.user.id || u.studentId === data.user.studentId);
-          const studentEntry = { ...data.user, password: registerData.password };
-          if (idx >= 0) {
-            list[idx] = studentEntry;
-          } else {
-            list.push(studentEntry);
-          }
-          localStorage.setItem('janta_school_registered_students', JSON.stringify(list));
-        } catch {
-          // ignore localStorage error
-        }
-
-        // Authenticate session and redirect to Home/Dashboard
+        // Transition to logged-in state
         setTimeout(() => {
-          onLoginSuccess(data.user);
+          onLoginSuccess(studentUser);
         }, 350);
         return;
       }
 
-      // Specific Backend / Database Error Mapping (Requirement 2 & 4)
-      if (res.status === 409 || data?.errorType === 'duplicate_id' || data?.errorType === 'duplicate_roll') {
-        setErrorMessage(data?.message || 'This Student ID is already registered.');
-      } else if (res.status === 503 || data?.errorType === 'database_error') {
-        setErrorMessage('School database is temporarily unavailable. Please try again.');
-      } else if (res.status === 400 || data?.errorType === 'validation' || data?.errorType === 'password_format') {
+      // Handle specific backend HTTP status codes and error messages (Requirement 7 & 9)
+      if (
+        res.status === 409 ||
+        data?.errorType === 'duplicate_account' ||
+        data?.errorType === 'duplicate_id' ||
+        data?.errorType === 'duplicate_roll'
+      ) {
+        setErrorMessage(data?.message || 'This student account already exists.');
+      } else if (
+        res.status === 400 ||
+        res.status === 422 ||
+        data?.errorType === 'validation' ||
+        data?.errorType === 'password_format'
+      ) {
         setErrorMessage(data?.message || 'Please check the entered information.');
+      } else if (res.status === 401) {
+        setErrorMessage(data?.message || 'Authentication problem. Please verify details.');
+      } else if (res.status === 403) {
+        setErrorMessage(data?.message || 'Permission problem. Registration not allowed.');
+      } else if (res.status === 404) {
+        setErrorMessage('Registration service endpoint not found (HTTP 404). Please check backend deployment.');
+      } else if (res.status === 503 || data?.errorType === 'database_error') {
+        setErrorMessage(data?.message || 'School database is temporarily unavailable. Please try again.');
+      } else if (res.status >= 500) {
+        setErrorMessage(data?.message || 'School server is temporarily unavailable. Please try again.');
       } else if (data?.message) {
         setErrorMessage(data.message);
-      } else if (res.status >= 500) {
-        setErrorMessage('School server is temporarily unavailable. Please try again.');
       } else {
-        setErrorMessage('Unable to register student account. Please check the entered information.');
+        setErrorMessage('Registration failed. Please check the entered information.');
       }
-    } catch {
-      // Network failure or static environment without Node server
+    } catch (err: any) {
       if (typeof navigator !== 'undefined' && !navigator.onLine) {
         setErrorMessage('Internet connection problem. Please check your connection and try again.');
       } else {
-        // Fallback for static hosting / GitHub Pages: save to persistent browser store
-        const isStaticHost =
-          typeof window !== 'undefined' &&
-          (window.location.hostname.endsWith('github.io') ||
-            window.location.protocol === 'file:' ||
-            process.env.NEXT_PUBLIC_STATIC_EXPORT === 'true');
-
-        if (isStaticHost) {
-          try {
-            const registeredRaw = localStorage.getItem('janta_school_registered_students');
-            const list: Array<UserProfile & { password?: string }> = registeredRaw
-              ? JSON.parse(registeredRaw)
-              : [];
-
-            // Duplicate checks
-            const duplicate = list.find(
-              (u) =>
-                (u.id && u.id.toLowerCase() === generatedId.toLowerCase()) ||
-                (u.studentId && u.studentId.toLowerCase() === generatedId.toLowerCase())
-            );
-            if (duplicate) {
-              setErrorMessage('This Student ID is already registered.');
-              return;
-            }
-
-            const dupRoll = list.find(
-              (u) =>
-                u.selectedClass === registerData.selectedClass &&
-                (u.section || 'A').toUpperCase() === cleanSection &&
-                u.rollNo &&
-                u.rollNo.trim().toLowerCase() === cleanRoll.toLowerCase()
-            );
-            if (dupRoll) {
-              setErrorMessage(`A student with Roll No. ${cleanRoll} is already registered in Class ${registerData.selectedClass} Section ${cleanSection}.`);
-              return;
-            }
-
-            const newLocalUser: UserProfile = {
-              id: generatedId,
-              studentAccountId: generatedId,
-              studentId: generatedId,
-              loginId: generatedId,
-              name: registerData.name.trim(),
-              email: `${generatedId.toLowerCase()}@student.janta.edu`,
-              role: 'student',
-              selectedClass: registerData.selectedClass,
-              section: cleanSection,
-              rollNo: cleanRoll,
-              stream: registerData.stream,
-              phone: registerData.phone.trim(),
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
-            };
-
-            list.push({ ...newLocalUser, password: registerData.password });
-            localStorage.setItem('janta_school_registered_students', JSON.stringify(list));
-
-            setSuccessMessage('Account created successfully! Loading your student profile...');
-            setTimeout(() => {
-              onLoginSuccess(newLocalUser);
-            }, 350);
-            return;
-          } catch {
-            setErrorMessage('School database is temporarily unavailable. Please try again.');
-          }
-        } else {
-          setErrorMessage('School server is temporarily unavailable. Please try again.');
-        }
+        setErrorMessage(
+          err?.message ||
+          'Unable to reach the school registration server. Please verify your internet connection.'
+        );
       }
     } finally {
       setIsLoading(false);
@@ -500,13 +393,13 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
 
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Mobile Number
+                  Mobile Number <span className="text-[10px] font-normal text-slate-500">(Optional)</span>
                 </label>
                 <input
                   type="tel"
                   value={registerData.phone}
                   onChange={(e) => setRegisterData({ ...registerData, phone: e.target.value })}
-                  placeholder="10 digits"
+                  placeholder="e.g. 9876543210"
                   className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
                 />
               </div>
@@ -515,7 +408,8 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
             <div className="grid grid-cols-2 gap-2.5">
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Set Password <span className="text-red-500">*</span>
+                  Set Password <span className="text-red-500">*</span>{' '}
+                  <span className="text-[10px] font-normal text-slate-500">(Min 4 chars)</span>
                 </label>
                 <input
                   type="password"

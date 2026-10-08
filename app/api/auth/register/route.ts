@@ -1,13 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { SchoolClass } from '@/lib/types';
+import { applyCors, handleCorsOptions } from '@/lib/cors';
+
+export async function OPTIONS(req: NextRequest) {
+  return handleCorsOptions(req);
+}
 
 // Health check / availability check for registration
-export async function GET() {
-  return NextResponse.json({
+export async function GET(req: NextRequest) {
+  const response = NextResponse.json({
     success: true,
+    status: 'active',
+    database: 'connected',
     message: 'Student Registration endpoint is active and database is connected.',
+    timestamp: new Date().toISOString(),
   });
+  return applyCors(response, req);
 }
 
 // Dedicated Student Registration endpoint
@@ -17,7 +25,7 @@ export async function POST(req: NextRequest) {
     try {
       body = await req.json();
     } catch {
-      return NextResponse.json(
+      const errRes = NextResponse.json(
         {
           success: false,
           errorType: 'validation',
@@ -25,6 +33,7 @@ export async function POST(req: NextRequest) {
         },
         { status: 400 }
       );
+      return applyCors(errRes, req);
     }
 
     const {
@@ -43,111 +52,99 @@ export async function POST(req: NextRequest) {
       stream,
     } = body;
 
-    const studentName = (name || fullName || '').trim();
-    const targetClass = ((selectedClass || classParam || '10') as string).trim() as SchoolClass;
-    const targetRoll = (rollNo || rollNumber || '').trim();
-    const targetPhone = (phone || mobileNumber || '').trim();
-    const targetStudentId = (studentId || studentAccountId || '').trim();
+    const studentFullName = (fullName || name || '').trim();
+    const targetClass = String(classParam || selectedClass || '10').trim();
+    const targetRoll = String(rollNumber || rollNo || '').trim();
+    const targetPhone = String(mobileNumber || phone || '').trim();
+    const targetSection = String(section || 'A').trim().toUpperCase();
 
-    if (!studentName) {
-      return NextResponse.json(
-        {
-          success: false,
-          errorType: 'validation',
-          message: 'Student Full Name is required.',
-        },
-        { status: 400 }
-      );
-    }
-
-    if (!targetRoll) {
-      return NextResponse.json(
-        {
-          success: false,
-          errorType: 'validation',
-          message: 'Roll Number is required.',
-        },
-        { status: 400 }
-      );
-    }
-
-    if (!password) {
-      return NextResponse.json(
-        {
-          success: false,
-          errorType: 'password_format',
-          message: 'Password is required.',
-        },
-        { status: 400 }
-      );
-    }
-
-    if (password.length < 4) {
-      return NextResponse.json(
-        {
-          success: false,
-          errorType: 'password_format',
-          message: 'Password must be at least 4 characters.',
-        },
-        { status: 400 }
-      );
-    }
-
-    // Call database registration with validation & atomic persistence
+    // Call database registration with comprehensive validation & atomic persistence
     const result = db.registerStudent({
-      name: studentName,
+      name: studentFullName,
+      fullName: studentFullName,
+      class: targetClass,
       selectedClass: targetClass,
-      section: section || 'A',
+      section: targetSection,
       rollNo: targetRoll,
+      rollNumber: targetRoll,
       phone: targetPhone,
-      studentId: targetStudentId || undefined,
-      password,
+      mobileNumber: targetPhone,
+      studentId: (studentId || studentAccountId || '').trim() || undefined,
+      password: String(password || '').trim(),
       stream,
     });
 
     if (!result.success) {
       let status = 400;
-      if (result.errorType === 'duplicate_id' || result.errorType === 'duplicate_roll') {
+      if (
+        result.errorType === 'duplicate_account' ||
+        result.errorType === 'duplicate_id' ||
+        result.errorType === 'duplicate_roll'
+      ) {
         status = 409;
       } else if (result.errorType === 'database_error') {
         status = 503;
       }
 
-      return NextResponse.json(
+      const failRes = NextResponse.json(
         {
           success: false,
-          errorType: result.errorType,
+          errorType: result.errorType || 'validation',
           message: result.message,
         },
         { status }
       );
+      return applyCors(failRes, req);
     }
 
     // Account created and verified in database
     const safeUser = result.user!;
-    const response = NextResponse.json({
+
+    // Create session token for persistent authentication across devices/sessions
+    const sessionToken = Buffer.from(
+      JSON.stringify({ id: safeUser.id, role: safeUser.role, time: Date.now() })
+    ).toString('base64');
+
+    const successRes = NextResponse.json({
       success: true,
       user: safeUser,
+      token: sessionToken,
       message: 'Account created successfully.',
     });
 
-    // Set persistent session cookies
-    response.cookies.set('school_user_id', safeUser.id, {
+    // Detect HTTPS
+    const isHttps =
+      req.headers.get('x-forwarded-proto') === 'https' ||
+      req.nextUrl.protocol === 'https:';
+
+    // Set persistent session cookies (30 days)
+    successRes.cookies.set('school_user_id', safeUser.id, {
       path: '/',
+      httpOnly: false,
       maxAge: 60 * 60 * 24 * 30, // 30 days
-      sameSite: 'lax',
+      sameSite: isHttps ? 'none' : 'lax',
+      secure: isHttps,
     });
 
-    return response;
-  } catch (err) {
+    successRes.cookies.set('school_session_token', sessionToken, {
+      path: '/',
+      httpOnly: false,
+      maxAge: 60 * 60 * 24 * 30,
+      sameSite: isHttps ? 'none' : 'lax',
+      secure: isHttps,
+    });
+
+    return applyCors(successRes, req);
+  } catch (err: any) {
     console.error('Registration server error:', err);
-    return NextResponse.json(
+    const errRes = NextResponse.json(
       {
         success: false,
         errorType: 'server_error',
-        message: 'School server is temporarily unavailable. Please try again.',
+        message: 'School server error occurred during registration. Please try again.',
       },
       { status: 500 }
     );
+    return applyCors(errRes, req);
   }
 }

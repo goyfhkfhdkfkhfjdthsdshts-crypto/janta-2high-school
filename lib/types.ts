@@ -4,19 +4,24 @@ export type UserRole = 'student' | 'teacher' | 'admin' | 'principal' | 'parent';
 
 export interface UserProfile {
   id: string;
+  accountId?: string;
   studentAccountId?: string;
   studentId?: string;
   loginId?: string;
-  email: string;
+  fullName?: string;
   name: string;
   picture?: string;
   role: UserRole;
+  class?: SchoolClass;
   selectedClass: SchoolClass;
   section?: string;
+  rollNumber?: string;
   rollNo?: string;
+  mobileNumber?: string;
+  phone?: string;
+  email: string;
   passwordHash?: string;
   stream?: 'Science' | 'Commerce' | 'Arts' | 'General';
-  phone?: string;
   childId?: string;
   childName?: string;
   childRollNo?: string;

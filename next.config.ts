@@ -63,6 +63,17 @@ const nextConfig = (phase: string): NextConfig => {
       ],
     },
     transpilePackages: ['motion'],
+    env: {
+      NEXT_PUBLIC_APP_URL:
+        process.env.NEXT_PUBLIC_APP_URL ||
+        process.env.APP_URL ||
+        'https://ais-dev-wlf64tug2tdgfzlwqwnakm-952150739875.asia-southeast1.run.app',
+      NEXT_PUBLIC_API_URL:
+        process.env.NEXT_PUBLIC_API_URL ||
+        process.env.APP_URL ||
+        'https://ais-dev-wlf64tug2tdgfzlwqwnakm-952150739875.asia-southeast1.run.app',
+      NEXT_PUBLIC_BASE_PATH: basePath || '',
+    },
     webpack: (config, { dev }) => {
       // HMR is disabled in AI Studio via DISABLE_HMR env var.
       // Do not modify - file watching is disabled to prevent flickering during agent edits.

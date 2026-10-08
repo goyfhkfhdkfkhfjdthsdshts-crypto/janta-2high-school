@@ -10,6 +10,7 @@ import {
   AboutSchoolData,
   SchoolContactInfo,
 } from '@/lib/types';
+import { apiFetch, saveStoredSession, clearStoredSession } from '@/lib/apiConfig';
 import { Header } from '@/components/Header';
 import { BottomNav, NavTab } from '@/components/BottomNav';
 import { LoginScreen } from '@/components/LoginScreen';
@@ -99,26 +100,23 @@ export function SchoolPortalClient({
         // Verify with persistent database to get latest verified profile
         const idToFetch = parsed.studentId || parsed.id || parsed.loginId || parsed.email;
         if (idToFetch) {
-          fetch(`/api/auth/profile?id=${encodeURIComponent(idToFetch)}`)
-            .then((r) => r.json())
-            .then((data) => {
-              if (data.success && data.user) {
+          apiFetch(`/api/auth/profile?id=${encodeURIComponent(idToFetch)}`)
+            .then(({ data }) => {
+              if (data && data.success && data.user) {
                 setUser(data.user);
-                localStorage.setItem('janta_school_user', JSON.stringify(data.user));
+                saveStoredSession(data.user);
               }
             })
             .catch(() => {});
         }
       } else {
-        // Attempt cookie-based persistent session restoration
-        fetch('/api/auth/profile')
-          .then((r) => r.json())
-          .then((data) => {
-            if (data.success && data.user) {
+        // Attempt persistent session restoration via token/cookie
+        apiFetch('/api/auth/profile')
+          .then(({ data }) => {
+            if (data && data.success && data.user) {
               setUser(data.user);
-              setSelectedClass(data.user.selectedClass);
-              localStorage.setItem('janta_school_user', JSON.stringify(data.user));
-              localStorage.setItem('janta_school_class', data.user.selectedClass);
+              setSelectedClass(data.user.selectedClass || data.user.class || '10');
+              saveStoredSession(data.user);
             }
           })
           .catch(() => {});
@@ -174,16 +172,15 @@ export function SchoolPortalClient({
 
   const handleLoginSuccess = (loggedInUser: UserProfile) => {
     setUser(loggedInUser);
-    setSelectedClass(loggedInUser.selectedClass);
-    localStorage.setItem('janta_school_user', JSON.stringify(loggedInUser));
-    localStorage.setItem('janta_school_class', loggedInUser.selectedClass);
+    setSelectedClass(loggedInUser.selectedClass || loggedInUser.class || '10');
+    saveStoredSession(loggedInUser);
   };
 
   const handleLogout = () => {
     setUser(null);
     setIsAdmin(false);
-    localStorage.removeItem('janta_school_user');
-    localStorage.removeItem('janta_school_admin');
+    clearStoredSession();
+    apiFetch('/api/auth/logout', { method: 'POST' }).catch(() => {});
     setActiveTab('home');
     setActiveSection('home');
   };

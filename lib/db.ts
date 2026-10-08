@@ -1444,27 +1444,48 @@ export const db = {
 
   // Dedicated Student Registration with Strict Validation & Verification
   registerStudent(input: {
-    name: string;
-    selectedClass: SchoolClass;
+    name?: string;
+    fullName?: string;
+    selectedClass?: SchoolClass | string;
+    class?: SchoolClass | string;
     section?: string;
-    rollNo: string;
+    rollNo?: string;
+    rollNumber?: string;
     phone?: string;
+    mobileNumber?: string;
     studentId?: string;
+    studentAccountId?: string;
     password: string;
     stream?: 'Science' | 'Commerce' | 'Arts' | 'General';
   }): {
     success: boolean;
     user?: UserProfile;
-    errorType?: 'validation' | 'duplicate_id' | 'duplicate_roll' | 'password_format' | 'database_error';
+    errorType?: 'validation' | 'duplicate_account' | 'duplicate_id' | 'duplicate_roll' | 'password_format' | 'database_error';
     message: string;
   } {
-    // 1. Validate required fields
-    if (!input.name || !input.name.trim()) {
+    // 1. Resolve and validate Student Name
+    const studentFullName = (input.fullName || input.name || '').trim();
+    if (!studentFullName) {
       return { success: false, errorType: 'validation', message: 'Student Full Name is required.' };
     }
-    if (!input.rollNo || !input.rollNo.trim()) {
+    if (studentFullName.length < 2) {
+      return { success: false, errorType: 'validation', message: 'Please enter a valid Full Name (at least 2 characters).' };
+    }
+
+    // 2. Resolve Class (9, 10, 11, 12)
+    const rawClass = String(input.class || input.selectedClass || '10').trim();
+    const targetClass: SchoolClass = (['9', '10', '11', '12'].includes(rawClass) ? rawClass : '10') as SchoolClass;
+
+    // 3. Resolve Section (A, B, C, etc.)
+    const cleanSection = String(input.section || 'A').trim().toUpperCase() || 'A';
+
+    // 4. Resolve Roll Number
+    const cleanRoll = String(input.rollNumber || input.rollNo || '').trim();
+    if (!cleanRoll) {
       return { success: false, errorType: 'validation', message: 'Roll Number is required.' };
     }
+
+    // 5. Validate Password
     if (!input.password) {
       return { success: false, errorType: 'password_format', message: 'Password is required.' };
     }
@@ -1472,7 +1493,28 @@ export const db = {
       return { success: false, errorType: 'password_format', message: 'Password must be at least 4 characters.' };
     }
 
-    // 2. Check Database connection
+    // 6. Validate Mobile Number (Optional, flexible Indian format)
+    let cleanMobile = '';
+    const rawPhone = String(input.mobileNumber || input.phone || '').trim();
+    if (rawPhone) {
+      let digits = rawPhone.replace(/[\s\-\(\)\+]/g, '');
+      if (digits.startsWith('91') && digits.length > 10) {
+        digits = digits.slice(2);
+      }
+      if (digits.startsWith('0') && digits.length > 10) {
+        digits = digits.slice(1);
+      }
+      if (!/^\d{10,12}$/.test(digits)) {
+        return {
+          success: false,
+          errorType: 'validation',
+          message: 'Please enter a valid 10-digit mobile number or leave it blank.',
+        };
+      }
+      cleanMobile = digits;
+    }
+
+    // 7. Check Database Connection
     let data: DatabaseSchema;
     try {
       data = getDatabase();
@@ -1483,77 +1525,112 @@ export const db = {
       return { success: false, errorType: 'database_error', message: 'School database is temporarily unavailable. Please try again.' };
     }
 
-    const cleanRoll = input.rollNo.trim();
-    const cleanSection = (input.section || 'A').trim().toUpperCase();
-    const targetClass = input.selectedClass || '10';
-    const targetStudentId = (
-      input.studentId?.trim() ||
-      `std-${targetClass}-${cleanRoll.replace(/[^a-zA-Z0-9]/g, '')}`
-    ).toLowerCase();
-
-    // 3. Check for Duplicate Student ID
-    const duplicateId = data.users.find(
-      (u) =>
-        (u.id && u.id.toLowerCase() === targetStudentId) ||
-        (u.studentId && u.studentId.toLowerCase() === targetStudentId) ||
-        (u.loginId && u.loginId.toLowerCase() === targetStudentId)
-    );
-    if (duplicateId) {
-      return {
-        success: false,
-        errorType: 'duplicate_id',
-        message: 'This Student ID is already registered.',
-      };
-    }
-
-    // 4. Check for Duplicate Roll in same Class and Section
+    // 8. Check for Duplicate Student Account by Roll in same Class and Section
     const duplicateRoll = data.users.find(
       (u) =>
         u.role === 'student' &&
-        u.rollNo &&
-        u.rollNo.trim().toLowerCase() === cleanRoll.toLowerCase() &&
-        u.selectedClass === targetClass &&
-        (u.section || 'A').trim().toUpperCase() === cleanSection
+        (u.rollNo || u.rollNumber) &&
+        String(u.rollNo || u.rollNumber).trim().toLowerCase() === cleanRoll.toLowerCase() &&
+        (u.selectedClass === targetClass || u.class === targetClass) &&
+        String(u.section || 'A').trim().toUpperCase() === cleanSection
     );
     if (duplicateRoll) {
       return {
         success: false,
-        errorType: 'duplicate_roll',
-        message: `A student with Roll No. ${cleanRoll} is already registered in Class ${targetClass} Section ${cleanSection}.`,
+        errorType: 'duplicate_account',
+        message: 'This student account already exists.',
       };
     }
 
-    // 5. Secure password hashing & permanent ID creation
+    // 9. Generate permanent unique Student Account ID: std-CLASS-XXXX
+    let permanentAccountId = '';
+    const candidateRoll = cleanRoll.replace(/[^a-zA-Z0-9]/g, '');
+    const standardCandidate = `std-${targetClass}-${candidateRoll}`.toLowerCase();
+    const candidateTaken = data.users.some(
+      (u) =>
+        (u.id && u.id.toLowerCase() === standardCandidate) ||
+        (u.studentId && u.studentId.toLowerCase() === standardCandidate) ||
+        (u.accountId && u.accountId.toLowerCase() === standardCandidate) ||
+        (u.loginId && u.loginId.toLowerCase() === standardCandidate)
+    );
+
+    if (!candidateTaken && candidateRoll.length >= 2) {
+      permanentAccountId = `std-${targetClass}-${candidateRoll}`;
+    } else {
+      const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+      let attempts = 0;
+      do {
+        let rand = '';
+        for (let i = 0; i < 4; i++) {
+          rand += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        permanentAccountId = `std-${targetClass}-${candidateRoll ? candidateRoll + '-' : ''}${rand}`;
+        attempts++;
+      } while (
+        attempts < 100 &&
+        data.users.some(
+          (u) =>
+            (u.id && u.id.toLowerCase() === permanentAccountId.toLowerCase()) ||
+            (u.studentId && u.studentId.toLowerCase() === permanentAccountId.toLowerCase()) ||
+            (u.accountId && u.accountId.toLowerCase() === permanentAccountId.toLowerCase()) ||
+            (u.loginId && u.loginId.toLowerCase() === permanentAccountId.toLowerCase())
+        )
+      );
+    }
+
+    // 10. Check if explicitly provided studentId has collision
+    if (input.studentId) {
+      const explicitId = input.studentId.trim().toLowerCase();
+      const duplicateExplicit = data.users.find(
+        (u) =>
+          (u.id && u.id.toLowerCase() === explicitId) ||
+          (u.studentId && u.studentId.toLowerCase() === explicitId) ||
+          (u.accountId && u.accountId.toLowerCase() === explicitId) ||
+          (u.loginId && u.loginId.toLowerCase() === explicitId)
+      );
+      if (duplicateExplicit) {
+        return {
+          success: false,
+          errorType: 'duplicate_account',
+          message: 'This student account already exists.',
+        };
+      }
+    }
+
+    // 11. Secure password hashing & student record assembly (Requirement 8)
     const now = new Date().toISOString();
-    const permanentAccountId = `std-${targetClass}-${cleanRoll.replace(/[^a-zA-Z0-9]/g, '')}`;
     const generatedEmail = `${permanentAccountId.toLowerCase()}@student.janta.edu`;
     const passwordHash = hashPassword(input.password);
 
     const newStudent: UserProfile = {
       id: permanentAccountId,
+      accountId: permanentAccountId,
       studentAccountId: permanentAccountId,
       studentId: permanentAccountId,
       loginId: permanentAccountId,
-      email: generatedEmail,
-      name: input.name.trim(),
-      picture: '',
-      role: 'student',
+      fullName: studentFullName,
+      name: studentFullName,
+      class: targetClass,
       selectedClass: targetClass,
       section: cleanSection,
+      rollNumber: cleanRoll,
       rollNo: cleanRoll,
+      mobileNumber: cleanMobile,
+      phone: cleanMobile,
+      email: generatedEmail,
+      picture: '',
+      role: 'student',
       stream: input.stream || 'General',
-      phone: input.phone?.trim() || '',
       passwordHash,
       createdAt: now,
       updatedAt: now,
     };
 
-    // 6. Save account permanently to database
+    // 12. Save account permanently to database file
     try {
       data.users.push(newStudent);
       saveDatabase(data);
 
-      // Verify persistence in database
       const verifyData = getDatabase();
       const verified = verifyData.users.find((u) => u.id === permanentAccountId);
       if (!verified) {
