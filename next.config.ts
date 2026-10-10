@@ -25,7 +25,20 @@ const nextConfig = (phase: string): NextConfig => {
     ? (rawBasePath.startsWith('/') ? rawBasePath : `/${rawBasePath}`).replace(/\/$/, '') 
     : '';
 
+  // Base44 preview sandbox: Next.js gates dev assets and HMR by request origin.
+  // The preview is served from the public proxy host, so allow that origin only
+  // when the platform flags a preview run. Unset or any other value keeps the
+  // default behavior.
+  const allowedDevOrigins =
+    process.env.BASE44_PREVIEW_MODE === '1' && process.env.BASE44_PUBLIC_HOST_SUFFIX
+      ? [
+          `3000-${process.env.BASE44_PUBLIC_HOST_SUFFIX}`,
+          `https://3000-${process.env.BASE44_PUBLIC_HOST_SUFFIX}`,
+        ]
+      : undefined;
+
   return {
+    ...(allowedDevOrigins ? { allowedDevOrigins } : {}),
     // Enable static export when building for GitHub Pages or static hosting
     ...(isExport
       ? {

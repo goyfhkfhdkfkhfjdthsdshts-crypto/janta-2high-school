@@ -1,0 +1,56 @@
+# Base44 sandbox development stack for "Janta +2 High School – Khalari".
+#
+# Runs the Next.js 15 app straight from the cloned source with hot reload and
+# serves the web entry point on host port 3000.
+#
+# No database service is needed: the whole persistence layer is a JSON file that
+# the app reads/writes at data/school_database.json (see lib/db.ts), which lives
+# inside the bind-mounted source tree so edits and saved data survive restarts.
+#
+# Secrets (GEMINI_API_KEY, ADMIN_PASSWORD) come from the platform-managed
+# /run/base44/app.env. Every key there overrides the app's built-in defaults, and
+# the app boots fine without them (AI routes degrade to their offline fallback).
+
+services:
+  web:
+    image: node:22-bookworm-slim
+    working_dir: /app
+    # Dependencies are installed at startup (after the bind mount is available) so
+    # the mounted node_modules volume always matches the checked-out lockfile.
+    command:
+      - sh
+      - -ec
+      - |
+        npm ci --no-audit --no-fund || npm install --no-audit --no-fund
+        exec npm run dev -- --hostname 0.0.0.0 --port 3000
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      - node_modules:/app/node_modules
+    environment:
+      # Passed through from the sandbox so next.config.ts can allow the preview
+      # proxy origin for dev assets/HMR when BASE44_PREVIEW_MODE === "1".
+      - BASE44_PREVIEW_MODE
+      - BASE44_PUBLIC_HOST_SUFFIX
+      # Bind mounts do not always emit inotify events; poll so hot reload fires.
+      - WATCHPACK_POLLING=true
+      - CHOKIDAR_USEPOLLING=true
+    env_file:
+      # Managed platform secrets - always listed last so they win.
+      - /run/base44/app.env
+    healthcheck:
+      # Real HTTP probe against the app's own health route.
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+      interval: 20s
+      timeout: 5s
+      retries: 10
+      start_period: 240s
+    restart: on-failure
+
+volumes:
+  node_modules:
