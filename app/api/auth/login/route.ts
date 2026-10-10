@@ -52,18 +52,18 @@ export async function POST(req: NextRequest) {
         return applyCors(errRes, req);
       }
 
-      const user = authResult.user;
+      const { passwordHash: _hash, ...safeUser } = authResult.user;
 
       // Set secure persistent session token (30 days)
       const sessionToken = Buffer.from(
-        JSON.stringify({ id: user.id, role: user.role, time: Date.now() })
+        JSON.stringify({ id: safeUser.id, role: safeUser.role, time: Date.now() })
       ).toString('base64');
 
       const response = NextResponse.json({
         success: true,
-        user,
+        user: safeUser,
         token: sessionToken,
-        message: `Welcome ${user.name}! Login successful.`,
+        message: `Welcome ${safeUser.name}! Login successful.`,
       });
 
       const isHttps =
@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
         secure: isHttps,
       });
 
-      response.cookies.set('school_user_id', user.id, {
+      response.cookies.set('school_user_id', safeUser.id, {
         path: '/',
         httpOnly: false,
         maxAge: 60 * 60 * 24 * 30,
@@ -86,8 +86,8 @@ export async function POST(req: NextRequest) {
         secure: isHttps,
       });
 
-      if (user.email) {
-        response.cookies.set('school_user_email', user.email, {
+      if (safeUser.email) {
+        response.cookies.set('school_user_email', safeUser.email, {
           path: '/',
           httpOnly: false,
           maxAge: 60 * 60 * 24 * 30,
@@ -120,18 +120,18 @@ export async function POST(req: NextRequest) {
       return applyCors(errRes, req);
     }
 
-    const user = authResult.user;
+    const { passwordHash: _hash, ...safeUser } = authResult.user;
 
     // Set secure persistent session token (30 days)
     const sessionToken = Buffer.from(
-      JSON.stringify({ id: user.id, role: user.role, time: Date.now() })
+      JSON.stringify({ id: safeUser.id, role: safeUser.role, time: Date.now() })
     ).toString('base64');
 
     const response = NextResponse.json({
       success: true,
-      user,
+      user: safeUser,
       token: sessionToken,
-      message: `Welcome ${user.name}! Login successful.`,
+      message: `Welcome ${safeUser.name}! Login successful.`,
     });
 
     const isHttps =
@@ -146,7 +146,7 @@ export async function POST(req: NextRequest) {
       secure: isHttps,
     });
 
-    response.cookies.set('school_user_id', user.id, {
+    response.cookies.set('school_user_id', safeUser.id, {
       path: '/',
       httpOnly: false,
       maxAge: 60 * 60 * 24 * 30,
@@ -154,8 +154,8 @@ export async function POST(req: NextRequest) {
       secure: isHttps,
     });
 
-    if (user.email) {
-      response.cookies.set('school_user_email', user.email, {
+    if (safeUser.email) {
+      response.cookies.set('school_user_email', safeUser.email, {
         path: '/',
         httpOnly: false,
         maxAge: 60 * 60 * 24 * 30,

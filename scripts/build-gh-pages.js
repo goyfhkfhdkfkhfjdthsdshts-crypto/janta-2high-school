@@ -88,13 +88,13 @@ try {
       NEXT_PUBLIC_BASE_PATH: basePath,
       BASE_PATH: basePath,
       NEXT_PUBLIC_API_URL:
-        process.env.NEXT_PUBLIC_API_URL ||
-        process.env.APP_URL ||
-        'https://ais-dev-wlf64tug2tdgfzlwqwnakm-952150739875.asia-southeast1.run.app',
+        process.env.NEXT_PUBLIC_API_URL && !process.env.NEXT_PUBLIC_API_URL.includes('ais-dev-')
+          ? process.env.NEXT_PUBLIC_API_URL
+          : '',
       NEXT_PUBLIC_APP_URL:
-        process.env.NEXT_PUBLIC_APP_URL ||
-        process.env.APP_URL ||
-        'https://ais-dev-wlf64tug2tdgfzlwqwnakm-952150739875.asia-southeast1.run.app',
+        process.env.NEXT_PUBLIC_APP_URL && !process.env.NEXT_PUBLIC_APP_URL.includes('ais-dev-')
+          ? process.env.NEXT_PUBLIC_APP_URL
+          : '',
     },
   });
   console.log('\n✅ Static compilation finished successfully!');
