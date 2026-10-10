@@ -173,7 +173,8 @@
       "role": "teacher",
       "selectedClass": "9",
       "createdAt": "2026-01-01T00:00:00.000Z",
-      "updatedAt": "2026-01-01T00:00:00.000Z"
+      "updatedAt": "2026-01-01T00:00:00.000Z",
+      "passwordHash": "15d4627874c75bf480999acf57301c98446c790d425a16cf40a86b0baa03594c"
     },
     {
       "id": "adm-001",
