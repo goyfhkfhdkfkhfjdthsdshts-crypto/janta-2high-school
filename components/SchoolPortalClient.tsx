@@ -39,6 +39,8 @@ import { OfflineBanner } from '@/components/OfflineBanner';
 import { AdminPasswordModal } from '@/components/AdminPasswordModal';
 import { ChatView } from '@/components/ChatView';
 import { WrittenQaView } from '@/components/WrittenQaView';
+import { LoginScreen } from '@/components/LoginScreen';
+import { SchoolLogo } from '@/components/SchoolLogo';
 import { ArrowLeft } from 'lucide-react';
 
 interface SchoolPortalClientProps {
@@ -55,26 +57,7 @@ export function SchoolPortalClient({
   initialFaculty,
   initialAboutSchool,
 }: SchoolPortalClientProps) {
-  const defaultStudentUser: UserProfile = {
-    id: 'std-10-1001',
-    accountId: 'std-10-1001',
-    studentAccountId: 'std-10-1001',
-    studentId: 'std-10-1001',
-    loginId: '1001',
-    name: 'Aman Kumar',
-    fullName: 'Aman Kumar (Class 10)',
-    email: 'aman.kumar@student.janta.edu',
-    role: 'student',
-    class: '10',
-    selectedClass: '10',
-    section: 'A',
-    rollNo: '1001',
-    rollNumber: '1001',
-    createdAt: '2026-04-01T00:00:00.000Z',
-    updatedAt: '2026-04-01T00:00:00.000Z',
-  };
-
-  const [user, setUser] = useState<UserProfile>(defaultStudentUser);
+  const [user, setUser] = useState<UserProfile | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [selectedClass, setSelectedClass] = useState<SchoolClass>('10');
   const [activeTab, setActiveTab] = useState<NavTab>('home');
@@ -106,21 +89,38 @@ export function SchoolPortalClient({
 
   // Restore stored session and check active live sessions
   useEffect(() => {
+    let isMounted = true;
     try {
       const storedUser = localStorage.getItem('janta_school_user');
       const storedAdmin = localStorage.getItem('janta_school_admin');
       const storedClass = localStorage.getItem('janta_school_class') as SchoolClass;
       const storedLang = localStorage.getItem('janta_school_lang') as 'hi' | 'en';
 
+      if (storedClass && ['9', '10', '11', '12'].includes(storedClass)) {
+        setSelectedClass(storedClass);
+      }
+      if (storedLang && ['hi', 'en'].includes(storedLang)) {
+        setLanguage(storedLang);
+      }
+
       if (storedUser) {
         const parsed = JSON.parse(storedUser);
-        setUser(parsed);
+        if (isMounted) {
+          setUser(parsed);
+          if (parsed.role === 'admin' || parsed.role === 'principal' || storedAdmin === 'true') {
+            setIsAdmin(true);
+          }
+          if (parsed.selectedClass) {
+            setSelectedClass(parsed.selectedClass);
+          }
+          setIsInitializing(false);
+        }
         // Verify with persistent database to get latest verified profile
-        const idToFetch = parsed.studentId || parsed.id || parsed.loginId || parsed.email;
+        const idToFetch = parsed.id || parsed.studentId || parsed.loginId || parsed.email;
         if (idToFetch) {
           apiFetch(`/api/auth/profile?id=${encodeURIComponent(idToFetch)}`)
             .then(({ data }) => {
-              if (data && data.success && data.user) {
+              if (isMounted && data?.success && data?.user) {
                 setUser(data.user);
                 saveStoredSession(data.user);
               }
@@ -131,28 +131,35 @@ export function SchoolPortalClient({
         // Attempt persistent session restoration via token/cookie
         apiFetch('/api/auth/profile')
           .then(({ data }) => {
-            if (data && data.success && data.user) {
+            if (isMounted && data?.success && data?.user) {
               setUser(data.user);
-              setSelectedClass(data.user.selectedClass || data.user.class || '10');
+              if (data.user.role === 'admin' || data.user.role === 'principal') {
+                setIsAdmin(true);
+              }
+              const cls = data.user.selectedClass || data.user.class || '10';
+              setSelectedClass(cls);
               saveStoredSession(data.user);
             }
           })
-          .catch(() => {});
-      }
-      if (storedAdmin === 'true') {
-        setIsAdmin(true);
-      }
-      if (storedClass && ['9', '10', '11', '12'].includes(storedClass)) {
-        setSelectedClass(storedClass);
-      }
-      if (storedLang && ['hi', 'en'].includes(storedLang)) {
-        setLanguage(storedLang);
+          .catch(() => {})
+          .finally(() => {
+            if (isMounted) {
+              setIsInitializing(false);
+            }
+          });
       }
     } catch (e) {
       console.error('Error loading stored session:', e);
-    } finally {
-      setIsInitializing(false);
+      if (isMounted) setIsInitializing(false);
     }
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!user) return;
 
     // Check if any live session is running
     const checkLive = async () => {
@@ -175,14 +182,14 @@ export function SchoolPortalClient({
       refreshNotificationCount(selectedClass, studentId);
     }, 8000);
     return () => clearInterval(interval);
-  }, [selectedClass, user?.id]);
+  }, [selectedClass, user]);
 
   // Save changes to localStorage
   const handleSelectClass = (c: SchoolClass) => {
     setSelectedClass(c);
     localStorage.setItem('janta_school_class', c);
     if (user) {
-      const updated = { ...user, selectedClass: c };
+      const updated = { ...user, selectedClass: c, class: c };
       setUser(updated);
       localStorage.setItem('janta_school_user', JSON.stringify(updated));
     }
@@ -190,14 +197,27 @@ export function SchoolPortalClient({
 
   const handleLoginSuccess = (loggedInUser: UserProfile) => {
     setUser(loggedInUser);
-    setSelectedClass(loggedInUser.selectedClass || loggedInUser.class || '10');
+    if (loggedInUser.role === 'admin' || loggedInUser.role === 'principal') {
+      setIsAdmin(true);
+      localStorage.setItem('janta_school_admin', 'true');
+    } else {
+      setIsAdmin(false);
+      localStorage.removeItem('janta_school_admin');
+    }
+    const cls = loggedInUser.selectedClass || loggedInUser.class || '10';
+    setSelectedClass(cls);
     saveStoredSession(loggedInUser);
+    setActiveTab('home');
+    setActiveSection('home');
   };
 
-  const handleLogout = () => {
-    setUser(defaultStudentUser);
-    setIsAdmin(false);
+  const handleLogout = async () => {
+    try {
+      await apiFetch('/api/auth/logout', { method: 'POST' });
+    } catch {}
     clearStoredSession();
+    setUser(null);
+    setIsAdmin(false);
     setActiveTab('home');
     setActiveSection('home');
   };
@@ -241,6 +261,27 @@ export function SchoolPortalClient({
     'chat',
     'profile',
   ].includes(activeSection);
+
+  // Branded Loading State while verifying session
+  if (isInitializing) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-slate-100 via-blue-50/50 to-slate-100 flex flex-col items-center justify-center p-4 selection:bg-blue-600 selection:text-white">
+        <SchoolLogo size={76} showText={false} className="animate-pulse mb-3" />
+        <h2 className="text-base sm:text-lg font-black text-slate-900 uppercase tracking-tight">
+          Janta +2 High School – Khalari
+        </h2>
+        <p className="text-xs font-semibold text-blue-800 mt-1 uppercase tracking-wider">
+          Loading Academic Portal...
+        </p>
+        <div className="mt-4 w-7 h-7 border-3 border-blue-700 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  // If user is not logged in, show the role-based login screen
+  if (!user) {
+    return <LoginScreen onLoginSuccess={handleLoginSuccess} />;
+  }
 
   return (
     <div className="min-h-screen bg-slate-100/90 text-slate-900 flex flex-col selection:bg-blue-600 selection:text-white">

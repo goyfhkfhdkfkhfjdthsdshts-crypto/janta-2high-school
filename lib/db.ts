@@ -708,21 +708,25 @@ function ensureDataDirectory() {
 }
 
 const initialEnrolledStudents: UserProfile[] = [
-  { id: 'std-10-1', studentId: 'std-10-1', loginId: '1001', name: 'Amit Kumar Singh', email: 'amit.singh@student.janta.edu', role: 'student', selectedClass: '10', section: 'A', rollNo: '1001', createdAt: '2026-04-01T00:00:00.000Z', updatedAt: '2026-04-01T00:00:00.000Z' },
-  { id: 'std-10-2', studentId: 'std-10-2', loginId: '1002', name: 'Pooja Kumari Oraon', email: 'pooja.oraon@student.janta.edu', role: 'student', selectedClass: '10', section: 'A', rollNo: '1002', createdAt: '2026-04-01T00:00:00.000Z', updatedAt: '2026-04-01T00:00:00.000Z' },
-  { id: 'std-10-3', studentId: 'std-10-3', loginId: '1003', name: 'Rahul Soren', email: 'rahul.soren@student.janta.edu', role: 'student', selectedClass: '10', section: 'A', rollNo: '1003', createdAt: '2026-04-01T00:00:00.000Z', updatedAt: '2026-04-01T00:00:00.000Z' },
-  { id: 'std-10-4', studentId: 'std-10-4', loginId: '1004', name: 'Anjali Kumari', email: 'anjali.kumari@student.janta.edu', role: 'student', selectedClass: '10', section: 'A', rollNo: '1004', createdAt: '2026-04-01T00:00:00.000Z', updatedAt: '2026-04-01T00:00:00.000Z' },
-  { id: 'std-10-5', studentId: 'std-10-5', loginId: '1005', name: 'Rohit Kumar', email: 'rohit.kumar@student.janta.edu', role: 'student', selectedClass: '10', section: 'B', rollNo: '1005', createdAt: '2026-04-01T00:00:00.000Z', updatedAt: '2026-04-01T00:00:00.000Z' },
-  { id: 'std-10-6', studentId: 'std-10-6', loginId: '1006', name: 'Neha Sharma', email: 'neha.sharma@student.janta.edu', role: 'student', selectedClass: '10', section: 'B', rollNo: '1006', createdAt: '2026-04-01T00:00:00.000Z', updatedAt: '2026-04-01T00:00:00.000Z' },
-  { id: 'std-10-7', studentId: 'std-10-7', loginId: '1007', name: 'Deepak Mahto', email: 'deepak.mahto@student.janta.edu', role: 'student', selectedClass: '10', section: 'B', rollNo: '1007', createdAt: '2026-04-01T00:00:00.000Z', updatedAt: '2026-04-01T00:00:00.000Z' },
-  { id: 'std-10-8', studentId: 'std-10-8', loginId: '1008', name: 'Priya Kumari', email: 'priya.kumari@student.janta.edu', role: 'student', selectedClass: '10', section: 'B', rollNo: '1008', createdAt: '2026-04-01T00:00:00.000Z', updatedAt: '2026-04-01T00:00:00.000Z' },
-  { id: 'std-9-1', studentId: 'std-9-1', loginId: '901', name: 'Vicky Kumar', email: 'vicky.kumar@student.janta.edu', role: 'student', selectedClass: '9', section: 'A', rollNo: '901', createdAt: '2026-04-01T00:00:00.000Z', updatedAt: '2026-04-01T00:00:00.000Z' },
-  { id: 'std-9-2', studentId: 'std-9-2', loginId: '902', name: 'Sunita Munda', email: 'sunita.munda@student.janta.edu', role: 'student', selectedClass: '9', section: 'A', rollNo: '902', createdAt: '2026-04-01T00:00:00.000Z', updatedAt: '2026-04-01T00:00:00.000Z' },
-  { id: 'std-9-3', studentId: 'std-9-3', loginId: '903', name: 'Ajay Oraon', email: 'ajay.oraon@student.janta.edu', role: 'student', selectedClass: '9', section: 'B', rollNo: '903', createdAt: '2026-04-01T00:00:00.000Z', updatedAt: '2026-04-01T00:00:00.000Z' },
-  { id: 'std-11-1', studentId: 'std-11-1', loginId: '1101', name: 'Rohan Karmali', email: 'rohan.karmali@student.janta.edu', role: 'student', selectedClass: '11', section: 'A', rollNo: '1101', stream: 'Science', createdAt: '2026-04-01T00:00:00.000Z', updatedAt: '2026-04-01T00:00:00.000Z' },
-  { id: 'std-11-2', studentId: 'std-11-2', loginId: '1102', name: 'Meena Kumari', email: 'meena.kumari@student.janta.edu', role: 'student', selectedClass: '11', section: 'B', rollNo: '1102', stream: 'Arts', createdAt: '2026-04-01T00:00:00.000Z', updatedAt: '2026-04-01T00:00:00.000Z' },
-  { id: 'std-12-1', studentId: 'std-12-1', loginId: '1201', name: 'Manish Verma', email: 'manish.verma@student.janta.edu', role: 'student', selectedClass: '12', section: 'A', rollNo: '1201', stream: 'Science', createdAt: '2026-04-01T00:00:00.000Z', updatedAt: '2026-04-01T00:00:00.000Z' },
-  { id: 'std-12-2', studentId: 'std-12-2', loginId: '1202', name: 'Sunita Kumari', email: 'sunita.k12@student.janta.edu', role: 'student', selectedClass: '12', section: 'A', rollNo: '1202', stream: 'Commerce', createdAt: '2026-04-01T00:00:00.000Z', updatedAt: '2026-04-01T00:00:00.000Z' },
+  { id: 'std-10-1', studentId: 'std-10-1', loginId: '1001', name: 'Amit Kumar Singh', email: 'amit.singh@student.janta.edu', role: 'student', selectedClass: '10', class: '10', section: 'A', rollNo: '1001', rollNumber: '1001', createdAt: '2026-04-01T00:00:00.000Z', updatedAt: '2026-04-01T00:00:00.000Z' },
+  { id: 'std-10-2', studentId: 'std-10-2', loginId: '1002', name: 'Pooja Kumari Oraon', email: 'pooja.oraon@student.janta.edu', role: 'student', selectedClass: '10', class: '10', section: 'A', rollNo: '1002', rollNumber: '1002', createdAt: '2026-04-01T00:00:00.000Z', updatedAt: '2026-04-01T00:00:00.000Z' },
+  { id: 'std-10-3', studentId: 'std-10-3', loginId: '1003', name: 'Rahul Soren', email: 'rahul.soren@student.janta.edu', role: 'student', selectedClass: '10', class: '10', section: 'A', rollNo: '1003', rollNumber: '1003', createdAt: '2026-04-01T00:00:00.000Z', updatedAt: '2026-04-01T00:00:00.000Z' },
+  { id: 'std-10-4', studentId: 'std-10-4', loginId: '1004', name: 'Anjali Kumari', email: 'anjali.kumari@student.janta.edu', role: 'student', selectedClass: '10', class: '10', section: 'A', rollNo: '1004', rollNumber: '1004', createdAt: '2026-04-01T00:00:00.000Z', updatedAt: '2026-04-01T00:00:00.000Z' },
+  { id: 'std-10-5', studentId: 'std-10-5', loginId: '1005', name: 'Rohit Kumar', email: 'rohit.kumar@student.janta.edu', role: 'student', selectedClass: '10', class: '10', section: 'B', rollNo: '1005', rollNumber: '1005', createdAt: '2026-04-01T00:00:00.000Z', updatedAt: '2026-04-01T00:00:00.000Z' },
+  { id: 'std-10-6', studentId: 'std-10-6', loginId: '1006', name: 'Neha Sharma', email: 'neha.sharma@student.janta.edu', role: 'student', selectedClass: '10', class: '10', section: 'B', rollNo: '1006', rollNumber: '1006', createdAt: '2026-04-01T00:00:00.000Z', updatedAt: '2026-04-01T00:00:00.000Z' },
+  { id: 'std-10-7', studentId: 'std-10-7', loginId: '1007', name: 'Deepak Mahto', email: 'deepak.mahto@student.janta.edu', role: 'student', selectedClass: '10', class: '10', section: 'B', rollNo: '1007', rollNumber: '1007', createdAt: '2026-04-01T00:00:00.000Z', updatedAt: '2026-04-01T00:00:00.000Z' },
+  { id: 'std-10-8', studentId: 'std-10-8', loginId: '1008', name: 'Priya Kumari', email: 'priya.kumari@student.janta.edu', role: 'student', selectedClass: '10', class: '10', section: 'B', rollNo: '1008', rollNumber: '1008', createdAt: '2026-04-01T00:00:00.000Z', updatedAt: '2026-04-01T00:00:00.000Z' },
+  { id: 'std-10-25', accountId: 'std-10-25', studentAccountId: 'std-10-25', studentId: 'std-10-25', loginId: '25', name: 'Kavita Soren', fullName: 'Kavita Soren', email: 'kavita.soren@student.janta.edu', role: 'student', selectedClass: '10', class: '10', section: 'A', rollNo: '25', rollNumber: '25', createdAt: '2026-04-01T00:00:00.000Z', updatedAt: '2026-04-01T00:00:00.000Z' },
+  { id: 'std-9-1', studentId: 'std-9-1', loginId: '901', name: 'Vicky Kumar', email: 'vicky.kumar@student.janta.edu', role: 'student', selectedClass: '9', class: '9', section: 'A', rollNo: '901', rollNumber: '901', createdAt: '2026-04-01T00:00:00.000Z', updatedAt: '2026-04-01T00:00:00.000Z' },
+  { id: 'std-9-2', studentId: 'std-9-2', loginId: '902', name: 'Sunita Munda', email: 'sunita.munda@student.janta.edu', role: 'student', selectedClass: '9', class: '9', section: 'A', rollNo: '902', rollNumber: '902', createdAt: '2026-04-01T00:00:00.000Z', updatedAt: '2026-04-01T00:00:00.000Z' },
+  { id: 'std-9-3', studentId: 'std-9-3', loginId: '903', name: 'Ajay Oraon', email: 'ajay.oraon@student.janta.edu', role: 'student', selectedClass: '9', class: '9', section: 'B', rollNo: '903', rollNumber: '903', createdAt: '2026-04-01T00:00:00.000Z', updatedAt: '2026-04-01T00:00:00.000Z' },
+  { id: 'std-9-25', accountId: 'std-9-25', studentAccountId: 'std-9-25', studentId: 'std-9-25', loginId: '25', name: 'Pooja Singh', fullName: 'Pooja Singh', email: 'pooja.singh@student.janta.edu', role: 'student', selectedClass: '9', class: '9', section: 'A', rollNo: '25', rollNumber: '25', createdAt: '2026-04-01T00:00:00.000Z', updatedAt: '2026-04-01T00:00:00.000Z' },
+  { id: 'std-11-1', studentId: 'std-11-1', loginId: '1101', name: 'Rohan Karmali', email: 'rohan.karmali@student.janta.edu', role: 'student', selectedClass: '11', class: '11', section: 'A', rollNo: '1101', rollNumber: '1101', stream: 'Science', createdAt: '2026-04-01T00:00:00.000Z', updatedAt: '2026-04-01T00:00:00.000Z' },
+  { id: 'std-11-2', studentId: 'std-11-2', loginId: '1102', name: 'Meena Kumari', email: 'meena.kumari@student.janta.edu', role: 'student', selectedClass: '11', class: '11', section: 'B', rollNo: '1102', rollNumber: '1102', stream: 'Arts', createdAt: '2026-04-01T00:00:00.000Z', updatedAt: '2026-04-01T00:00:00.000Z' },
+  { id: 'std-11-25', accountId: 'std-11-25', studentAccountId: 'std-11-25', studentId: 'std-11-25', loginId: '25', name: 'Anup Kujur', fullName: 'Anup Kujur', email: 'anup.kujur@student.janta.edu', role: 'student', selectedClass: '11', class: '11', section: 'A', rollNo: '25', rollNumber: '25', stream: 'Science', createdAt: '2026-04-01T00:00:00.000Z', updatedAt: '2026-04-01T00:00:00.000Z' },
+  { id: 'std-12-1', studentId: 'std-12-1', loginId: '1201', name: 'Manish Verma', email: 'manish.verma@student.janta.edu', role: 'student', selectedClass: '12', class: '12', section: 'A', rollNo: '1201', rollNumber: '1201', stream: 'Science', createdAt: '2026-04-01T00:00:00.000Z', updatedAt: '2026-04-01T00:00:00.000Z' },
+  { id: 'std-12-2', studentId: 'std-12-2', loginId: '1202', name: 'Sunita Kumari', email: 'sunita.k12@student.janta.edu', role: 'student', selectedClass: '12', class: '12', section: 'A', rollNo: '1202', rollNumber: '1202', stream: 'Commerce', createdAt: '2026-04-01T00:00:00.000Z', updatedAt: '2026-04-01T00:00:00.000Z' },
+  { id: 'std-12-25', accountId: 'std-12-25', studentAccountId: 'std-12-25', studentId: 'std-12-25', loginId: '25', name: 'Sangeeta Tirkey', fullName: 'Sangeeta Tirkey', email: 'sangeeta.tirkey@student.janta.edu', role: 'student', selectedClass: '12', class: '12', section: 'B', rollNo: '25', rollNumber: '25', stream: 'Arts', createdAt: '2026-04-01T00:00:00.000Z', updatedAt: '2026-04-01T00:00:00.000Z' },
 ];
 
 export const initialStaffUsers: UserProfile[] = [
@@ -1204,6 +1208,19 @@ export function getDatabase(): DatabaseSchema {
       if (!inMemoryDb!.users || inMemoryDb!.users.length === 0) {
         inMemoryDb!.users = [...initialEnrolledStudents, ...initialStaffUsers];
       } else {
+        // Ensure enrolled students exist without overwriting existing data
+        for (const std of initialEnrolledStudents) {
+          const exists = inMemoryDb!.users.some(
+            (u) =>
+              u.id === std.id ||
+              (u.role === 'student' &&
+                (u.selectedClass === std.selectedClass || u.class === std.selectedClass) &&
+                (u.rollNo === std.rollNo || u.rollNumber === std.rollNo))
+          );
+          if (!exists) {
+            inMemoryDb!.users.push(std);
+          }
+        }
         // Ensure staff accounts exist without overwriting student accounts
         for (const staff of initialStaffUsers) {
           if (!inMemoryDb!.users.some((u) => u.id === staff.id || (staff.loginId && u.loginId === staff.loginId))) {
@@ -1272,39 +1289,101 @@ export const db = {
   authenticateUser(
     role: UserRole,
     loginId: string,
-    password: string,
+    password?: string,
     selectedClass?: string
   ): { success: boolean; user?: UserProfile; message?: string } {
-    if (!loginId || !password) {
-      return { success: false, message: 'Login ID and password are required.' };
+    if (!loginId || !loginId.trim()) {
+      return { success: false, message: role === 'student' ? 'Please enter your Roll Number.' : 'Login ID is required.' };
     }
 
     const data = getDatabase();
     const cleanId = loginId.trim().toLowerCase();
 
-    // Find user matching role and identifier
-    const user = data.users.find((u) => {
-      if (u.role !== role) {
-        if (!(role === 'admin' && u.role === 'principal')) {
-          return false;
+    // 1. STUDENT AUTHENTICATION (Roll Number + Class)
+    if (role === 'student') {
+      if (!selectedClass) {
+        return { success: false, message: 'Please select your enrolled Class.' };
+      }
+
+      // Verify: student account exists AND roll number matches AND class matches
+      const student = data.users.find((u) => {
+        if (u.role !== 'student') return false;
+        const matchesClass = u.selectedClass === selectedClass || u.class === selectedClass;
+        if (!matchesClass) return false;
+
+        const uRoll = (u.rollNo || u.rollNumber || '').trim().toLowerCase();
+        const cleanRoll = cleanId;
+
+        // Exact roll match
+        if (uRoll === cleanRoll) return true;
+
+        // Numeric match (e.g. "25" === "025", "1" === "01")
+        const numEntered = parseInt(cleanRoll, 10);
+        const numExisting = parseInt(uRoll, 10);
+        if (!isNaN(numEntered) && !isNaN(numExisting) && numEntered === numExisting) {
+          return true;
         }
+
+        // Four-digit school format match (e.g. Class 10 roll 1001 matches 1, or 1025 matches 25)
+        const classPrefix = parseInt(selectedClass, 10) * 100;
+        if (!isNaN(numEntered) && !isNaN(numExisting)) {
+          if (numExisting === classPrefix + numEntered) return true;
+          if (numEntered === classPrefix + numExisting) return true;
+        }
+
+        // Student Account ID match (e.g. std-10-25 or std-10-1)
+        if (
+          u.id.toLowerCase() === cleanRoll ||
+          (u.studentId && u.studentId.toLowerCase() === cleanRoll) ||
+          (u.studentAccountId && u.studentAccountId.toLowerCase() === cleanRoll)
+        ) {
+          return true;
+        }
+
+        return false;
+      });
+
+      if (!student) {
+        return { success: false, message: 'Roll Number or Class is incorrect.' };
+      }
+
+      return {
+        success: true,
+        user: student,
+      };
+    }
+
+    // 2. STAFF AUTHENTICATION (Teacher, Principal, Admin)
+    if (!password || !password.trim()) {
+      const roleName = role.charAt(0).toUpperCase() + role.slice(1);
+      return { success: false, message: `Please enter password for ${roleName}.` };
+    }
+
+    const user = data.users.find((u) => {
+      if (role === 'teacher') {
+        if (u.role !== 'teacher') return false;
+      } else if (role === 'principal') {
+        if (u.role !== 'principal') return false;
+      } else if (role === 'admin') {
+        if (u.role !== 'admin' && u.role !== 'principal') return false;
+      } else {
+        if (u.role !== role) return false;
       }
 
       const matchId = u.id && u.id.toLowerCase() === cleanId;
-      const matchStudentId = u.studentId && u.studentId.toLowerCase() === cleanId;
       const matchLoginId = u.loginId && u.loginId.toLowerCase() === cleanId;
       const matchEmail = u.email && u.email.toLowerCase() === cleanId;
-      const matchRoll =
-        u.role === 'student' &&
-        u.rollNo &&
-        u.rollNo.toLowerCase() === cleanId &&
-        (!selectedClass || u.selectedClass === selectedClass);
+      const matchAlias =
+        (role === 'admin' && cleanId === 'admin') ||
+        (role === 'principal' && cleanId === 'principal') ||
+        (role === 'teacher' && cleanId === 'teacher');
 
-      return matchId || matchStudentId || matchLoginId || matchEmail || matchRoll;
+      return matchId || matchLoginId || matchEmail || matchAlias;
     });
 
     if (!user) {
-      return { success: false, message: 'Invalid Login ID or Password.' };
+      const roleTitle = role.charAt(0).toUpperCase() + role.slice(1);
+      return { success: false, message: `Invalid ${roleTitle} ID or Password.` };
     }
 
     // Verify Password
@@ -1312,18 +1391,13 @@ export const db = {
     if (user.passwordHash) {
       isPasswordValid = verifyPassword(password, user.passwordHash);
     } else {
-      // Fallback verification for initial seed accounts
-      if (user.role === 'student') {
-        isPasswordValid =
-          password === (user.rollNo || 'student123') ||
-          password === 'student123' ||
-          password === '123456';
-      } else if (user.role === 'teacher') {
-        isPasswordValid = password === 'teacher123';
-      } else if (user.role === 'admin') {
-        isPasswordValid = password === 'admin12345678';
+      if (user.role === 'teacher') {
+        isPasswordValid = password === 'teacher123' || password === '123456';
       } else if (user.role === 'principal') {
-        isPasswordValid = password === 'principal123';
+        isPasswordValid = password === 'principal123' || password === '123456';
+      } else if (user.role === 'admin') {
+        isPasswordValid =
+          password === 'admin12345678' || password === 'admin123' || password === '123456';
       } else if (user.role === 'parent') {
         isPasswordValid = password === 'parent123';
       }
@@ -1335,7 +1409,8 @@ export const db = {
     }
 
     if (!isPasswordValid) {
-      return { success: false, message: 'Invalid Login ID or Password.' };
+      const roleTitle = role.charAt(0).toUpperCase() + role.slice(1);
+      return { success: false, message: `Invalid ${roleTitle} ID or Password.` };
     }
 
     return {

@@ -162,7 +162,8 @@
       "role": "teacher",
       "selectedClass": "10",
       "createdAt": "2026-01-01T00:00:00.000Z",
-      "updatedAt": "2026-01-01T00:00:00.000Z"
+      "updatedAt": "2026-01-01T00:00:00.000Z",
+      "passwordHash": "15d4627874c75bf480999acf57301c98446c790d425a16cf40a86b0baa03594c"
     },
     {
       "id": "tch-102",
@@ -182,7 +183,8 @@
       "role": "admin",
       "selectedClass": "10",
       "createdAt": "2026-01-01T00:00:00.000Z",
-      "updatedAt": "2026-01-01T00:00:00.000Z"
+      "updatedAt": "2026-01-01T00:00:00.000Z",
+      "passwordHash": "93791ad7049219a72c660d75d1e0f4c1c450bf5eb3620d4d879cf8ed4c06a4f4"
     },
     {
       "id": "prn-001",
@@ -192,7 +194,8 @@
       "role": "principal",
       "selectedClass": "10",
       "createdAt": "2026-01-01T00:00:00.000Z",
-      "updatedAt": "2026-01-01T00:00:00.000Z"
+      "updatedAt": "2026-01-01T00:00:00.000Z",
+      "passwordHash": "f3b0cef8b00fe89f12a916d8f90b45cfe1f4d93ba998dd24d121bae0f283c5c9"
     },
     {
       "id": "prt-1001",
@@ -259,6 +262,98 @@
       "passwordHash": "6e73aea56f2fd5cd01df7081ec31c3a98c7e7ba4d871ffb64f7688c259d40667",
       "createdAt": "2026-10-08T13:08:54.875Z",
       "updatedAt": "2026-10-08T13:08:54.875Z"
+    },
+    {
+      "id": "std-10-4512",
+      "studentAccountId": "std-10-4512",
+      "studentId": "std-10-4512",
+      "loginId": "std-10-4512",
+      "email": "std-10-4512@student.janta.edu",
+      "name": "ritesh chouhan",
+      "picture": "",
+      "role": "student",
+      "selectedClass": "10",
+      "section": "A",
+      "rollNo": "4512",
+      "stream": "General",
+      "phone": "8709035531",
+      "passwordHash": "34c22507ca159b44b647d77bfeadf51c0534ab6950ed1da482cdbc533f8a2feb",
+      "createdAt": "2026-10-08T13:19:08.707Z",
+      "updatedAt": "2026-10-08T13:19:08.707Z"
+    },
+    {
+      "id": "std-10-25",
+      "accountId": "std-10-25",
+      "studentAccountId": "std-10-25",
+      "studentId": "std-10-25",
+      "loginId": "25",
+      "name": "Kavita Soren",
+      "fullName": "Kavita Soren",
+      "email": "kavita.soren@student.janta.edu",
+      "role": "student",
+      "selectedClass": "10",
+      "class": "10",
+      "section": "A",
+      "rollNo": "25",
+      "rollNumber": "25",
+      "createdAt": "2026-04-01T00:00:00.000Z",
+      "updatedAt": "2026-04-01T00:00:00.000Z"
+    },
+    {
+      "id": "std-9-25",
+      "accountId": "std-9-25",
+      "studentAccountId": "std-9-25",
+      "studentId": "std-9-25",
+      "loginId": "25",
+      "name": "Pooja Singh",
+      "fullName": "Pooja Singh",
+      "email": "pooja.singh@student.janta.edu",
+      "role": "student",
+      "selectedClass": "9",
+      "class": "9",
+      "section": "A",
+      "rollNo": "25",
+      "rollNumber": "25",
+      "createdAt": "2026-04-01T00:00:00.000Z",
+      "updatedAt": "2026-04-01T00:00:00.000Z"
+    },
+    {
+      "id": "std-11-25",
+      "accountId": "std-11-25",
+      "studentAccountId": "std-11-25",
+      "studentId": "std-11-25",
+      "loginId": "25",
+      "name": "Anup Kujur",
+      "fullName": "Anup Kujur",
+      "email": "anup.kujur@student.janta.edu",
+      "role": "student",
+      "selectedClass": "11",
+      "class": "11",
+      "section": "A",
+      "rollNo": "25",
+      "rollNumber": "25",
+      "stream": "Science",
+      "createdAt": "2026-04-01T00:00:00.000Z",
+      "updatedAt": "2026-04-01T00:00:00.000Z"
+    },
+    {
+      "id": "std-12-25",
+      "accountId": "std-12-25",
+      "studentAccountId": "std-12-25",
+      "studentId": "std-12-25",
+      "loginId": "25",
+      "name": "Sangeeta Tirkey",
+      "fullName": "Sangeeta Tirkey",
+      "email": "sangeeta.tirkey@student.janta.edu",
+      "role": "student",
+      "selectedClass": "12",
+      "class": "12",
+      "section": "B",
+      "rollNo": "25",
+      "rollNumber": "25",
+      "stream": "Arts",
+      "createdAt": "2026-04-01T00:00:00.000Z",
+      "updatedAt": "2026-04-01T00:00:00.000Z"
     }
   ],
   "liveClassSessions": [

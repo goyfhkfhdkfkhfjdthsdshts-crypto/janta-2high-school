@@ -444,8 +444,8 @@ export function ProfileView({
             </div>
           </div>
 
-          {/* Edit Profile Toggle Button */}
-          <div className="shrink-0 mt-2 sm:mt-0">
+          {/* Edit Profile Toggle & Logout Buttons */}
+          <div className="shrink-0 mt-2 sm:mt-0 flex items-center gap-2">
             <button
               onClick={() => {
                 setIsEditing(!isEditing);
@@ -465,6 +465,14 @@ export function ProfileView({
                   <span>{language === 'hi' ? 'प्रोफ़ाइल बदलें' : 'Edit Profile'}</span>
                 </>
               )}
+            </button>
+            <button
+              onClick={onLogout}
+              className="px-3.5 py-2 rounded-2xl bg-red-600/80 hover:bg-red-600 border border-red-400/40 text-white text-xs font-bold transition-all flex items-center gap-1.5 shadow-xs cursor-pointer"
+              title="Logout / लॉग आउट"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span>{language === 'hi' ? 'लॉग आउट' : 'Logout'}</span>
             </button>
           </div>
         </div>

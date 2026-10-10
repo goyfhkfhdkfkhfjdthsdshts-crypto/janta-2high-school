@@ -130,23 +130,32 @@ export function Header({
 
           {/* User Avatar / Profile Button */}
           {user ? (
-            <button
-              onClick={onOpenProfile}
-              className="flex items-center gap-1.5 pl-1.5 pr-2.5 py-1 rounded-full bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-900 transition-all max-w-[130px] cursor-pointer"
-              title={`Student: ${user.name}`}
-            >
-              <div className="w-6 h-6 rounded-full bg-blue-700 text-white font-bold text-xs flex items-center justify-center shrink-0 overflow-hidden shadow-xs">
-                {user.picture ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={user.picture} alt={user.name} className="w-full h-full object-cover" />
-                ) : (
-                  user.name.charAt(0).toUpperCase()
-                )}
-              </div>
-              <span className="text-xs font-semibold truncate leading-none">
-                {user.name.split(' ')[0]}
-              </span>
-            </button>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={onOpenProfile}
+                className="flex items-center gap-1.5 pl-1.5 pr-2.5 py-1 rounded-full bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-900 transition-all max-w-[130px] cursor-pointer"
+                title={`${user.role}: ${user.name}`}
+              >
+                <div className="w-6 h-6 rounded-full bg-blue-700 text-white font-bold text-xs flex items-center justify-center shrink-0 overflow-hidden shadow-xs">
+                  {user.picture ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={user.picture} alt={user.name} className="w-full h-full object-cover" />
+                  ) : (
+                    user.name.charAt(0).toUpperCase()
+                  )}
+                </div>
+                <span className="text-xs font-semibold truncate leading-none">
+                  {user.name.split(' ')[0]}
+                </span>
+              </button>
+              <button
+                onClick={onLogout}
+                className="p-1.5 rounded-full text-slate-500 hover:text-red-700 hover:bg-red-50 border border-slate-200 transition-colors cursor-pointer"
+                title="Logout / लॉग आउट"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+              </button>
+            </div>
           ) : (
             <button
               onClick={onOpenProfile}
