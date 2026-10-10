@@ -1,0 +1,19 @@
+{
+  "previewPort": 3000,
+  "healthPath": "/api/health",
+  "startCommand": "docker compose -f docker-compose.base44.yml up -d",
+  "secrets": [
+    {
+      "name": "GEMINI_API_KEY",
+      "description": "Google Gemini API key used by the AI Class / MCQ / transcription routes (@google/genai). Create one at https://aistudio.google.com/app/apikey. Optional for boot - without it those routes return their built-in offline fallback.",
+      "requiredAtBoot": false,
+      "generatedForDevelopment": false
+    },
+    {
+      "name": "ADMIN_PASSWORD",
+      "description": "Optional master password for the teacher/admin management panel (app/api/admin/verify). Falls back to the in-app default when unset.",
+      "requiredAtBoot": false,
+      "generatedForDevelopment": false
+    }
+  ]
+}
