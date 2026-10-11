@@ -7,7 +7,8 @@ import { SchoolLogo } from './SchoolLogo';
 interface AdminPasswordModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess: () => void;
+  /** Receives the verified password so privileged actions can re-prove it server-side. */
+  onSuccess: (verifiedPassword: string) => void;
   isAdmin: boolean;
   onLogoutAdmin: () => void;
 }
@@ -45,9 +46,9 @@ export function AdminPasswordModal({
       const data = await res.json();
 
       if (res.ok && data.success) {
+        onSuccess(password);
         setPassword('');
         setError(null);
-        onSuccess();
       } else {
         // MANDATORY REQUIREMENT: Wrong password message must ONLY say: "Incorrect password. Please try again."
         setError('Incorrect password. Please try again.');

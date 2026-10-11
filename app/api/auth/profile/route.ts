@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db, hashPassword } from '@/lib/db';
-import { UserRole } from '@/lib/types';
 import { applyCors, handleCorsOptions } from '@/lib/cors';
 
 export async function OPTIONS(req: NextRequest) {
@@ -253,10 +252,18 @@ export async function DELETE(req: NextRequest) {
       return applyCors(errRes, req);
     }
 
-    const adminPassword = req.headers.get('x-admin-password');
-    const userRole = (req.headers.get('x-user-role') || '').toLowerCase() as UserRole;
+    // Role-based authorization: a verified admin/principal session, or the
+    // platform-managed ADMIN_PASSWORD secret. No password literal lives in code.
+    const adminPassword = req.headers.get('x-admin-password') || '';
+    const expectedAdminPassword = process.env.ADMIN_PASSWORD || '';
+    const sessionUserId = req.cookies.get('school_user_id')?.value || '';
+    const sessionUser = sessionUserId ? db.findUser(sessionUserId) : undefined;
+    const sessionRole = (sessionUser?.role || '').toLowerCase();
+    const hasPrivilegedSession = sessionRole === 'admin' || sessionRole === 'principal';
+    const hasValidAdminPassword =
+      Boolean(expectedAdminPassword) && adminPassword === expectedAdminPassword;
 
-    if (userRole !== 'admin' && userRole !== 'principal' && adminPassword !== 'admin12345678') {
+    if (!hasPrivilegedSession && !hasValidAdminPassword) {
       const unauthRes = NextResponse.json(
         { success: false, message: 'Unauthorized. Admin permission required to delete student accounts.' },
         { status: 403 }

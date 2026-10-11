@@ -4,9 +4,16 @@ export async function POST(req: NextRequest) {
   try {
     const { password } = await req.json();
 
-    const expectedPassword = process.env.ADMIN_PASSWORD || 'JantaAdmin@2026';
+    // The admin password is a platform secret (ADMIN_PASSWORD). No default password
+    // is hardcoded here, so an unset secret can never be guessed or bypassed.
+    const expectedPassword = process.env.ADMIN_PASSWORD || '';
 
-    if (!password || typeof password !== 'string' || password.trim() !== expectedPassword) {
+    if (
+      !expectedPassword ||
+      !password ||
+      typeof password !== 'string' ||
+      password.trim() !== expectedPassword
+    ) {
       // STRICT REQUIREMENT: Wrong password message must ONLY say: "Incorrect password. Please try again."
       return NextResponse.json(
         {

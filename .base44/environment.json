@@ -11,7 +11,7 @@
     },
     {
       "name": "ADMIN_PASSWORD",
-      "description": "Optional master password for the teacher/admin management panel (app/api/admin/verify). Falls back to the in-app default when unset.",
+      "description": "Master password for the teacher/admin management panel (app/api/admin/verify) and for privileged actions such as deleting a student account (app/api/auth/profile DELETE). Required for those features - there is no in-code default, so set a real value in the dashboard.",
       "requiredAtBoot": false,
       "generatedForDevelopment": false
     }
