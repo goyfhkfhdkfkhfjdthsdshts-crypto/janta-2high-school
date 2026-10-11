@@ -39,10 +39,8 @@ committed — the AI routes already degrade to a built-in offline answer set:
 - `GEMINI_API_KEY` — used by `app/api/ai/ask`, `app/api/mcq/generate`,
   `app/api/ai/transcribe` via `@google/genai`. Without it those routes return canned
   "offline mode" content instead of real Gemini answers.
-- `ADMIN_PASSWORD` — unlocks the teacher/admin management panel (`app/api/admin/verify`)
-  and authorizes privileged actions such as deleting a student account
-  (`app/api/auth/profile` DELETE). It has **no in-code default**: with the secret unset the
-  panel accepts nothing, so set a real value in the dashboard Secrets page.
+- `ADMIN_PASSWORD` — teacher/admin management panel (`app/api/admin/verify`); falls back
+  to the in-app default when unset.
 
 ## Sandbox-only override
 
@@ -55,8 +53,5 @@ and `BASE44_PUBLIC_HOST_SUFFIX` are passed through in compose.
 ## Signing in when testing by hand
 
 Seeded accounts live in `lib/db.ts`. Students sign in with class + roll number and **no
-password**, e.g. `Class 10` + roll `1001` (Amit Kumar Singh). The teacher/principal/admin
-tabs take a login ID + password that is checked only against the SHA-256 hash stored on the
-user record in `data/school_database.json` — no default/fallback password exists in code, and
-the login page never displays credentials. Unlocking the teacher/admin management panel is a
-separate step and uses the `ADMIN_PASSWORD` secret.
+password**, e.g. `Class 10` + roll `1001` (Amit Kumar Singh). Teacher/principal/admin tabs
+use a login ID + password (`ADMIN_PASSWORD` for admin).
