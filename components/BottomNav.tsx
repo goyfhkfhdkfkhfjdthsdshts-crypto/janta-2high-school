@@ -31,8 +31,8 @@ export function BottomNav({
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200/90 shadow-lg px-2 pb-safe">
-      <div className="max-w-md mx-auto flex items-center justify-around h-16">
+    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200/90 shadow-lg px-1.5 sm:px-3 pb-[max(env(safe-area-inset-bottom,0px),0.35rem)]">
+      <div className="max-w-md mx-auto flex items-center justify-around h-14 sm:h-16">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -41,16 +41,16 @@ export function BottomNav({
             <button
               key={tab.id}
               onClick={() => onTabChange(tab.id)}
-              className={`relative flex flex-col items-center justify-center flex-1 h-full py-1 transition-all select-none touch-manipulation ${
+              className={`relative flex flex-col items-center justify-center flex-1 h-full py-1 px-0.5 transition-colors select-none touch-manipulation cursor-pointer ${
                 isActive
-                  ? 'text-blue-700 font-bold scale-105'
+                  ? 'text-blue-700 font-bold'
                   : 'text-slate-500 hover:text-slate-800 font-medium'
               }`}
             >
               <div className="relative">
                 <Icon
-                  className={`w-5 h-5 transition-transform ${
-                    isActive ? 'stroke-[2.5px]' : 'stroke-2'
+                  className={`w-5 h-5 shrink-0 transition-transform ${
+                    isActive ? 'stroke-[2.5px] scale-110' : 'stroke-2'
                   }`}
                 />
                 {tab.badge && (
@@ -60,11 +60,15 @@ export function BottomNav({
                   </span>
                 )}
               </div>
-              <span className={`text-[11px] mt-1 tracking-tight leading-none ${isActive ? 'font-bold' : ''}`}>
+              <span
+                className={`text-[10px] sm:text-[11px] mt-1 tracking-tight leading-none truncate max-w-full text-center ${
+                  isActive ? 'font-bold' : ''
+                }`}
+              >
                 {tab.label}
               </span>
               {isActive && (
-                <span className="absolute bottom-1 w-6 h-0.5 bg-blue-700 rounded-full" />
+                <span className="absolute bottom-0.5 w-5 h-0.5 bg-blue-700 rounded-full" />
               )}
             </button>
           );

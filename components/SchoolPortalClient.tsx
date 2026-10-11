@@ -284,7 +284,7 @@ export function SchoolPortalClient({
   }
 
   return (
-    <div className="min-h-screen bg-slate-100/90 text-slate-900 flex flex-col selection:bg-blue-600 selection:text-white">
+    <div className="min-h-screen min-h-[100dvh] bg-slate-100/90 text-slate-900 flex flex-col selection:bg-blue-600 selection:text-white overflow-x-hidden">
       {/* Sticky Top Header */}
       <Header
         user={user}
@@ -307,8 +307,8 @@ export function SchoolPortalClient({
       {/* Offline Connectivity Status Banner */}
       <OfflineBanner language={language} />
 
-      {/* Main Container */}
-      <main className="flex-1 max-w-4xl w-full mx-auto p-3 sm:p-5">
+      {/* Main Container with safe area padding above BottomNav */}
+      <main className="flex-1 max-w-4xl w-full mx-auto p-3 sm:p-5 pb-[calc(4.75rem+env(safe-area-inset-bottom,0px))]">
         {/* Sub-section Back to Home button */}
         {isSubSection && (
           <div className="mb-3">

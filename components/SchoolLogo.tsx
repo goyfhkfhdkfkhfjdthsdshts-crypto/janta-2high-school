@@ -183,7 +183,7 @@ export function SchoolLogo({
   );
 
   if (!showText) {
-    return <div className={`inline-flex items-center justify-center ${className}`}>{svgEmblem}</div>;
+    return <div className={`inline-flex items-center justify-center shrink-0 ${className}`}>{svgEmblem}</div>;
   }
 
   if (orientation === 'vertical') {

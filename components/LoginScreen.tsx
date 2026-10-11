@@ -173,25 +173,26 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-100 via-blue-50/50 to-slate-100 flex flex-col justify-between p-3 sm:p-6 selection:bg-blue-600 selection:text-white">
+    <div className="min-h-screen min-h-[100dvh] bg-gradient-to-b from-slate-100 via-blue-50/50 to-slate-100 flex flex-col justify-between p-3 sm:p-6 pt-[max(env(safe-area-inset-top,0px),0.75rem)] pb-[max(env(safe-area-inset-bottom,0px),0.75rem)] selection:bg-blue-600 selection:text-white overflow-x-hidden">
       {/* Top Banner Branding */}
-      <div className="w-full max-w-md mx-auto pt-4 sm:pt-6 pb-2 text-center">
-        <SchoolLogo size={84} showText={false} className="mx-auto mb-2.5 drop-shadow-sm" />
-        <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight uppercase leading-tight">
+      <div className="w-full max-w-md mx-auto pt-2 sm:pt-6 pb-2 text-center">
+        <SchoolLogo size={60} showText={false} className="sm:hidden mx-auto mb-2 drop-shadow-sm" />
+        <SchoolLogo size={84} showText={false} className="hidden sm:block mx-auto mb-2.5 drop-shadow-sm" />
+        <h1 className="text-lg sm:text-2xl font-black text-slate-900 tracking-tight uppercase leading-tight">
           Janta +2 High School
         </h1>
         <p className="text-xs sm:text-sm font-bold text-blue-800 tracking-wider uppercase mt-0.5">
           Khalari, Ranchi • Jharkhand
         </p>
         <div className="mt-1.5 inline-flex items-center gap-1.5 px-3 py-0.5 bg-amber-50 border border-amber-200/80 rounded-full">
-          <span className="text-[11px] font-semibold text-amber-800">
+          <span className="text-[10px] sm:text-[11px] font-semibold text-amber-800">
             शिक्षा • अनुशासन • सफलता
           </span>
         </div>
       </div>
 
       {/* Main Login Card */}
-      <div className="w-full max-w-md mx-auto bg-white rounded-3xl shadow-xl border border-slate-200/80 p-5 sm:p-7 my-auto space-y-4">
+      <div className="w-full max-w-md mx-auto bg-white rounded-2xl sm:rounded-3xl shadow-xl border border-slate-200/80 p-4 sm:p-7 my-auto space-y-3.5 sm:space-y-4">
         {/* Role Selector Tabs (ONLY 4 ROLES: Student, Teacher, Principal, Admin) */}
         <div>
           <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider text-center mb-1.5">

@@ -260,20 +260,20 @@ export function HomeView({
   ];
 
   return (
-    <div className="space-y-4 pb-20">
+    <div className="space-y-3 sm:space-y-4 pb-3 sm:pb-4">
       {/* REAL-TIME LIVE CLASS BANNER (if active) */}
       {(activeLiveForCurrentClass || anyActiveLive) && (
-        <div className="bg-gradient-to-r from-red-600 via-rose-600 to-red-700 text-white rounded-3xl p-4 sm:p-5 shadow-lg border border-red-400 animate-in fade-in space-y-3">
-          <div className="flex items-start justify-between gap-3">
-            <div className="space-y-1">
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-black uppercase tracking-wider bg-white text-red-700 shadow-xs">
+        <div className="bg-gradient-to-r from-red-600 via-rose-600 to-red-700 text-white rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 shadow-lg border border-red-400 animate-in fade-in space-y-2.5 sm:space-y-3">
+          <div className="flex items-start justify-between gap-2.5 sm:gap-3">
+            <div className="space-y-1 min-w-0">
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-black uppercase tracking-wider bg-white text-red-700 shadow-xs">
                 <span className="w-2 h-2 rounded-full bg-red-600 animate-ping" />
                 🔴 LIVE NOW: Class {(activeLiveForCurrentClass || anyActiveLive).class}
               </div>
-              <h3 className="text-base sm:text-lg font-black tracking-tight leading-snug">
+              <h3 className="text-sm sm:text-lg font-black tracking-tight leading-snug truncate">
                 {(activeLiveForCurrentClass || anyActiveLive).title}
               </h3>
-              <p className="text-xs text-red-100">
+              <p className="text-[11px] sm:text-xs text-red-100 truncate">
                 Subject: <span className="font-bold text-white">{(activeLiveForCurrentClass || anyActiveLive).subject}</span> • Teacher:{' '}
                 <span className="font-bold text-white">{(activeLiveForCurrentClass || anyActiveLive).teacherName}</span>
               </p>
@@ -281,9 +281,9 @@ export function HomeView({
 
             <button
               onClick={() => onOpenSection('live')}
-              className="py-2.5 px-5 bg-white hover:bg-red-50 text-red-700 font-extrabold text-xs sm:text-sm rounded-2xl shadow-md hover:shadow-lg transition-transform active:scale-95 shrink-0 flex items-center gap-1.5"
+              className="py-2 sm:py-2.5 px-3 sm:px-5 bg-white hover:bg-red-50 text-red-700 font-extrabold text-xs sm:text-sm rounded-xl sm:rounded-2xl shadow-md transition-all active:scale-95 shrink-0 flex items-center gap-1.5 cursor-pointer"
             >
-              <Play className="w-4 h-4 fill-red-700" />
+              <Play className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-red-700" />
               <span>[ Join Live ]</span>
             </button>
           </div>
@@ -291,24 +291,23 @@ export function HomeView({
       )}
 
       {/* Hero Welcome & School Identity Header */}
-      <div className="bg-gradient-to-br from-blue-900 via-indigo-950 to-slate-950 text-white rounded-3xl p-5 sm:p-6 shadow-xl space-y-4 relative overflow-hidden">
+      <div className="bg-gradient-to-br from-blue-900 via-indigo-950 to-slate-950 text-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-xl space-y-3 sm:space-y-4 relative overflow-hidden">
         {/* Subtle background glow */}
         <div className="absolute -top-12 -right-12 w-48 h-48 bg-blue-600/20 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="flex flex-col sm:flex-row items-center sm:items-start justify-between gap-4 text-center sm:text-left relative z-10">
-          <div className="flex items-center gap-3">
-            <SchoolLogo size={58} showText={false} />
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-lg sm:text-xl font-black uppercase tracking-tight">
-                  Janta +2 High School
-                </h1>
-              </div>
-              <p className="text-xs text-blue-200 font-bold uppercase tracking-wider mt-0.5">
+        <div className="flex flex-col sm:flex-row items-start justify-between gap-3 sm:gap-4 relative z-10">
+          <div className="flex items-center gap-2.5 sm:gap-3 text-left min-w-0">
+            <SchoolLogo size={46} className="sm:hidden shrink-0" showText={false} />
+            <SchoolLogo size={58} className="hidden sm:block shrink-0" showText={false} />
+            <div className="min-w-0">
+              <h1 className="text-base sm:text-xl font-black uppercase tracking-tight truncate leading-tight">
+                Janta +2 High School
+              </h1>
+              <p className="text-[11px] sm:text-xs text-blue-200 font-bold uppercase tracking-wider mt-0.5 leading-tight">
                 Khalari, Ranchi • Jharkhand
               </p>
-              <div className="mt-1.5 inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-amber-400/20 border border-amber-400/30 rounded-full">
-                <span className="text-[11px] font-semibold text-amber-300">
+              <div className="mt-1 inline-flex items-center gap-1.5 px-2 sm:px-2.5 py-0.5 bg-amber-400/20 border border-amber-400/30 rounded-full">
+                <span className="text-[10px] sm:text-[11px] font-semibold text-amber-300">
                   शिक्षा • अनुशासन • सफलता
                 </span>
               </div>
@@ -316,27 +315,29 @@ export function HomeView({
           </div>
 
           {/* User Welcome Pill */}
-          <div className="bg-white/10 backdrop-blur-xs px-3.5 py-2 rounded-2xl border border-white/20 text-center sm:text-right shrink-0">
-            <p className="text-[10px] text-blue-200 uppercase font-semibold">Welcome Back</p>
-            <p className="text-xs sm:text-sm font-extrabold text-white truncate max-w-[160px]">
-              {user?.name || 'Student'}
-            </p>
-            <p className="text-[11px] text-emerald-300 font-semibold mt-0.5">
-              Current: Class {selectedClass}
+          <div className="w-full sm:w-auto bg-white/10 backdrop-blur-xs px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl border border-white/20 flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-1 shrink-0">
+            <div className="text-left sm:text-right">
+              <p className="text-[9px] sm:text-[10px] text-blue-200 uppercase font-semibold leading-tight">Welcome Back</p>
+              <p className="text-xs sm:text-sm font-extrabold text-white truncate max-w-[150px] sm:max-w-[160px] leading-tight">
+                {user?.name || 'Student'}
+              </p>
+            </div>
+            <p className="text-[10px] sm:text-[11px] text-emerald-300 font-semibold shrink-0">
+              Class {selectedClass}
             </p>
           </div>
         </div>
 
         {/* Quick Urgent Notice ticker if available */}
         {recentNotices.length > 0 && (
-          <div className="pt-2 border-t border-white/10 flex items-center gap-2 text-xs text-blue-100">
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-red-500 text-white shrink-0">
+          <div className="pt-2 border-t border-white/10 flex items-center gap-2 text-xs text-blue-100 min-w-0">
+            <span className="px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-black uppercase bg-red-500 text-white shrink-0">
               Notice
             </span>
             <span className="truncate">{recentNotices[0].title}</span>
             <button
               onClick={() => onOpenSection('notice')}
-              className="ml-auto text-[11px] font-bold text-amber-300 hover:underline shrink-0"
+              className="ml-auto text-[11px] font-bold text-amber-300 hover:underline shrink-0 cursor-pointer"
             >
               View All
             </button>
@@ -345,10 +346,10 @@ export function HomeView({
       </div>
 
       {/* Class Selector Bar: [ 9 ] [ 10 ] [ 11 ] [ 12 ] */}
-      <div className="bg-white rounded-3xl p-3 sm:p-4 border border-slate-200 shadow-xs space-y-2">
+      <div className="bg-white rounded-2xl sm:rounded-3xl p-3 sm:p-4 border border-slate-200 shadow-xs space-y-2">
         <div className="flex items-center justify-between px-1">
           <span className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
-            <GraduationCap className="w-4 h-4 text-blue-700" />
+            <GraduationCap className="w-4 h-4 text-blue-700 shrink-0" />
             Select Your Class:
           </span>
           <span className="text-[11px] text-slate-400 font-medium">
@@ -356,14 +357,14 @@ export function HomeView({
           </span>
         </div>
 
-        <div className="grid grid-cols-4 gap-2">
+        <div className="grid grid-cols-4 gap-1.5 sm:gap-2">
           {(['9', '10', '11', '12'] as SchoolClass[]).map((c) => (
             <button
               key={c}
               onClick={() => onSelectClass(c)}
-              className={`py-2.5 sm:py-3 rounded-2xl text-xs sm:text-sm font-black transition-all border ${
+              className={`py-2 sm:py-3 px-1 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-black transition-colors border text-center touch-manipulation cursor-pointer ${
                 selectedClass === c
-                  ? 'bg-blue-700 text-white border-blue-700 shadow-md scale-102 ring-2 ring-blue-300'
+                  ? 'bg-blue-700 text-white border-blue-700 shadow-sm ring-2 ring-blue-300'
                   : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
               }`}
             >
