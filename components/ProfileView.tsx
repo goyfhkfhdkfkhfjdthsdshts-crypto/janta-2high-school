@@ -44,6 +44,8 @@ import {
 interface ProfileViewProps {
   user: UserProfile | null;
   isAdmin: boolean;
+  /** Admin password the user just verified in the admin modal (kept in memory only). */
+  adminPassword?: string;
   selectedClass: SchoolClass;
   onSelectClass: (c: SchoolClass) => void;
   onOpenAdminModal: () => void;
@@ -58,6 +60,7 @@ interface ProfileViewProps {
 export function ProfileView({
   user,
   isAdmin,
+  adminPassword,
   selectedClass,
   onSelectClass,
   onOpenAdminModal,
@@ -328,8 +331,10 @@ export function ProfileView({
         {
           method: 'DELETE',
           headers: {
-            'x-admin-password': 'admin12345678',
-            'x-user-role': 'admin',
+            // Admin rights are proven by the password just verified in the admin
+            // modal - no credential is hardcoded in the frontend.
+            'x-user-role': user?.role || 'student',
+            ...(adminPassword ? { 'x-admin-password': adminPassword } : {}),
           },
         }
       );
