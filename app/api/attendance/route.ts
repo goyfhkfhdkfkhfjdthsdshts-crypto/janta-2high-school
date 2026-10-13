@@ -1,6 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { AttendanceRecord, SchoolClass } from '@/lib/types';
+import { getActor, hasAdminPanelAccess } from '@/lib/session';
+
+/**
+ * Attendance corrections and staff overrides are school-record changes: they
+ * require a signed-in Principal/Admin, or staff who verified the school's
+ * management password.
+ */
+function attendanceAdminGuard(req: NextRequest): NextResponse | null {
+  if (hasAdminPanelAccess(req)) return null;
+  return NextResponse.json(
+    { success: false, message: 'Unauthorized. School administrator access is required to modify attendance records.' },
+    { status: 403 }
+  );
+}
 
 export async function GET(req: NextRequest) {
   try {
@@ -90,6 +104,12 @@ export async function POST(req: NextRequest) {
       time: clientTime,
     } = body;
 
+    // A staff override of a student's attendance is a school-record change.
+    if (method === 'admin_override') {
+      const denied = attendanceAdminGuard(req);
+      if (denied) return denied;
+    }
+
     // Security & integrity validation
     if (!studentId || !studentEmail || !studentName) {
       return NextResponse.json(
@@ -163,8 +183,13 @@ export async function POST(req: NextRequest) {
 
 export async function PUT(req: NextRequest) {
   try {
+    const denied = attendanceAdminGuard(req);
+    if (denied) return denied;
+
     const body = await req.json();
     const { id, status, remarks, adminName, date, time } = body;
+    const actor = getActor(req);
+    const verifiedEditor = actor ? actor.name : adminName || 'School Admin';
 
     if (!id) {
       return NextResponse.json(
@@ -188,7 +213,7 @@ export async function PUT(req: NextRequest) {
     }
     updates.method = 'admin_override';
 
-    const updated = db.updateAttendanceRecord(id, updates, adminName || 'School Admin');
+    const updated = db.updateAttendanceRecord(id, updates, verifiedEditor);
 
     if (!updated) {
       return NextResponse.json(
@@ -199,7 +224,7 @@ export async function PUT(req: NextRequest) {
 
     db.logAudit(
       'UPDATE_ATTENDANCE',
-      adminName || 'Attendance Admin',
+      verifiedEditor,
       'Attendance',
       `Modified attendance for ${updated.studentName} on ${updated.date}: Status=${updated.status}, Remarks=${updated.remarks || 'None'}`
     );

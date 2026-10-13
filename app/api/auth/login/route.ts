@@ -2,9 +2,39 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { UserRole } from '@/lib/types';
 import { applyCors, handleCorsOptions } from '@/lib/cors';
+import {
+  SESSION_COOKIE,
+  SESSION_MAX_AGE_SECONDS,
+  createSessionToken,
+  sessionCookieOptions,
+} from '@/lib/session';
 
 export async function OPTIONS(req: NextRequest) {
   return handleCorsOptions(req);
+}
+
+/**
+ * Attaches the signed session cookie (and the non-sensitive identity cookies the
+ * server-side profile lookup reads) to a successful login response.
+ */
+function createLoginResponse(req: NextRequest, safeUser: any, message: string) {
+  const sessionToken = createSessionToken(safeUser.id, safeUser.role);
+
+  const response = NextResponse.json({
+    success: true,
+    user: safeUser,
+    token: sessionToken,
+    message,
+  });
+
+  const options = sessionCookieOptions(req, SESSION_MAX_AGE_SECONDS);
+  response.cookies.set(SESSION_COOKIE, sessionToken, options);
+  response.cookies.set('school_user_id', safeUser.id, options);
+  if (safeUser.email) {
+    response.cookies.set('school_user_email', safeUser.email, options);
+  }
+
+  return response;
 }
 
 export async function POST(req: NextRequest) {
@@ -54,49 +84,10 @@ export async function POST(req: NextRequest) {
 
       const { passwordHash: _hash, ...safeUser } = authResult.user;
 
-      // Set secure persistent session token (30 days)
-      const sessionToken = Buffer.from(
-        JSON.stringify({ id: safeUser.id, role: safeUser.role, time: Date.now() })
-      ).toString('base64');
-
-      const response = NextResponse.json({
-        success: true,
-        user: safeUser,
-        token: sessionToken,
-        message: `Welcome ${safeUser.name}! Login successful.`,
-      });
-
-      const isHttps =
-        req.headers.get('x-forwarded-proto') === 'https' ||
-        req.nextUrl.protocol === 'https:';
-
-      response.cookies.set('school_session_token', sessionToken, {
-        path: '/',
-        httpOnly: false,
-        maxAge: 60 * 60 * 24 * 30, // 30 days
-        sameSite: isHttps ? 'none' : 'lax',
-        secure: isHttps,
-      });
-
-      response.cookies.set('school_user_id', safeUser.id, {
-        path: '/',
-        httpOnly: false,
-        maxAge: 60 * 60 * 24 * 30,
-        sameSite: isHttps ? 'none' : 'lax',
-        secure: isHttps,
-      });
-
-      if (safeUser.email) {
-        response.cookies.set('school_user_email', safeUser.email, {
-          path: '/',
-          httpOnly: false,
-          maxAge: 60 * 60 * 24 * 30,
-          sameSite: isHttps ? 'none' : 'lax',
-          secure: isHttps,
-        });
-      }
-
-      return applyCors(response, req);
+      return applyCors(
+        createLoginResponse(req, safeUser, `Welcome ${safeUser.name}! Login successful.`),
+        req
+      );
     }
 
     // Staff Authentication: Teacher, Principal, Admin (ID + Password)
@@ -122,49 +113,10 @@ export async function POST(req: NextRequest) {
 
     const { passwordHash: _hash, ...safeUser } = authResult.user;
 
-    // Set secure persistent session token (30 days)
-    const sessionToken = Buffer.from(
-      JSON.stringify({ id: safeUser.id, role: safeUser.role, time: Date.now() })
-    ).toString('base64');
-
-    const response = NextResponse.json({
-      success: true,
-      user: safeUser,
-      token: sessionToken,
-      message: `Welcome ${safeUser.name}! Login successful.`,
-    });
-
-    const isHttps =
-      req.headers.get('x-forwarded-proto') === 'https' ||
-      req.nextUrl.protocol === 'https:';
-
-    response.cookies.set('school_session_token', sessionToken, {
-      path: '/',
-      httpOnly: false,
-      maxAge: 60 * 60 * 24 * 30, // 30 days
-      sameSite: isHttps ? 'none' : 'lax',
-      secure: isHttps,
-    });
-
-    response.cookies.set('school_user_id', safeUser.id, {
-      path: '/',
-      httpOnly: false,
-      maxAge: 60 * 60 * 24 * 30,
-      sameSite: isHttps ? 'none' : 'lax',
-      secure: isHttps,
-    });
-
-    if (safeUser.email) {
-      response.cookies.set('school_user_email', safeUser.email, {
-        path: '/',
-        httpOnly: false,
-        maxAge: 60 * 60 * 24 * 30,
-        sameSite: isHttps ? 'none' : 'lax',
-        secure: isHttps,
-      });
-    }
-
-    return applyCors(response, req);
+    return applyCors(
+      createLoginResponse(req, safeUser, `Welcome ${safeUser.name}! Login successful.`),
+      req
+    );
   } catch (error) {
     console.error('Login error:', error);
     const errRes = NextResponse.json(

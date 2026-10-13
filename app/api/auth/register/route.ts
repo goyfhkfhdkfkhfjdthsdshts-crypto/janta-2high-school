@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { applyCors, handleCorsOptions } from '@/lib/cors';
+import {
+  SESSION_COOKIE,
+  SESSION_MAX_AGE_SECONDS,
+  createSessionToken,
+  sessionCookieOptions,
+} from '@/lib/session';
 
 export async function OPTIONS(req: NextRequest) {
   return handleCorsOptions(req);
@@ -100,10 +106,8 @@ export async function POST(req: NextRequest) {
     // Account created and verified in database
     const safeUser = result.user!;
 
-    // Create session token for persistent authentication across devices/sessions
-    const sessionToken = Buffer.from(
-      JSON.stringify({ id: safeUser.id, role: safeUser.role, time: Date.now() })
-    ).toString('base64');
+    // Signed session token for persistent authentication across devices/sessions
+    const sessionToken = createSessionToken(safeUser.id, safeUser.role);
 
     const successRes = NextResponse.json({
       success: true,
@@ -112,27 +116,10 @@ export async function POST(req: NextRequest) {
       message: 'Account created successfully.',
     });
 
-    // Detect HTTPS
-    const isHttps =
-      req.headers.get('x-forwarded-proto') === 'https' ||
-      req.nextUrl.protocol === 'https:';
-
     // Set persistent session cookies (30 days)
-    successRes.cookies.set('school_user_id', safeUser.id, {
-      path: '/',
-      httpOnly: false,
-      maxAge: 60 * 60 * 24 * 30, // 30 days
-      sameSite: isHttps ? 'none' : 'lax',
-      secure: isHttps,
-    });
-
-    successRes.cookies.set('school_session_token', sessionToken, {
-      path: '/',
-      httpOnly: false,
-      maxAge: 60 * 60 * 24 * 30,
-      sameSite: isHttps ? 'none' : 'lax',
-      secure: isHttps,
-    });
+    const cookieOptions = sessionCookieOptions(req, SESSION_MAX_AGE_SECONDS);
+    successRes.cookies.set('school_user_id', safeUser.id, cookieOptions);
+    successRes.cookies.set(SESSION_COOKIE, sessionToken, cookieOptions);
 
     return applyCors(successRes, req);
   } catch (err: any) {

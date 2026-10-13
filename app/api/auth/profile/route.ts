@@ -1,28 +1,40 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db, hashPassword } from '@/lib/db';
-import { UserRole } from '@/lib/types';
+import { db } from '@/lib/db';
 import { applyCors, handleCorsOptions } from '@/lib/cors';
+import {
+  SESSION_COOKIE,
+  SESSION_MAX_AGE_SECONDS,
+  createSessionToken,
+  getActor,
+  hasAdminPanelAccess,
+  isStaffRole,
+  sessionCookieOptions,
+} from '@/lib/session';
 
 export async function OPTIONS(req: NextRequest) {
   return handleCorsOptions(req);
 }
 
-// GET: Retrieve authenticated student/user profile from real persistent database
+/** Never send password material back to the browser. */
+function withoutPassword<T extends { passwordHash?: string }>(user: T) {
+  const { passwordHash: _hash, ...safeUser } = user;
+  return safeUser;
+}
+
+// GET: Retrieve a profile. The caller must be signed in, and may only read their
+// own record unless they are staff.
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
+    const actor = getActor(req);
 
-    // Check Authorization header (Bearer token)
-    const authHeader = req.headers.get('authorization')?.replace(/^Bearer\s+/i, '');
-    let tokenUserId: string | null = null;
-    if (authHeader) {
-      try {
-        const parsed = JSON.parse(Buffer.from(authHeader, 'base64').toString('utf-8'));
-        if (parsed.id) tokenUserId = parsed.id;
-      } catch {}
+    if (!actor) {
+      const unauthRes = NextResponse.json(
+        { success: false, message: 'Please sign in to view profile records.' },
+        { status: 401 }
+      );
+      return applyCors(unauthRes, req);
     }
-
-    const headerUserId = req.headers.get('x-user-id');
 
     const identifier =
       searchParams.get('id') ||
@@ -30,34 +42,10 @@ export async function GET(req: NextRequest) {
       searchParams.get('loginId') ||
       searchParams.get('rollNo') ||
       searchParams.get('email') ||
-      headerUserId ||
-      tokenUserId ||
+      req.headers.get('x-user-id') ||
       req.cookies.get('school_user_id')?.value ||
-      req.cookies.get('school_user_email')?.value;
-
-    if (!identifier) {
-      // Check session cookie token
-      const sessionCookie = req.cookies.get('school_session_token')?.value;
-      if (sessionCookie) {
-        try {
-          const parsed = JSON.parse(Buffer.from(sessionCookie, 'base64').toString('utf-8'));
-          if (parsed.id) {
-            const user = db.findUser(parsed.id);
-            if (user) {
-              const okRes = NextResponse.json({ success: true, user });
-              return applyCors(okRes, req);
-            }
-          }
-        } catch {
-          // invalid token
-        }
-      }
-      const unauthRes = NextResponse.json(
-        { success: false, message: 'No active session or identifier provided.' },
-        { status: 401 }
-      );
-      return applyCors(unauthRes, req);
-    }
+      req.cookies.get('school_user_email')?.value ||
+      actor.id;
 
     const user = db.findUser(identifier);
     if (!user) {
@@ -68,7 +56,15 @@ export async function GET(req: NextRequest) {
       return applyCors(notFoundRes, req);
     }
 
-    const res = NextResponse.json({ success: true, user });
+    if (user.id !== actor.id && !isStaffRole(actor.role)) {
+      const forbiddenRes = NextResponse.json(
+        { success: false, message: 'You can only view your own profile.' },
+        { status: 403 }
+      );
+      return applyCors(forbiddenRes, req);
+    }
+
+    const res = NextResponse.json({ success: true, user: withoutPassword(user) });
     return applyCors(res, req);
   } catch (error) {
     console.error('Error fetching profile:', error);
@@ -80,7 +76,7 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// POST: Register or save a new permanent student profile
+// POST: Register or save a new permanent student profile (public sign-up).
 export async function POST(req: NextRequest) {
   try {
     let body;
@@ -160,10 +156,8 @@ export async function POST(req: NextRequest) {
       return applyCors(failRes, req);
     }
 
-    const safeUser = regResult.user!;
-    const sessionToken = Buffer.from(
-      JSON.stringify({ id: safeUser.id, role: safeUser.role, time: Date.now() })
-    ).toString('base64');
+    const safeUser = withoutPassword(regResult.user!);
+    const sessionToken = createSessionToken(safeUser.id, safeUser.role);
 
     const response = NextResponse.json({
       success: true,
@@ -172,25 +166,9 @@ export async function POST(req: NextRequest) {
       message: 'Student account created and permanently verified in database.',
     });
 
-    const isHttps =
-      req.headers.get('x-forwarded-proto') === 'https' ||
-      req.nextUrl.protocol === 'https:';
-
-    response.cookies.set('school_user_id', safeUser.id, {
-      path: '/',
-      httpOnly: false,
-      maxAge: 60 * 60 * 24 * 30, // 30 days
-      sameSite: isHttps ? 'none' : 'lax',
-      secure: isHttps,
-    });
-
-    response.cookies.set('school_session_token', sessionToken, {
-      path: '/',
-      httpOnly: false,
-      maxAge: 60 * 60 * 24 * 30,
-      sameSite: isHttps ? 'none' : 'lax',
-      secure: isHttps,
-    });
+    const options = sessionCookieOptions(req, SESSION_MAX_AGE_SECONDS);
+    response.cookies.set('school_user_id', safeUser.id, options);
+    response.cookies.set(SESSION_COOKIE, sessionToken, options);
 
     return applyCors(response, req);
   } catch (error) {
@@ -203,9 +181,19 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// PUT: Safe profile update
+// PUT: Safe profile update. Callers may update their own profile; staff may
+// update any profile.
 export async function PUT(req: NextRequest) {
   try {
+    const actor = getActor(req);
+    if (!actor) {
+      const unauthRes = NextResponse.json(
+        { success: false, message: 'Please sign in to update profile records.' },
+        { status: 401 }
+      );
+      return applyCors(unauthRes, req);
+    }
+
     const body = await req.json();
     const userId = body.id || body.studentId || body.studentAccountId || body.loginId || body.email;
 
@@ -217,6 +205,23 @@ export async function PUT(req: NextRequest) {
       return applyCors(errRes, req);
     }
 
+    const target = db.findUser(userId);
+    if (!target) {
+      const failRes = NextResponse.json(
+        { success: false, message: 'Student account not found in database.' },
+        { status: 404 }
+      );
+      return applyCors(failRes, req);
+    }
+
+    if (target.id !== actor.id && !isStaffRole(actor.role)) {
+      const forbiddenRes = NextResponse.json(
+        { success: false, message: 'You can only update your own profile.' },
+        { status: 403 }
+      );
+      return applyCors(forbiddenRes, req);
+    }
+
     const result = db.updateUserProfile(userId, body);
     if (!result.success) {
       const failRes = NextResponse.json({ success: false, message: result.message }, { status: 404 });
@@ -225,7 +230,7 @@ export async function PUT(req: NextRequest) {
 
     const response = NextResponse.json({
       success: true,
-      user: result.user,
+      user: withoutPassword(result.user!),
       message: 'Profile updated and verified in database.',
     });
     return applyCors(response, req);
@@ -239,7 +244,7 @@ export async function PUT(req: NextRequest) {
   }
 }
 
-// DELETE: Permanent deletion of a student account (ADMIN ONLY)
+// DELETE: Permanent deletion of a student account (school management panel only).
 export async function DELETE(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
@@ -253,10 +258,9 @@ export async function DELETE(req: NextRequest) {
       return applyCors(errRes, req);
     }
 
-    const adminPassword = req.headers.get('x-admin-password');
-    const userRole = (req.headers.get('x-user-role') || '').toLowerCase() as UserRole;
-
-    if (userRole !== 'admin' && userRole !== 'principal' && adminPassword !== 'admin12345678') {
+    // Authority comes from a signed-in Principal/Admin session or from the school
+    // management password verified server-side - never from a request header.
+    if (!hasAdminPanelAccess(req)) {
       const unauthRes = NextResponse.json(
         { success: false, message: 'Unauthorized. Admin permission required to delete student accounts.' },
         { status: 403 }

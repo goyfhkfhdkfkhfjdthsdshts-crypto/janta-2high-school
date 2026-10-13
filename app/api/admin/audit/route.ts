@@ -1,8 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { getActor, hasAdminPanelAccess } from '@/lib/session';
 
-export async function GET() {
+/**
+ * Audit trail and full-database backup are private school records: they are
+ * readable only from the management panel (Principal/Admin session, or staff who
+ * verified the school's admin password).
+ */
+function denyUnprivileged(req: NextRequest) {
+  return NextResponse.json(
+    { success: false, error: 'Administrator access required for audit records.' },
+    { status: 403 }
+  );
+}
+
+export async function GET(req: NextRequest) {
   try {
+    if (!hasAdminPanelAccess(req)) {
+      return denyUnprivileged(req);
+    }
+
     const logs = db.getAuditLogs();
     return NextResponse.json({
       success: true,
@@ -18,9 +35,13 @@ export async function GET() {
   }
 }
 
-export async function POST(request: NextRequest) {
+export async function POST(req: NextRequest) {
   try {
-    const body = await request.json();
+    if (!hasAdminPanelAccess(req)) {
+      return denyUnprivileged(req);
+    }
+
+    const body = await req.json();
     const { action } = body;
 
     if (action === 'backup') {
@@ -34,8 +55,11 @@ export async function POST(request: NextRequest) {
     }
 
     if (action === 'log') {
-      const { performedBy, targetType, details, auditAction } = body;
-      const log = db.logAudit(auditAction || 'ADMIN_ACTION', performedBy || 'Admin', targetType || 'System', details || '');
+      const { targetType, details, auditAction } = body;
+      // Attribute the entry to the verified caller, not to client-supplied text.
+      const actor = getActor(req);
+      const performedBy = actor ? actor.name : 'Admin';
+      const log = db.logAudit(auditAction || 'ADMIN_ACTION', performedBy, targetType || 'System', details || '');
       return NextResponse.json({ success: true, log });
     }
 

@@ -1,5 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { getActor, hasAdminPanelAccess } from '@/lib/session';
+
+/**
+ * Official school records (notices, timetable, exams, marks, books, MCQ bank,
+ * faculty) may only be changed from the school management panel: a signed-in
+ * Principal/Admin, or a staff member who verified the school's admin password.
+ */
+function managementGuard(req: NextRequest): NextResponse | null {
+  if (hasAdminPanelAccess(req)) return null;
+  return NextResponse.json(
+    {
+      success: false,
+      message: 'Unauthorized. School administrator access is required to manage official records.',
+    },
+    { status: 403 }
+  );
+}
+
+/** Audit attribution taken from the verified caller, never from a request header. */
+function auditName(req: NextRequest): string {
+  const actor = getActor(req);
+  return actor ? actor.name : 'School Admin Panel';
+}
 
 export async function GET(
   req: NextRequest,
@@ -25,6 +48,13 @@ export async function GET(
       case 'exams':
         return NextResponse.json({ success: true, data: db.getExamSchedules(classNum) });
       case 'results':
+        // Marks are private school records: only signed-in members can read them.
+        if (!getActor(req)) {
+          return NextResponse.json(
+            { success: false, message: 'Please sign in to view examination results.' },
+            { status: 401 }
+          );
+        }
         return NextResponse.json({ success: true, data: db.getResults(classNum, rollNo) });
       case 'faculty':
         return NextResponse.json({ success: true, data: db.getFaculty() });
@@ -44,10 +74,13 @@ export async function POST(
   { params }: { params: Promise<{ entity: string }> }
 ) {
   try {
+    const denied = managementGuard(req);
+    if (denied) return denied;
+
     const { entity } = await params;
     const body = await req.json();
 
-    const userAgentHeader = req.headers.get('x-admin-user') || 'Admin / Faculty';
+    const userAgentHeader = auditName(req);
 
     switch (entity) {
       case 'contact': {
@@ -104,10 +137,13 @@ export async function PUT(
   { params }: { params: Promise<{ entity: string }> }
 ) {
   try {
+    const denied = managementGuard(req);
+    if (denied) return denied;
+
     const { entity } = await params;
     const body = await req.json();
     const { id, ...updates } = body;
-    const userAgentHeader = req.headers.get('x-admin-user') || 'Admin / Faculty';
+    const userAgentHeader = auditName(req);
 
     if (!id) {
       return NextResponse.json({ success: false, message: 'ID is required' }, { status: 400 });
@@ -131,10 +167,13 @@ export async function DELETE(
   { params }: { params: Promise<{ entity: string }> }
 ) {
   try {
+    const denied = managementGuard(req);
+    if (denied) return denied;
+
     const { entity } = await params;
     const { searchParams } = new URL(req.url);
     const id = searchParams.get('id');
-    const userAgentHeader = req.headers.get('x-admin-user') || 'Admin / Faculty';
+    const userAgentHeader = auditName(req);
 
     if (!id) {
       return NextResponse.json({ success: false, message: 'ID required' }, { status: 400 });

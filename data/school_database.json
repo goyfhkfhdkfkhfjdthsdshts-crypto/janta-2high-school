@@ -391,6 +391,20 @@
   ],
   "mcqQuestions": [
     {
+      "id": "mcq_1791902607376_agi7",
+      "class": "10",
+      "subject": "Science",
+      "chapter": "JAC Board High Weightage Practice Topics",
+      "question": "[JAC Board Class 10 Science] इस विषय के मुख्य सिद्धांतों के संदर्भ में सही कथन चुनें:",
+      "optionA": "सिद्धान्त एवं सूत्र NCERT/JCERT पाठ्यक्रम के अनुरूप हैं",
+      "optionB": "प्रश्नों में कोई मानक नियम लागू नहीं होता",
+      "optionC": "इकाई (Unit) लिखना अनिवार्य नहीं है",
+      "optionD": "उपरोक्त में से कोई नहीं",
+      "correctAnswer": "A",
+      "explanation": "JAC बोर्ड परीक्षाओं में NCERT/JCERT नियमों एवं इकाइयों का स्पष्ट उल्लेख पूरे अंक दिलाता है।",
+      "isAiGenerated": true
+    },
+    {
       "id": "mcq-10-sci-1",
       "class": "10",
       "subject": "Science",
@@ -3163,6 +3177,14 @@
   ],
   "reportedSafetyItems": [],
   "auditLogs": [
+    {
+      "id": "audit-1791902607378-vtjm",
+      "action": "ADD_QUESTION",
+      "performedBy": "Admin / Faculty",
+      "targetType": "MCQ Question",
+      "details": "Added MCQ question for Class 10 (Science)",
+      "timestamp": "2026-10-13T14:43:27.378Z"
+    },
     {
       "id": "audit-1790687420530-iswy",
       "action": "UPLOAD_STUDY_MATERIAL",

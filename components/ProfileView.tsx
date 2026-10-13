@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { SchoolLogo } from './SchoolLogo';
 import { UserProfile, SchoolClass, StudentNote, BookmarkItem } from '@/lib/types';
+import { apiFetch } from '@/lib/apiConfig';
 import {
   User,
   Mail,
@@ -323,17 +324,12 @@ export function ProfileView({
     setDeleteStatus(null);
 
     try {
-      const res = await fetch(
+      // Authorization comes from the signed-in session (or the verified admin
+      // panel password held server-side) - never from a credential in the page.
+      const { res, data } = await apiFetch(
         `/api/auth/profile?studentId=${encodeURIComponent(adminDeleteStudentId.trim())}`,
-        {
-          method: 'DELETE',
-          headers: {
-            'x-admin-password': 'admin12345678',
-            'x-user-role': 'admin',
-          },
-        }
+        { method: 'DELETE' }
       );
-      const data = await res.json();
       if (res.ok && data.success) {
         setDeleteStatus('Student account permanently deleted from database.');
         setShowDeleteConfirm(false);

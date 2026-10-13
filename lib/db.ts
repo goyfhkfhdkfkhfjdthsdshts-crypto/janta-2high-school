@@ -729,11 +729,18 @@ const initialEnrolledStudents: UserProfile[] = [
   { id: 'std-12-25', accountId: 'std-12-25', studentAccountId: 'std-12-25', studentId: 'std-12-25', loginId: '25', name: 'Sangeeta Tirkey', fullName: 'Sangeeta Tirkey', email: 'sangeeta.tirkey@student.janta.edu', role: 'student', selectedClass: '12', class: '12', section: 'B', rollNo: '25', rollNumber: '25', stream: 'Arts', createdAt: '2026-04-01T00:00:00.000Z', updatedAt: '2026-04-01T00:00:00.000Z' },
 ];
 
+// No default staff password is committed. A brand-new database gets staff
+// logins only if the deployment sets STAFF_INITIAL_PASSWORD; otherwise those
+// accounts exist but have no password until the school office assigns one.
+const staffSeedPasswordHash = process.env.STAFF_INITIAL_PASSWORD
+  ? hashPassword(process.env.STAFF_INITIAL_PASSWORD)
+  : undefined;
+
 export const initialStaffUsers: UserProfile[] = [
-  { id: 'tch-101', loginId: 'TCH-101', name: 'Dr. Rameshwar Mahto', email: 'rameshwar.mahto@janta.edu', role: 'teacher', selectedClass: '10', createdAt: '2026-01-01T00:00:00.000Z', updatedAt: '2026-01-01T00:00:00.000Z' },
-  { id: 'tch-102', loginId: 'TCH-102', name: 'Sunita Devi', email: 'sunita.devi@janta.edu', role: 'teacher', selectedClass: '9', createdAt: '2026-01-01T00:00:00.000Z', updatedAt: '2026-01-01T00:00:00.000Z' },
-  { id: 'adm-001', loginId: 'ADM-001', name: 'Senior School Administrator', email: 'admin@janta.edu', role: 'admin', selectedClass: '10', createdAt: '2026-01-01T00:00:00.000Z', updatedAt: '2026-01-01T00:00:00.000Z' },
-  { id: 'prn-001', loginId: 'PRN-001', name: 'Principal Dr. Arvind Kumar', email: 'principal@janta.edu', role: 'principal', selectedClass: '10', createdAt: '2026-01-01T00:00:00.000Z', updatedAt: '2026-01-01T00:00:00.000Z' },
+  { id: 'tch-101', loginId: 'TCH-101', name: 'Dr. Rameshwar Mahto', email: 'rameshwar.mahto@janta.edu', role: 'teacher', selectedClass: '10', passwordHash: staffSeedPasswordHash, createdAt: '2026-01-01T00:00:00.000Z', updatedAt: '2026-01-01T00:00:00.000Z' },
+  { id: 'tch-102', loginId: 'TCH-102', name: 'Sunita Devi', email: 'sunita.devi@janta.edu', role: 'teacher', selectedClass: '9', passwordHash: staffSeedPasswordHash, createdAt: '2026-01-01T00:00:00.000Z', updatedAt: '2026-01-01T00:00:00.000Z' },
+  { id: 'adm-001', loginId: 'ADM-001', name: 'Senior School Administrator', email: 'admin@janta.edu', role: 'admin', selectedClass: '10', passwordHash: staffSeedPasswordHash, createdAt: '2026-01-01T00:00:00.000Z', updatedAt: '2026-01-01T00:00:00.000Z' },
+  { id: 'prn-001', loginId: 'PRN-001', name: 'Principal Dr. Arvind Kumar', email: 'principal@janta.edu', role: 'principal', selectedClass: '10', passwordHash: staffSeedPasswordHash, createdAt: '2026-01-01T00:00:00.000Z', updatedAt: '2026-01-01T00:00:00.000Z' },
   { id: 'prt-1001', loginId: 'PRT-1001', name: 'Rajesh Kumar Singh (Guardian of Amit)', email: 'rajesh.singh@parents.janta.edu', role: 'parent', selectedClass: '10', childId: 'std-10-1', childName: 'Amit Kumar Singh', childRollNo: '1001', childClass: '10', createdAt: '2026-01-01T00:00:00.000Z', updatedAt: '2026-01-01T00:00:00.000Z' },
 ];
 
@@ -1386,29 +1393,18 @@ export const db = {
       return { success: false, message: `Invalid ${roleTitle} ID or Password.` };
     }
 
-    // Verify Password
-    let isPasswordValid = false;
-    if (user.passwordHash) {
-      isPasswordValid = verifyPassword(password, user.passwordHash);
-    } else {
-      if (user.role === 'teacher') {
-        isPasswordValid = password === 'teacher123' || password === '123456';
-      } else if (user.role === 'principal') {
-        isPasswordValid = password === 'principal123' || password === '123456';
-      } else if (user.role === 'admin') {
-        isPasswordValid =
-          password === 'admin12345678' || password === 'admin123' || password === '123456';
-      } else if (user.role === 'parent') {
-        isPasswordValid = password === 'parent123';
-      }
-
-      if (isPasswordValid) {
-        user.passwordHash = hashPassword(password);
-        saveDatabase(data);
-      }
+    // Verify Password against the account's own stored hash. There are
+    // deliberately no built-in default passwords: an account with no password
+    // set can only be signed into after the school office assigns one.
+    if (!user.passwordHash) {
+      return {
+        success: false,
+        message:
+          'This account has no password set yet. Please contact the school office to have one assigned.',
+      };
     }
 
-    if (!isPasswordValid) {
+    if (!verifyPassword(password, user.passwordHash)) {
       const roleTitle = role.charAt(0).toUpperCase() + role.slice(1);
       return { success: false, message: `Invalid ${roleTitle} ID or Password.` };
     }
@@ -1447,23 +1443,20 @@ export const db = {
       return { success: false, message: 'Account not found.' };
     }
 
-    // Verify current password
+    // Verify the current password against the stored hash. Only a student
+    // account that has no password yet (students sign in with roll number +
+    // class) may set its first password, using its own roll number - there is no
+    // shared default password.
     let isCurrentValid = false;
     if (user.passwordHash) {
       isCurrentValid = verifyPassword(currentPassword, user.passwordHash);
+    } else if (user.role === 'student' && user.rollNo) {
+      isCurrentValid = currentPassword.trim() === user.rollNo.trim();
     } else {
-      if (user.role === 'student') {
-        isCurrentValid =
-          currentPassword === (user.rollNo || 'student123') || currentPassword === 'student123';
-      } else if (user.role === 'teacher') {
-        isCurrentValid = currentPassword === 'teacher123';
-      } else if (user.role === 'admin') {
-        isCurrentValid = currentPassword === 'admin12345678';
-      } else if (user.role === 'principal') {
-        isCurrentValid = currentPassword === 'principal123';
-      } else if (user.role === 'parent') {
-        isCurrentValid = currentPassword === 'parent123';
-      }
+      return {
+        success: false,
+        message: 'No password is set for this account yet. Please contact the school office.',
+      };
     }
 
     if (!isCurrentValid) {
@@ -1868,6 +1861,8 @@ export const db = {
     delete safeUpdates.id;
     delete safeUpdates.studentId;
     delete safeUpdates.createdAt;
+    // Password material is only ever written by the password-change flow.
+    delete safeUpdates.passwordHash;
 
     const updatedUser: UserProfile = {
       ...current,
