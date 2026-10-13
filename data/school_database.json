@@ -536,8 +536,8 @@
   ],
   "books": [
     {
-      "title": "hindi",
-      "subject": "Mathematics",
+      "title": "Hindi (हिंदी कक्षा 10)",
+      "subject": "Hindi",
       "class": "10",
       "medium": "Hindi",
       "fileUrl": "https://ncert.nic.in/textbook.php",
@@ -1091,17 +1091,6 @@
       "room": "Exam Hall A",
       "instructions": "Entry strictly with JAC Admit Card and School Uniform. No electronic devices permitted.",
       "id": "ex_1790687340352_zjqv"
-    },
-    {
-      "class": "10",
-      "examName": "JAC Board Annual Examination 2026",
-      "subject": "Mathematics",
-      "date": "2026-03-15",
-      "time": "09:45 AM - 01:00 PM",
-      "shift": "1st Sitting",
-      "room": "Exam Hall A",
-      "instructions": "Entry strictly with JAC Admit Card and School Uniform. No electronic devices permitted.",
-      "id": "ex_1790687353337_p2o6"
     }
   ],
   "results": [

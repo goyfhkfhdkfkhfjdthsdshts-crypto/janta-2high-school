@@ -52,7 +52,7 @@ export function Header({
           <SchoolLogo size={36} className="sm:hidden shrink-0" showText={false} />
           <SchoolLogo size={42} className="hidden sm:block shrink-0" showText={false} />
           <div className="flex flex-col min-w-0">
-            <span className="font-extrabold text-blue-950 text-xs sm:text-sm tracking-tight leading-tight uppercase group-hover:text-blue-700 transition-colors truncate">
+            <span className="font-extrabold text-blue-950 text-[10px] sm:text-sm tracking-tight leading-[1.15] uppercase group-hover:text-blue-700 transition-colors">
               Janta +2 High School
             </span>
             <div className="flex items-center gap-1 text-[10px] sm:text-[11px] text-slate-500 font-semibold leading-tight">
@@ -144,7 +144,7 @@ export function Header({
                     user.name.charAt(0).toUpperCase()
                   )}
                 </div>
-                <span className="text-[11px] sm:text-xs font-semibold truncate leading-none">
+                <span className="hidden sm:inline text-[11px] sm:text-xs font-semibold truncate leading-none">
                   {user.name.split(' ')[0]}
                 </span>
               </button>

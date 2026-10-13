@@ -1,5 +1,11 @@
 @import "tailwindcss";
 
+/* Small-phone breakpoint. The header and help views use `xs:` utilities, but
+   Tailwind 4 ships no `xs` breakpoint, so those elements were never rendered. */
+@theme {
+  --breakpoint-xs: 30rem;
+}
+
 :root {
   --sat: env(safe-area-inset-top, 0px);
   --sab: env(safe-area-inset-bottom, 0px);
