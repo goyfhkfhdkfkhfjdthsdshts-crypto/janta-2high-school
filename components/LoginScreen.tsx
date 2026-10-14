@@ -10,78 +10,63 @@ import {
   ShieldCheck,
   Building2,
   UserCheck,
+  Users,
   User,
   Lock,
   ArrowRight,
-  Eye,
-  EyeOff,
   HelpCircle,
   PhoneCall,
   CheckCircle2,
-  Sparkles,
   RotateCw,
 } from 'lucide-react';
 
-export type AppLoginRole = 'student' | 'teacher' | 'principal' | 'admin';
+export type AppLoginRole = 'student' | 'teacher' | 'principal' | 'admin' | 'parent';
 
 interface LoginScreenProps {
   onLoginSuccess: (user: UserProfile) => void;
 }
 
+/**
+ * Role based login screen.
+ *
+ * SECURITY: this page never renders, pre-fills or hints at any real credential.
+ * Password inputs are always masked; accounts and passwords are issued by the
+ * school office and verified server-side against the account's assigned role.
+ */
 export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
   const [selectedRole, setSelectedRole] = useState<AppLoginRole>('student');
   const [selectedClass, setSelectedClass] = useState<SchoolClass>('10');
   const [rollNumber, setRollNumber] = useState('');
   const [loginId, setLoginId] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
 
-  const sampleRollNumbers: Record<SchoolClass, Array<{ roll: string; name: string }>> = {
-    '10': [
-      { roll: '25', name: 'Kavita Soren' },
-      { roll: '1001', name: 'Amit Kumar Singh' },
-      { roll: '1002', name: 'Pooja Kumari Oraon' },
-      { roll: '1003', name: 'Rahul Soren' },
-    ],
-    '9': [
-      { roll: '25', name: 'Pooja Singh' },
-      { roll: '901', name: 'Vicky Kumar' },
-      { roll: '902', name: 'Sunita Munda' },
-      { roll: '903', name: 'Ajay Oraon' },
-    ],
-    '11': [
-      { roll: '25', name: 'Anup Kujur' },
-      { roll: '1101', name: 'Rohan Karmali' },
-      { roll: '1102', name: 'Meena Kumari' },
-    ],
-    '12': [
-      { roll: '25', name: 'Sangeeta Tirkey' },
-      { roll: '1201', name: 'Manish Verma' },
-      { roll: '1202', name: 'Sunita Kumari' },
-    ],
+  const roleTabs: Array<{ role: AppLoginRole; label: string; icon: typeof User }> = [
+    { role: 'student', label: 'Student', icon: GraduationCap },
+    { role: 'teacher', label: 'Teacher', icon: UserCheck },
+    { role: 'principal', label: 'Principal', icon: Building2 },
+    { role: 'admin', label: 'Admin', icon: ShieldCheck },
+    { role: 'parent', label: 'Parent', icon: Users },
+  ];
+
+  const roleTitle: Record<AppLoginRole, string> = {
+    student: 'Student',
+    teacher: 'Teacher',
+    principal: 'Principal',
+    admin: 'Admin',
+    parent: 'Parent',
   };
 
   const handleRoleChange = (role: AppLoginRole) => {
     setSelectedRole(role);
     setErrorMessage(null);
     setSuccessMessage(null);
+    // Never pre-fill credentials: every field starts empty for the chosen role.
+    setLoginId('');
     setPassword('');
-    if (role === 'teacher') {
-      setLoginId('TCH-101');
-      setPassword('teacher123');
-    } else if (role === 'principal') {
-      setLoginId('PRN-001');
-      setPassword('principal123');
-    } else if (role === 'admin') {
-      setLoginId('ADM-001');
-      setPassword('admin12345678');
-    } else {
-      setLoginId('');
-    }
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -127,7 +112,7 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
       return;
     }
 
-    // Staff Login (Teacher, Principal, Admin)
+    // Staff / Parent Login (Teacher, Principal, Admin, Parent)
     const cleanId = loginId.trim();
     const cleanPassword = password.trim();
 
@@ -155,13 +140,7 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
           onLoginSuccess(data.user);
         }, 300);
       } else {
-        const roleLabel =
-          selectedRole === 'teacher'
-            ? 'Teacher'
-            : selectedRole === 'principal'
-            ? 'Principal'
-            : 'Admin';
-        setErrorMessage(data?.message || `Invalid ${roleLabel} ID or Password.`);
+        setErrorMessage(data?.message || `Invalid ${roleTitle[selectedRole]} ID or Password.`);
       }
     } catch (err: any) {
       setErrorMessage(
@@ -193,18 +172,13 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
 
       {/* Main Login Card */}
       <div className="w-full max-w-md mx-auto bg-white rounded-2xl sm:rounded-3xl shadow-xl border border-slate-200/80 p-4 sm:p-7 my-auto space-y-3.5 sm:space-y-4">
-        {/* Role Selector Tabs (ONLY 4 ROLES: Student, Teacher, Principal, Admin) */}
+        {/* Role Selector Tabs (Student, Teacher, Principal, Admin, Parent) */}
         <div>
           <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider text-center mb-1.5">
             Select Your Role
           </label>
-          <div className="grid grid-cols-4 p-1 bg-slate-100 rounded-2xl gap-1 text-center">
-            {[
-              { role: 'student' as const, label: 'Student', icon: GraduationCap },
-              { role: 'teacher' as const, label: 'Teacher', icon: UserCheck },
-              { role: 'principal' as const, label: 'Principal', icon: Building2 },
-              { role: 'admin' as const, label: 'Admin', icon: ShieldCheck },
-            ].map((tab) => {
+          <div className="grid grid-cols-3 sm:grid-cols-5 p-1 bg-slate-100 rounded-2xl gap-1 text-center">
+            {roleTabs.map((tab) => {
               const Icon = tab.icon;
               const isSelected = selectedRole === tab.role;
               return (
@@ -233,12 +207,14 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
             {selectedRole === 'teacher' && 'Teacher Portal Login'}
             {selectedRole === 'principal' && 'Principal Office Login'}
             {selectedRole === 'admin' && 'School Administrator Login'}
+            {selectedRole === 'parent' && 'Parent / Guardian Login'}
           </h2>
           <p className="text-xs text-slate-500">
             {selectedRole === 'student' && 'Select your class and enter your roll number'}
             {selectedRole === 'teacher' && 'Enter your authorized Faculty ID & Password'}
             {selectedRole === 'principal' && 'Executive school governance access'}
             {selectedRole === 'admin' && 'Full school database & administrative control'}
+            {selectedRole === 'parent' && 'View your child’s academic progress and updates'}
           </p>
         </div>
 
@@ -310,7 +286,7 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
                 </div>
                 <input
                   type="text"
-                  placeholder="e.g. 25 or 1001"
+                  placeholder="Enter your roll number"
                   value={rollNumber}
                   onChange={(e) => {
                     setRollNumber(e.target.value);
@@ -321,29 +297,9 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
                   required
                 />
               </div>
-            </div>
-
-            {/* Quick Demo Roll Number Suggestions */}
-            <div className="p-2.5 bg-blue-50/70 border border-blue-200/70 rounded-2xl space-y-1.5">
-              <div className="flex items-center gap-1.5 text-[11px] font-bold text-blue-900">
-                <Sparkles className="w-3.5 h-3.5 text-blue-700" />
-                <span>Enrolled Students in Class {selectedClass}:</span>
-              </div>
-              <div className="flex flex-wrap gap-1.5">
-                {sampleRollNumbers[selectedClass].map((s) => (
-                  <button
-                    key={s.roll}
-                    type="button"
-                    onClick={() => {
-                      setRollNumber(s.roll);
-                      setErrorMessage(null);
-                    }}
-                    className="px-2.5 py-1 text-[11px] bg-white hover:bg-blue-100 text-blue-900 border border-blue-200 rounded-lg font-semibold transition-all cursor-pointer shadow-2xs"
-                  >
-                    Roll {s.roll} <span className="text-slate-500 font-normal">({s.name.split(' ')[0]})</span>
-                  </button>
-                ))}
-              </div>
+              <p className="mt-1 text-[11px] text-slate-500">
+                Your roll number is printed on your school ID card.
+              </p>
             </div>
 
             {/* Submit Button */}
@@ -364,14 +320,17 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
           </form>
         ) : (
           /* ==================================================== */
-          /* STAFF LOGIN FORM (Teacher, Principal, Admin)         */
+          /* STAFF & PARENT LOGIN FORM (Teacher, Principal,       */
+          /* Admin, Parent)                                       */
           /* ==================================================== */
           <form onSubmit={handleLogin} className="space-y-3.5">
             <div>
               <label className="block text-xs font-bold text-slate-700 mb-1">
                 {selectedRole === 'teacher' && 'Teacher ID'}
                 {selectedRole === 'principal' && 'Principal ID'}
-                {selectedRole === 'admin' && 'Admin ID'} <span className="text-red-500">*</span>
+                {selectedRole === 'admin' && 'Admin ID'}
+                {selectedRole === 'parent' && 'Parent / Guardian ID'}{' '}
+                <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
@@ -379,19 +338,14 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
                 </div>
                 <input
                   type="text"
-                  placeholder={
-                    selectedRole === 'teacher'
-                      ? 'e.g. TCH-101'
-                      : selectedRole === 'principal'
-                      ? 'e.g. PRN-001'
-                      : 'e.g. ADM-001'
-                  }
+                  placeholder={`Enter your ${roleTitle[selectedRole]} ID`}
                   value={loginId}
                   onChange={(e) => {
                     setLoginId(e.target.value);
                     if (errorMessage) setErrorMessage(null);
                   }}
                   className="w-full pl-10 pr-3 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-300 rounded-xl font-medium focus:ring-2 focus:ring-blue-600 focus:bg-white focus:outline-hidden"
+                  autoComplete="username"
                   required
                 />
               </div>
@@ -406,34 +360,18 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
                   <Lock className="w-4 h-4" />
                 </div>
                 <input
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="Enter authorized password"
+                  type="password"
+                  placeholder="Enter your password"
                   value={password}
                   onChange={(e) => {
                     setPassword(e.target.value);
                     if (errorMessage) setErrorMessage(null);
                   }}
-                  className="w-full pl-10 pr-10 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-300 rounded-xl font-medium focus:ring-2 focus:ring-blue-600 focus:bg-white focus:outline-hidden"
+                  className="w-full pl-10 pr-3 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-300 rounded-xl font-medium focus:ring-2 focus:ring-blue-600 focus:bg-white focus:outline-hidden"
+                  autoComplete="current-password"
                   required
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 cursor-pointer"
-                >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
               </div>
-            </div>
-
-            {/* Quick Demo Credential Badge */}
-            <div className="p-2.5 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-between text-xs text-slate-600">
-              <span className="font-semibold text-slate-700">Official Demo Access:</span>
-              <span className="font-mono text-[11px] text-blue-800 bg-white px-2 py-0.5 rounded-lg border border-slate-200">
-                {selectedRole === 'teacher' && 'TCH-101 • teacher123'}
-                {selectedRole === 'principal' && 'PRN-001 • principal123'}
-                {selectedRole === 'admin' && 'ADM-001 • admin12345678'}
-              </span>
             </div>
 
             {/* Submit Button */}
@@ -491,16 +429,17 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
 
             <div className="space-y-3 text-xs text-slate-600">
               <p>
-                <strong>Students:</strong> Select your class (9, 10, 11, or 12) and type your registered Roll Number (e.g. 25, 1001). No password required.
+                <strong>Students:</strong> Select your class (9, 10, 11 or 12) and enter your
+                registered Roll Number. No password is required.
               </p>
               <p>
-                <strong>Teachers:</strong> Use your Teacher ID (e.g. TCH-101) and assigned password (<code>teacher123</code>).
+                <strong>Teachers, Principal, Admin &amp; Parents:</strong> Enter the Login ID and
+                password issued to you by the school office.
               </p>
-              <p>
-                <strong>Principal:</strong> Use your Principal ID (PRN-001) and password (<code>principal123</code>).
-              </p>
-              <p>
-                <strong>Administrator:</strong> Use Admin ID (ADM-001) and password (<code>admin12345678</code>).
+              <p className="p-3 bg-amber-50 border border-amber-200 rounded-2xl text-amber-900">
+                Passwords are never shown on this page. If you have forgotten your password or do
+                not have your Login ID, please contact the school office help desk to get it
+                reissued.
               </p>
 
               <div className="p-3 bg-blue-50 border border-blue-200 rounded-2xl space-y-1">

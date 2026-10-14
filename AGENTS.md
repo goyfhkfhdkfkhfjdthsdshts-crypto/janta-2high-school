@@ -50,6 +50,17 @@ and HMR by request origin, so without it the proxied preview loads HTML but not 
 Unset or any other value leaves the original config untouched. Both `BASE44_PREVIEW_MODE`
 and `BASE44_PUBLIC_HOST_SUFFIX` are passed through in compose.
 
+## Login page is credential-free (do not regress)
+
+`components/LoginScreen.tsx` renders no real credential: no demo password badge, no
+pre-filled ID/password on role switch, no credential hints in the help modal, and the
+password input is always `type="password"` with no reveal toggle. Roles are Student
+(class + roll, no password), Teacher, Principal, Admin and Parent (ID + password).
+The server rejects any login whose chosen role does not match the account's assigned
+role (`lib/db.ts` → `authenticateUser`). Deleting a student account
+(`DELETE /api/auth/profile`) now requires the session role to be admin or principal —
+no credential is embedded in the client bundle.
+
 ## Signing in when testing by hand
 
 Seeded accounts live in `lib/db.ts`. Students sign in with class + roll number and **no
