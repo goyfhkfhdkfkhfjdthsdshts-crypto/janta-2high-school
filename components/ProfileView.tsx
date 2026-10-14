@@ -316,9 +316,18 @@ export function ProfileView({
     }
   };
 
+  // Permanent student deletion is restricted to accounts whose assigned role is
+  // admin or principal. No password is embedded in the client bundle; the server
+  // re-checks the role from the signed-in session before deleting anything.
+  const canDeleteStudents = user?.role === 'admin' || user?.role === 'principal';
+
   // Admin Delete Student Account Handler
   const handleAdminDeleteAccount = async () => {
     if (!adminDeleteStudentId.trim()) return;
+    if (!canDeleteStudents) {
+      setDeleteStatus('Only admin or principal accounts may delete student accounts.');
+      return;
+    }
     setIsDeleting(true);
     setDeleteStatus(null);
 
@@ -328,8 +337,7 @@ export function ProfileView({
         {
           method: 'DELETE',
           headers: {
-            'x-admin-password': 'admin12345678',
-            'x-user-role': 'admin',
+            'x-user-role': user?.role || '',
           },
         }
       );
@@ -1031,7 +1039,7 @@ export function ProfileView({
         </div>
 
         {/* Authorized Admin Section: Delete Student Account (Requirement 9) */}
-        {isAdmin && (
+        {canDeleteStudents && (
           <div className="mt-4 pt-4 border-t border-slate-100 space-y-3">
             <div className="flex items-center gap-2 text-red-700">
               <Trash2 className="w-4 h-4" />

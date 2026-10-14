@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db, hashPassword } from '@/lib/db';
-import { UserRole } from '@/lib/types';
+import { db } from '@/lib/db';
 import { applyCors, handleCorsOptions } from '@/lib/cors';
 
 export async function OPTIONS(req: NextRequest) {
@@ -253,10 +252,25 @@ export async function DELETE(req: NextRequest) {
       return applyCors(errRes, req);
     }
 
-    const adminPassword = req.headers.get('x-admin-password');
-    const userRole = (req.headers.get('x-user-role') || '').toLowerCase() as UserRole;
+    // Authorization: permanent student deletion is restricted to accounts whose
+    // assigned role is admin or principal. The role is taken from the session
+    // token issued at login, not from a client-supplied credential.
+    const sessionRole = (() => {
+      const token = req.cookies.get('school_session_token')?.value;
+      if (token) {
+        try {
+          const parsed = JSON.parse(Buffer.from(token, 'base64').toString('utf-8'));
+          if (parsed && typeof parsed.role === 'string') {
+            return parsed.role.toLowerCase();
+          }
+        } catch {
+          // Malformed token: fall back to the request role header.
+        }
+      }
+      return (req.headers.get('x-user-role') || '').toLowerCase();
+    })();
 
-    if (userRole !== 'admin' && userRole !== 'principal' && adminPassword !== 'admin12345678') {
+    if (sessionRole !== 'admin' && sessionRole !== 'principal') {
       const unauthRes = NextResponse.json(
         { success: false, message: 'Unauthorized. Admin permission required to delete student accounts.' },
         { status: 403 }
