@@ -1386,27 +1386,11 @@ export const db = {
       return { success: false, message: `Invalid ${roleTitle} ID or Password.` };
     }
 
-    // Verify Password
-    let isPasswordValid = false;
-    if (user.passwordHash) {
-      isPasswordValid = verifyPassword(password, user.passwordHash);
-    } else {
-      if (user.role === 'teacher') {
-        isPasswordValid = password === 'teacher123' || password === '123456';
-      } else if (user.role === 'principal') {
-        isPasswordValid = password === 'principal123' || password === '123456';
-      } else if (user.role === 'admin') {
-        isPasswordValid =
-          password === 'admin12345678' || password === 'admin123' || password === '123456';
-      } else if (user.role === 'parent') {
-        isPasswordValid = password === 'parent123';
-      }
-
-      if (isPasswordValid) {
-        user.passwordHash = hashPassword(password);
-        saveDatabase(data);
-      }
-    }
+    // Verify Password: only the stored hash is accepted - the app keeps no default
+    // or fallback password anywhere in its code.
+    const isPasswordValid = Boolean(
+      user.passwordHash && verifyPassword(password, user.passwordHash)
+    );
 
     if (!isPasswordValid) {
       const roleTitle = role.charAt(0).toUpperCase() + role.slice(1);
@@ -1447,24 +1431,10 @@ export const db = {
       return { success: false, message: 'Account not found.' };
     }
 
-    // Verify current password
-    let isCurrentValid = false;
-    if (user.passwordHash) {
-      isCurrentValid = verifyPassword(currentPassword, user.passwordHash);
-    } else {
-      if (user.role === 'student') {
-        isCurrentValid =
-          currentPassword === (user.rollNo || 'student123') || currentPassword === 'student123';
-      } else if (user.role === 'teacher') {
-        isCurrentValid = currentPassword === 'teacher123';
-      } else if (user.role === 'admin') {
-        isCurrentValid = currentPassword === 'admin12345678';
-      } else if (user.role === 'principal') {
-        isCurrentValid = currentPassword === 'principal123';
-      } else if (user.role === 'parent') {
-        isCurrentValid = currentPassword === 'parent123';
-      }
-    }
+    // Verify current password against the stored hash only (no default passwords)
+    const isCurrentValid = Boolean(
+      user.passwordHash && verifyPassword(currentPassword, user.passwordHash)
+    );
 
     if (!isCurrentValid) {
       return { success: false, message: 'Current password is incorrect.' };

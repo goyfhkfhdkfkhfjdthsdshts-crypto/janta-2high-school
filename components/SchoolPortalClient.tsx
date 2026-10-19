@@ -59,6 +59,9 @@ export function SchoolPortalClient({
 }: SchoolPortalClientProps) {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  // Password verified in the admin modal, kept in memory only and cleared on logout.
+  // Privileged actions (e.g. deleting a student) re-prove it to the server.
+  const [adminPassword, setAdminPassword] = useState('');
   const [selectedClass, setSelectedClass] = useState<SchoolClass>('10');
   const [activeTab, setActiveTab] = useState<NavTab>('home');
   const [activeSection, setActiveSection] = useState<string>('home');
@@ -218,17 +221,20 @@ export function SchoolPortalClient({
     clearStoredSession();
     setUser(null);
     setIsAdmin(false);
+    setAdminPassword('');
     setActiveTab('home');
     setActiveSection('home');
   };
 
-  const handleAdminSuccess = () => {
+  const handleAdminSuccess = (verifiedPassword: string) => {
+    setAdminPassword(verifiedPassword);
     setIsAdmin(true);
     localStorage.setItem('janta_school_admin', 'true');
     setIsAdminModalOpen(false);
   };
 
   const handleAdminLogout = () => {
+    setAdminPassword('');
     setIsAdmin(false);
     localStorage.removeItem('janta_school_admin');
   };
@@ -525,6 +531,7 @@ export function SchoolPortalClient({
           <ProfileView
             user={user}
             isAdmin={isAdmin}
+            adminPassword={adminPassword}
             selectedClass={selectedClass}
             onSelectClass={handleSelectClass}
             onOpenAdminModal={() => setIsAdminModalOpen(true)}
