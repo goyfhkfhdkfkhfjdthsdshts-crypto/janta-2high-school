@@ -58,6 +58,9 @@ export interface MCQQuestion {
   optionD: string;
   correctAnswer: 'A' | 'B' | 'C' | 'D';
   explanation: string;
+  difficulty?: 'Easy' | 'Medium' | 'Hard';
+  topic?: string;
+  source?: string;
   isAiGenerated?: boolean;
 }
 

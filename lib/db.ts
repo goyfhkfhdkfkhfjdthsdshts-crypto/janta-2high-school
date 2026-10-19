@@ -30,6 +30,7 @@ import {
   StudentNote,
 } from './types';
 import { initialAboutSchoolData } from './aboutData';
+import { CLASS_10_VERIFIED_MCQS } from './jacClass10McqBank';
 
 // Secure Password Hashing Helper
 export function hashPassword(password: string): string {
@@ -466,6 +467,7 @@ const initialBooks: Book[] = [
 ];
 
 const initialMcqQuestions: MCQQuestion[] = [
+  ...CLASS_10_VERIFIED_MCQS,
   // Class 10 Science
   {
     id: 'mcq-10-sci-1',
@@ -1241,6 +1243,15 @@ export function getDatabase(): DatabaseSchema {
       if (!inMemoryDb!.testAttempts) inMemoryDb!.testAttempts = [];
       if (!inMemoryDb!.studentBookmarks) inMemoryDb!.studentBookmarks = [];
       if (!inMemoryDb!.studentNotes) inMemoryDb!.studentNotes = [];
+      if (!inMemoryDb!.mcqQuestions || inMemoryDb!.mcqQuestions.length === 0) {
+        inMemoryDb!.mcqQuestions = [...initialMcqQuestions];
+      } else {
+        for (const q of initialMcqQuestions) {
+          if (!inMemoryDb!.mcqQuestions.some((m) => m.id === q.id)) {
+            inMemoryDb!.mcqQuestions.push(q);
+          }
+        }
+      }
       return inMemoryDb!;
     } catch (err) {
       console.error('Error reading database file, resetting to initial seed:', err);

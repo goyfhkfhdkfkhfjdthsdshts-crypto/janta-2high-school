@@ -8,6 +8,7 @@
  */
 
 import { UserProfile } from './types';
+import { CLASS_10_VERIFIED_MCQS } from './jacClass10McqBank';
 
 /**
  * Returns the effective backend root URL for API requests.
