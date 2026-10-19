@@ -328,7 +328,6 @@ export function ProfileView({
         {
           method: 'DELETE',
           headers: {
-            'x-admin-password': 'admin12345678',
             'x-user-role': 'admin',
           },
         }

@@ -23,6 +23,7 @@ import {
   Camera,
 } from 'lucide-react';
 import { HomeworkItem, SchoolClass, UserProfile } from '@/lib/types';
+import { apiFetch } from '@/lib/apiConfig';
 
 interface HomeworkViewProps {
   user: UserProfile | null;
@@ -73,9 +74,8 @@ export function HomeworkView({
   const fetchHomework = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch(`/api/homework?class=${selectedClass}`);
-      const data = await res.json();
-      if (data.success && data.homework) {
+      const { res, data } = await apiFetch(`/api/homework?class=${selectedClass}`);
+      if (data?.success && data?.homework) {
         setHomeworkList(data.homework);
       }
     } catch (err) {
@@ -91,9 +91,8 @@ export function HomeworkView({
 
   const handleToggleCompletion = async (hwId: string) => {
     try {
-      const res = await fetch('/api/homework', {
+      const { res, data } = await apiFetch('/api/homework', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'toggle_complete',
           homeworkId: hwId,
@@ -101,8 +100,7 @@ export function HomeworkView({
           studentName,
         }),
       });
-      const data = await res.json();
-      if (data.success) {
+      if (data?.success) {
         setHomeworkList((prev) =>
           prev.map((h) => (h.id === hwId ? data.item : h))
         );
@@ -118,9 +116,8 @@ export function HomeworkView({
 
     setIsSubmittingUpload(true);
     try {
-      const res = await fetch('/api/homework', {
+      const { res, data } = await apiFetch('/api/homework', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'toggle_complete',
           homeworkId: studentUploadHw.id,
@@ -131,8 +128,7 @@ export function HomeworkView({
           submissionName: uploadAttachment?.name,
         }),
       });
-      const data = await res.json();
-      if (data.success) {
+      if (data?.success) {
         setHomeworkList((prev) =>
           prev.map((h) => (h.id === studentUploadHw.id ? data.item : h))
         );
@@ -153,9 +149,8 @@ export function HomeworkView({
 
     setIsSubmitting(true);
     try {
-      const res = await fetch('/api/homework', {
+      const { res, data } = await apiFetch('/api/homework', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'create',
           class: formClass,
@@ -169,8 +164,7 @@ export function HomeworkView({
         }),
       });
 
-      const data = await res.json();
-      if (data.success && data.homework) {
+      if (data?.success && data?.homework) {
         setHomeworkList((prev) => [data.homework, ...prev]);
         setIsCreateModalOpen(false);
         // Reset form
@@ -192,7 +186,7 @@ export function HomeworkView({
       return;
     }
     try {
-      const res = await fetch(`/api/homework?id=${id}&adminName=${encodeURIComponent(user?.name || 'Admin')}`, {
+      const { res } = await apiFetch(`/api/homework?id=${id}&adminName=${encodeURIComponent(user?.name || 'Admin')}`, {
         method: 'DELETE',
       });
       if (res.ok) {

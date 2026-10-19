@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { SchoolLogo } from './SchoolLogo';
 import { Notice, SchoolClass, UserProfile } from '@/lib/types';
+import { apiFetch } from '@/lib/apiConfig';
 import { Bell, Calendar, Plus, Trash2, Edit, AlertTriangle, Pin, Lock } from 'lucide-react';
 
 interface NoticeBoardViewProps {
@@ -33,9 +34,8 @@ export function NoticeBoardView({
 
   const fetchNotices = async () => {
     try {
-      const res = await fetch('/api/data/notices');
-      const data = await res.json();
-      if (res.ok && data.data) {
+      const { res, data } = await apiFetch('/api/data/notices');
+      if (res.ok && data?.data) {
         setNotices(data.data);
       }
     } catch (err) {
@@ -69,15 +69,13 @@ export function NoticeBoardView({
 
     try {
       if (editingNotice) {
-        await fetch('/api/data/notices', {
+        await apiFetch('/api/data/notices', {
           method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ id: editingNotice.id, ...payload }),
         });
       } else {
-        await fetch('/api/data/notices', {
+        await apiFetch('/api/data/notices', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
         });
       }
@@ -96,7 +94,7 @@ export function NoticeBoardView({
     if (!isAdmin) return;
     if (!window.confirm('Delete this notice from the board?')) return;
     try {
-      await fetch(`/api/data/notices?id=${id}`, { method: 'DELETE' });
+      await apiFetch(`/api/data/notices?id=${id}`, { method: 'DELETE' });
       fetchNotices();
     } catch (err) {
       console.error(err);

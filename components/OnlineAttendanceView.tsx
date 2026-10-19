@@ -7,6 +7,7 @@ import {
   AttendanceRecord,
   StudentAttendanceSummary,
 } from '@/lib/types';
+import { apiFetch } from '@/lib/apiConfig';
 import {
   Mic,
   MicOff,
@@ -132,11 +133,10 @@ export function OnlineAttendanceView({
     if (!user) return;
     setIsLoadingSummary(true);
     try {
-      const res = await fetch(
-        `/api/attendance?mode=student&studentId=${encodeURIComponent(user.id)}&studentEmail=${encodeURIComponent(user.email)}&class=${selectedClass}&date=${todayISODate}`
+      const { res, data } = await apiFetch(
+        `/api/attendance?mode=student&studentId=${encodeURIComponent(user.id)}&studentEmail=${encodeURIComponent(user.email || '')}&class=${selectedClass}&date=${todayISODate}`
       );
-      const data = await res.json();
-      if (data.success && data.summary) {
+      if (data?.success && data?.summary) {
         setStudentSummary(data.summary);
         if (data.summary.todayRecord) {
           setSubmissionSuccess(data.summary.todayRecord);
@@ -157,20 +157,18 @@ export function OnlineAttendanceView({
   const loadClassSummary = useCallback(async () => {
     setIsLoadingClassSummary(true);
     try {
-      const res = await fetch(
+      const { res, data } = await apiFetch(
         `/api/attendance?mode=class&class=${adminClass}&date=${adminDate}`
       );
-      const data = await res.json();
-      if (data.success && data.summary) {
+      if (data?.success && data?.summary) {
         setClassSummary(data.summary);
       }
 
       // Also fetch monthly report
-      const repRes = await fetch(
+      const { res: repRes, data: repData } = await apiFetch(
         `/api/attendance?mode=report&class=${adminClass}&month=${adminDate.slice(0, 7)}`
       );
-      const repData = await repRes.json();
-      if (repData.success && repData.report) {
+      if (repData?.success && repData?.report) {
         setMonthlyReport(repData.report);
       }
     } catch (err) {
@@ -348,23 +346,20 @@ export function OnlineAttendanceView({
         method: entryMethod,
       };
 
-      const res = await fetch('/api/attendance', {
+      const { res, data } = await apiFetch('/api/attendance', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        if (res.status === 409 || data.code === 'ALREADY_MARKED') {
+      if (!res.ok || !data?.success) {
+        if (res.status === 409 || data?.code === 'ALREADY_MARKED') {
           // Already marked for today: Set record and display the exact required message
-          if (data.record) {
+          if (data?.record) {
             setSubmissionSuccess(data.record);
           }
           setErrorMessage('आज आपकी Attendance पहले ही लग चुकी है।');
         } else {
-          setErrorMessage(data.message || 'Failed to mark attendance. Please retry.');
+          setErrorMessage(data?.message || 'Failed to mark attendance. Please retry.');
         }
         return;
       }
@@ -389,9 +384,8 @@ export function OnlineAttendanceView({
   const handleAdminMarkPresent = async (student: any) => {
     try {
       const now = new Date();
-      const res = await fetch('/api/attendance', {
+      const { res, data } = await apiFetch('/api/attendance', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           studentId: student.id,
           studentEmail: student.email,
@@ -408,11 +402,10 @@ export function OnlineAttendanceView({
           method: 'admin_override',
         }),
       });
-      const data = await res.json();
-      if (data.success) {
+      if (data?.success) {
         loadClassSummary();
       } else {
-        alert(data.message || 'Could not mark attendance');
+        alert(data?.message || 'Could not mark attendance');
       }
     } catch (e) {
       console.error(e);
@@ -424,9 +417,8 @@ export function OnlineAttendanceView({
     if (!editingRecord) return;
     setIsSavingCorrection(true);
     try {
-      const res = await fetch('/api/attendance', {
+      const { res, data } = await apiFetch('/api/attendance', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           id: editingRecord.id,
           status: correctionStatus,
@@ -434,12 +426,11 @@ export function OnlineAttendanceView({
           adminName: user?.name || 'Administrator',
         }),
       });
-      const data = await res.json();
-      if (data.success) {
+      if (data?.success) {
         setEditingRecord(null);
         loadClassSummary();
       } else {
-        alert(data.message || 'Update failed');
+        alert(data?.message || 'Update failed');
       }
     } catch (err) {
       console.error(err);

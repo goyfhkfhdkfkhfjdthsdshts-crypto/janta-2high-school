@@ -8,6 +8,7 @@ import {
   SchoolClass,
   UserRole,
 } from '@/lib/types';
+import { apiFetch } from '@/lib/apiConfig';
 import { SchoolLogo } from './SchoolLogo';
 import {
   MessageSquare,
@@ -80,11 +81,10 @@ export function ChatView({
   // Fetch all conversations for user
   const fetchConversations = useCallback(async () => {
     try {
-      const res = await fetch(
+      const { res, data } = await apiFetch(
         `/api/chat?type=conversations&userId=${encodeURIComponent(currentUserId)}&role=${currentUserRole}&class=${selectedClass}&userName=${encodeURIComponent(currentUserName)}`
       );
-      const data = await res.json();
-      if (data.success && data.conversations) {
+      if (data?.success && data?.conversations) {
         setConversations(data.conversations);
       }
     } catch (err) {
@@ -96,11 +96,10 @@ export function ChatView({
   const fetchMessages = useCallback(async (convId: string, silent = false) => {
     if (!silent) setIsLoading(true);
     try {
-      const res = await fetch(
+      const { res, data } = await apiFetch(
         `/api/chat?conversationId=${encodeURIComponent(convId)}&userId=${encodeURIComponent(currentUserId)}&role=${currentUserRole}`
       );
-      const data = await res.json();
-      if (data.success && data.messages) {
+      if (data?.success && data?.messages) {
         setMessages(data.messages);
       }
     } catch (err) {
@@ -276,13 +275,11 @@ export function ChatView({
     setReplyingTo(null);
 
     try {
-      const res = await fetch('/api/chat', {
+      const { res, data } = await apiFetch('/api/chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
-      const data = await res.json();
-      if (data.success && data.message) {
+      if (data?.success && data?.message) {
         setMessages((prev) =>
           prev.map((m) => (m.id === optimisticMsg.id ? data.message : m))
         );
@@ -316,9 +313,8 @@ export function ChatView({
   // Reaction
   const handleToggleReaction = async (messageId: string, emoji: string) => {
     try {
-      const res = await fetch('/api/chat', {
+      const { res, data } = await apiFetch('/api/chat', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'reaction',
           messageId,
@@ -327,8 +323,7 @@ export function ChatView({
           userName: currentUserName,
         }),
       });
-      const data = await res.json();
-      if (data.success && data.message) {
+      if (data?.success && data?.message) {
         setMessages((prev) =>
           prev.map((m) => (m.id === messageId ? data.message : m))
         );
@@ -342,7 +337,7 @@ export function ChatView({
   const handleDeleteMessage = async (messageId: string) => {
     if (!window.confirm(language === 'hi' ? 'क्या आप इस संदेश को हटाना चाहते हैं?' : 'Delete this message?')) return;
     try {
-      const res = await fetch(
+      const { res } = await apiFetch(
         `/api/chat?id=${encodeURIComponent(messageId)}&userId=${encodeURIComponent(currentUserId)}&role=${currentUserRole}`,
         { method: 'DELETE' }
       );
@@ -357,17 +352,15 @@ export function ChatView({
   // Toggle Mute
   const handleToggleMute = async () => {
     try {
-      const res = await fetch('/api/chat', {
+      const { res, data } = await apiFetch('/api/chat', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'mute',
           conversationId: activeConvId,
           userId: currentUserId,
         }),
       });
-      const data = await res.json();
-      if (data.success) {
+      if (data?.success) {
         setConversations((prev) =>
           prev.map((c) => (c.id === activeConvId ? { ...c, isMuted: data.isMuted } : c))
         );

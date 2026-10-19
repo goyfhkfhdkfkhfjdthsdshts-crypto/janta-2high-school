@@ -1374,6 +1374,21 @@
   ],
   "attendance": [
     {
+      "studentId": "std-10-1",
+      "studentEmail": "amit.singh@student.janta.edu",
+      "studentName": "Amit Kumar Singh",
+      "spokenOrEnteredName": "Amit Kumar Singh",
+      "class": "10",
+      "rollNo": "1001",
+      "date": "2026-10-19",
+      "time": "08:59 AM",
+      "status": "Present",
+      "method": "manual",
+      "verifiedBy": "school_auth",
+      "id": "att_1792400398987_2wg25",
+      "timestamp": "2026-10-19T08:59:58.986Z"
+    },
+    {
       "studentId": "std-10-25",
       "studentEmail": "kavita.soren@student.janta.edu",
       "studentName": "Kavita Soren",

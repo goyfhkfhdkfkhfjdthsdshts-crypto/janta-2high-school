@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { SchoolLogo } from './SchoolLogo';
 import { Book, SchoolClass, UserProfile } from '@/lib/types';
+import { apiFetch } from '@/lib/apiConfig';
 import {
   BookOpen,
   Download,
@@ -45,9 +46,8 @@ export function StudyBooksView({
 
   const fetchBooks = async () => {
     try {
-      const res = await fetch(`/api/data/books?class=${selectedClass}`);
-      const data = await res.json();
-      if (res.ok && data.data) {
+      const { res, data } = await apiFetch(`/api/data/books?class=${selectedClass}`);
+      if (res.ok && data?.data) {
         setBooks(data.data);
       }
     } catch (err) {
@@ -77,9 +77,8 @@ export function StudyBooksView({
     }
 
     try {
-      await fetch('/api/data/books', {
+      await apiFetch('/api/data/books', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           title: newTitle,
           subject: newSubject,
@@ -104,7 +103,7 @@ export function StudyBooksView({
     if (!isAdmin) return;
     if (!window.confirm('Delete this book from the library?')) return;
     try {
-      await fetch(`/api/data/books?id=${id}`, { method: 'DELETE' });
+      await apiFetch(`/api/data/books?id=${id}`, { method: 'DELETE' });
       fetchBooks();
     } catch (err) {
       console.error(err);

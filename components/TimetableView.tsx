@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { SchoolLogo } from './SchoolLogo';
 import { Timetable, SchoolClass, UserProfile } from '@/lib/types';
+import { apiFetch } from '@/lib/apiConfig';
 import { Clock, Calendar, Plus, Trash2, Edit, Check, Lock } from 'lucide-react';
 
 interface TimetableViewProps {
@@ -36,9 +37,8 @@ export function TimetableView({
 
   const fetchTimetable = async () => {
     try {
-      const res = await fetch(`/api/data/timetable?class=${selectedClass}`);
-      const data = await res.json();
-      if (res.ok && data.data) {
+      const { res, data } = await apiFetch(`/api/data/timetable?class=${selectedClass}`);
+      if (res.ok && data?.data) {
         setPeriods(data.data);
       }
     } catch (err) {
@@ -73,15 +73,13 @@ export function TimetableView({
 
     try {
       if (editingPeriod) {
-        await fetch('/api/data/timetable', {
+        await apiFetch('/api/data/timetable', {
           method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ id: editingPeriod.id, ...payload }),
         });
       } else {
-        await fetch('/api/data/timetable', {
+        await apiFetch('/api/data/timetable', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
         });
       }
@@ -98,7 +96,7 @@ export function TimetableView({
     if (!isAdmin) return;
     if (!window.confirm('Delete this period from timetable?')) return;
     try {
-      await fetch(`/api/data/timetable?id=${id}`, { method: 'DELETE' });
+      await apiFetch(`/api/data/timetable?id=${id}`, { method: 'DELETE' });
       fetchTimetable();
     } catch (err) {
       console.error(err);

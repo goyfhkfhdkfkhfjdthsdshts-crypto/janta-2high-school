@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
 
-const MODELS_TO_TRY = ['gemini-3.8-flash', 'gemini-flash-latest', 'gemini-3.1-flash-lite'];
+const MODELS_TO_TRY = ['gemini-3.8-flash', 'gemini-flash-latest'];
 
 async function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -119,45 +119,29 @@ Guidelines:
     let lastError: any = null;
     let generatedAnswer = '';
 
-    // Model fallback loop to handle 503 (high demand) or temporary spikes
+    // Fast model fallback loop to prevent UI hanging
     for (const modelName of MODELS_TO_TRY) {
-      for (let attempt = 1; attempt <= 2; attempt++) {
-        try {
-          const response = await ai.models.generateContent({
+      try {
+        const response = (await Promise.race([
+          ai.models.generateContent({
             model: modelName,
             contents,
             config: {
               systemInstruction,
               temperature: 0.4,
             },
-          });
+          }),
+          new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('AI generation timed out after 5 seconds')), 5000)
+          ),
+        ])) as any;
 
-          if (response?.text) {
-            generatedAnswer = response.text;
-            break;
-          }
-        } catch (err: any) {
-          lastError = err;
-          const isDemandError =
-            err?.status === 503 ||
-            err?.message?.includes('503') ||
-            err?.message?.includes('high demand') ||
-            err?.message?.includes('UNAVAILABLE') ||
-            err?.status === 429 ||
-            err?.message?.includes('429');
-
-          if (isDemandError && attempt < 2) {
-            // Brief backoff before retry
-            await delay(500 * attempt);
-            continue;
-          }
-          // If second attempt failed or not retryable on this model, break to try fallback model
+        if (response?.text) {
+          generatedAnswer = response.text;
           break;
         }
-      }
-
-      if (generatedAnswer) {
-        break;
+      } catch (err: any) {
+        lastError = err;
       }
     }
 

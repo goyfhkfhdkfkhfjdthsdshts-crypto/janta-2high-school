@@ -40,48 +40,12 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
 
-  const sampleRollNumbers: Record<SchoolClass, Array<{ roll: string; name: string }>> = {
-    '10': [
-      { roll: '25', name: 'Kavita Soren' },
-      { roll: '1001', name: 'Amit Kumar Singh' },
-      { roll: '1002', name: 'Pooja Kumari Oraon' },
-      { roll: '1003', name: 'Rahul Soren' },
-    ],
-    '9': [
-      { roll: '25', name: 'Pooja Singh' },
-      { roll: '901', name: 'Vicky Kumar' },
-      { roll: '902', name: 'Sunita Munda' },
-      { roll: '903', name: 'Ajay Oraon' },
-    ],
-    '11': [
-      { roll: '25', name: 'Anup Kujur' },
-      { roll: '1101', name: 'Rohan Karmali' },
-      { roll: '1102', name: 'Meena Kumari' },
-    ],
-    '12': [
-      { roll: '25', name: 'Sangeeta Tirkey' },
-      { roll: '1201', name: 'Manish Verma' },
-      { roll: '1202', name: 'Sunita Kumari' },
-    ],
-  };
-
   const handleRoleChange = (role: AppLoginRole) => {
     setSelectedRole(role);
     setErrorMessage(null);
     setSuccessMessage(null);
+    setLoginId('');
     setPassword('');
-    if (role === 'teacher') {
-      setLoginId('TCH-101');
-      setPassword('teacher123');
-    } else if (role === 'principal') {
-      setLoginId('PRN-001');
-      setPassword('principal123');
-    } else if (role === 'admin') {
-      setLoginId('ADM-001');
-      setPassword('admin12345678');
-    } else {
-      setLoginId('');
-    }
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -310,7 +274,7 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
                 </div>
                 <input
                   type="text"
-                  placeholder="e.g. 25 or 1001"
+                  placeholder="Enter registered Roll Number (e.g. 1001 or 25)"
                   value={rollNumber}
                   onChange={(e) => {
                     setRollNumber(e.target.value);
@@ -321,29 +285,9 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
                   required
                 />
               </div>
-            </div>
-
-            {/* Quick Demo Roll Number Suggestions */}
-            <div className="p-2.5 bg-blue-50/70 border border-blue-200/70 rounded-2xl space-y-1.5">
-              <div className="flex items-center gap-1.5 text-[11px] font-bold text-blue-900">
-                <Sparkles className="w-3.5 h-3.5 text-blue-700" />
-                <span>Enrolled Students in Class {selectedClass}:</span>
-              </div>
-              <div className="flex flex-wrap gap-1.5">
-                {sampleRollNumbers[selectedClass].map((s) => (
-                  <button
-                    key={s.roll}
-                    type="button"
-                    onClick={() => {
-                      setRollNumber(s.roll);
-                      setErrorMessage(null);
-                    }}
-                    className="px-2.5 py-1 text-[11px] bg-white hover:bg-blue-100 text-blue-900 border border-blue-200 rounded-lg font-semibold transition-all cursor-pointer shadow-2xs"
-                  >
-                    Roll {s.roll} <span className="text-slate-500 font-normal">({s.name.split(' ')[0]})</span>
-                  </button>
-                ))}
-              </div>
+              <p className="text-[11px] text-slate-500 mt-1">
+                Enter your official JAC board or school roll number. No password required for students.
+              </p>
             </div>
 
             {/* Submit Button */}
@@ -407,7 +351,8 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
                 </div>
                 <input
                   type={showPassword ? 'text' : 'password'}
-                  placeholder="Enter authorized password"
+                  placeholder="••••••••••••"
+                  autoComplete="current-password"
                   value={password}
                   onChange={(e) => {
                     setPassword(e.target.value);
@@ -420,20 +365,12 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 cursor-pointer"
+                  title={showPassword ? 'Hide password' : 'Show password'}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
-            </div>
-
-            {/* Quick Demo Credential Badge */}
-            <div className="p-2.5 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-between text-xs text-slate-600">
-              <span className="font-semibold text-slate-700">Official Demo Access:</span>
-              <span className="font-mono text-[11px] text-blue-800 bg-white px-2 py-0.5 rounded-lg border border-slate-200">
-                {selectedRole === 'teacher' && 'TCH-101 • teacher123'}
-                {selectedRole === 'principal' && 'PRN-001 • principal123'}
-                {selectedRole === 'admin' && 'ADM-001 • admin12345678'}
-              </span>
             </div>
 
             {/* Submit Button */}
@@ -494,13 +431,16 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
                 <strong>Students:</strong> Select your class (9, 10, 11, or 12) and type your registered Roll Number (e.g. 25, 1001). No password required.
               </p>
               <p>
-                <strong>Teachers:</strong> Use your Teacher ID (e.g. TCH-101) and assigned password (<code>teacher123</code>).
+                <strong>Teachers:</strong> Use your official Teacher ID and authorized security password.
               </p>
               <p>
-                <strong>Principal:</strong> Use your Principal ID (PRN-001) and password (<code>principal123</code>).
+                <strong>Principal:</strong> Use your executive Principal ID and governance password.
               </p>
               <p>
-                <strong>Administrator:</strong> Use Admin ID (ADM-001) and password (<code>admin12345678</code>).
+                <strong>Administrator:</strong> Use your administrative credentials issued by school management.
+              </p>
+              <p className="text-[11px] text-slate-500 italic">
+                * All staff passwords are confidential. For password resets or credential assistance, contact the School Office Help Desk below.
               </p>
 
               <div className="p-3 bg-blue-50 border border-blue-200 rounded-2xl space-y-1">

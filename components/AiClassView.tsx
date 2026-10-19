@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { SchoolLogo } from './SchoolLogo';
 import { SchoolClass, UserProfile } from '@/lib/types';
+import { apiFetch } from '@/lib/apiConfig';
 import { TranscribeAudioModal } from './TranscribeAudioModal';
 import {
   Bot,
@@ -221,9 +222,8 @@ export function AiClassView({
     setIsLoading(true);
 
     try {
-      const res = await fetch('/api/ai/ask', {
+      const { res, data } = await apiFetch('/api/ai/ask', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           question: userPrompt,
           imageBase64: photoToSend,
@@ -237,9 +237,7 @@ export function AiClassView({
         }),
       });
 
-      const data = await res.json();
-
-      if (res.ok && data.success) {
+      if (res.ok && data?.success && data?.answer) {
         const assistantMsg: MessageItem = {
           id: `ast_${Date.now()}`,
           role: 'assistant',

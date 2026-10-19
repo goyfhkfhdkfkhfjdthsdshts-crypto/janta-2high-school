@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { SchoolLogo } from './SchoolLogo';
 import { Result, SchoolClass, UserProfile } from '@/lib/types';
+import { apiFetch } from '@/lib/apiConfig';
 import { Award, Search, Plus, Trash2, CheckCircle2, XCircle, FileText, Lock } from 'lucide-react';
 
 interface ResultsViewProps {
@@ -42,9 +43,8 @@ export function ResultsView({
 
   const fetchResults = async () => {
     try {
-      const res = await fetch(`/api/data/results?class=${selectedClass}`);
-      const data = await res.json();
-      if (res.ok && data.data) {
+      const { res, data } = await apiFetch(`/api/data/results?class=${selectedClass}`);
+      if (res.ok && data?.data) {
         setResults(data.data);
       }
     } catch (err) {
@@ -102,9 +102,8 @@ export function ResultsView({
     };
 
     try {
-      await fetch('/api/data/results', {
+      await apiFetch('/api/data/results', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
 
@@ -122,7 +121,7 @@ export function ResultsView({
     if (!isAdmin) return;
     if (!window.confirm('Delete this result record?')) return;
     try {
-      await fetch(`/api/data/results?id=${id}`, { method: 'DELETE' });
+      await apiFetch(`/api/data/results?id=${id}`, { method: 'DELETE' });
       fetchResults();
       if (searchedResult?.id === id) setSearchedResult(null);
     } catch (err) {

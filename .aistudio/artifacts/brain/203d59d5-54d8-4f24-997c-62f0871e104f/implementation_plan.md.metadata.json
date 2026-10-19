@@ -1,6 +1,6 @@
 {
-  "summary": "Implementation plan to fix GitHub Actions deployment workflow (nextjs.yml), Next.js static export build, repository subpath asset resolution, and client-side offline database fallback for GitHub Pages hosting.",
-  "updatedAt": "2026-10-19T08:11:44.500322177Z",
+  "summary": "Comprehensive backend connectivity, data persistence, and API routing audit plan to fix AI Teacher chat, Online Attendance, Books/PDFs, and student records across development and published deployments.",
+  "updatedAt": "2026-10-19T09:07:58.551649651Z",
   "requestFeedback": true,
   "userFacing": true
 }
