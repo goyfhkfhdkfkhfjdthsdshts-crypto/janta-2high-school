@@ -20,7 +20,11 @@ const nextConfig = (phase: string): NextConfig => {
     }
   }
 
-  const rawBasePath = process.env.NEXT_PUBLIC_BASE_PATH || process.env.BASE_PATH || (isExport ? repoName : '');
+  const rawBasePath =
+    process.env.ACTIONS_PAGES_BASE_PATH ||
+    process.env.NEXT_PUBLIC_BASE_PATH ||
+    process.env.BASE_PATH ||
+    (isExport ? repoName : '');
   const basePath = rawBasePath && rawBasePath !== '/' 
     ? (rawBasePath.startsWith('/') ? rawBasePath : `/${rawBasePath}`).replace(/\/$/, '') 
     : '';
