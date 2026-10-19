@@ -1,0 +1,6 @@
+[build]
+  base = "."
+  # Install dependencies from the lockfile when they aren't already present
+  # (e.g. CLI deploys that skip the automatic install step).
+  command = "[ -x node_modules/.bin/next ] || npm ci; npm run build"
+  publish = ".next"
