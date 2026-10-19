@@ -46,16 +46,16 @@ export function Header({
         {/* Left: School Logo & Branding (Click to go Home) */}
         <button
           onClick={onGoHome}
-          className="flex items-center gap-2 sm:gap-2.5 text-left focus:outline-hidden group min-w-0 shrink"
+          className="flex items-center gap-1.5 sm:gap-2.5 text-left focus:outline-hidden group min-w-0 shrink"
           title="Go to Home"
         >
-          <SchoolLogo size={36} className="sm:hidden shrink-0" showText={false} />
+          <SchoolLogo size={34} className="sm:hidden shrink-0" showText={false} />
           <SchoolLogo size={42} className="hidden sm:block shrink-0" showText={false} />
           <div className="flex flex-col min-w-0">
-            <span className="font-extrabold text-blue-950 text-xs sm:text-sm tracking-tight leading-tight uppercase group-hover:text-blue-700 transition-colors truncate">
+            <span className="font-extrabold text-blue-950 text-[11px] sm:text-sm tracking-tight leading-tight uppercase group-hover:text-blue-700 transition-colors truncate max-w-[125px] xs:max-w-[180px] sm:max-w-none">
               Janta +2 High School
             </span>
-            <div className="flex items-center gap-1 text-[10px] sm:text-[11px] text-slate-500 font-semibold leading-tight">
+            <div className="flex items-center gap-1 text-[9px] sm:text-[11px] text-slate-500 font-semibold leading-tight">
               <span className="text-blue-700 font-bold uppercase tracking-wider shrink-0">Khalari</span>
               <span className="hidden xs:inline">•</span>
               <span className="text-amber-700 text-[10px] hidden sm:inline font-medium truncate">

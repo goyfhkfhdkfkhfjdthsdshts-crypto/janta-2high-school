@@ -41,7 +41,7 @@ export function BottomNav({
             <button
               key={tab.id}
               onClick={() => onTabChange(tab.id)}
-              className={`relative flex flex-col items-center justify-center flex-1 h-full py-1 px-0.5 transition-colors select-none touch-manipulation cursor-pointer ${
+              className={`relative flex flex-col items-center justify-center flex-1 min-w-0 h-full py-1 px-0.5 transition-colors select-none touch-manipulation cursor-pointer ${
                 isActive
                   ? 'text-blue-700 font-bold'
                   : 'text-slate-500 hover:text-slate-800 font-medium'

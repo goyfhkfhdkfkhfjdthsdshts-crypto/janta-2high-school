@@ -27,13 +27,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Generate unique, clean alphanumeric room name on meet.jit.si
+    // Generate unique, clean alphanumeric room name on Jitsi
     const cleanSubj = subject.replace(/[^a-zA-Z0-9]/g, '');
     const cleanTeacher = teacherName.replace(/[^a-zA-Z0-9]/g, '');
     const timeHash = Date.now().toString(36);
-    // Real valid meet.jit.si room name:
+    const jitsiDomain = process.env.JITSI_DOMAIN || 'fairmeeting.net';
     const meetingId = `JantaHighSchoolKhalari_Class${schoolClass}_${cleanSubj}_${cleanTeacher}_${timeHash}`;
-    const meetingUrl = `https://meet.jit.si/${meetingId}`;
+    const meetingUrl = `https://${jitsiDomain}/${meetingId}`;
 
     const newSession = db.createLiveSession({
       class: schoolClass as SchoolClass,

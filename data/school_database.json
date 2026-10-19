@@ -366,14 +366,54 @@
     {
       "class": "10",
       "subject": "Mathematics",
+      "teacherName": "Mr. R. K. Sharma",
+      "title": "Trigonometry & Heights Problem Solving",
+      "meetingId": "JantaHighSchoolKhalari_Class10_Mathematics_MrRKSharma_mvak3vki",
+      "meetingUrl": "https://fairmeeting.net/JantaHighSchoolKhalari_Class10_Mathematics_MrRKSharma_mvak3vki",
+      "createdBy": "teacher-admin",
+      "id": "live_1792130297492_ja12",
+      "status": "ended",
+      "startedAt": "2026-10-16T05:58:17.492Z",
+      "endedAt": "2026-10-16T05:58:26.583Z"
+    },
+    {
+      "class": "10",
+      "subject": "Mathematics",
+      "teacherName": "Mr. R. K. Sharma",
+      "title": "Height & Distance Live Interactive Session",
+      "meetingId": "JantaHighSchoolKhalari_Class10_Mathematics_MrRKSharma_mv6u520f",
+      "meetingUrl": "https://fairmeeting.net/JantaHighSchoolKhalari_Class10_Mathematics_MrRKSharma_mv6u520f",
+      "createdBy": "teacher-admin",
+      "id": "live_1791905283954_97zt",
+      "status": "ended",
+      "startedAt": "2026-10-13T15:28:03.955Z",
+      "endedAt": "2026-10-13T15:28:04.206Z"
+    },
+    {
+      "class": "10",
+      "subject": "Science",
+      "teacherName": "Mr. R. K. Sharma",
+      "title": "Light Reflection and Refraction Live Lab",
+      "meetingId": "JantaHighSchoolKhalari_Class10_Science_MrRKSharma_mv6u4is2",
+      "meetingUrl": "https://meet.jit.si/JantaHighSchoolKhalari_Class10_Science_MrRKSharma_mv6u4is2",
+      "createdBy": "admin@janta.edu",
+      "id": "live_1791905259026_4jje",
+      "status": "ended",
+      "startedAt": "2026-10-13T15:27:39.026Z",
+      "endedAt": "2026-10-13T15:27:39.128Z"
+    },
+    {
+      "class": "10",
+      "subject": "Mathematics",
       "teacherName": "Senior School Administrator",
       "title": "Chapter Problem Solving & Live Discussion",
       "meetingId": "JantaHighSchoolKhalari_Class10_Mathematics_SeniorSchoolAdministrator_mv1xhron",
       "meetingUrl": "https://meet.jit.si/JantaHighSchoolKhalari_Class10_Mathematics_SeniorSchoolAdministrator_mv1xhron",
       "createdBy": "admin@janta.edu",
       "id": "live_1791608585063_q1qh",
-      "status": "live",
-      "startedAt": "2026-10-10T05:03:05.063Z"
+      "status": "ended",
+      "startedAt": "2026-10-10T05:03:05.063Z",
+      "endedAt": "2026-10-13T15:27:39.026Z"
     },
     {
       "id": "live-default-1",

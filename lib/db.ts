@@ -690,7 +690,7 @@ const initialLiveSessions: LiveClassSession[] = [
     teacherName: 'Mr. R. K. Sharma',
     title: 'Trigonometry & Height-Distance Problem Solving',
     meetingId: 'JantaHighSchoolKhalari_Class10_Maths_2026',
-    meetingUrl: 'https://meet.jit.si/JantaHighSchoolKhalari_Class10_Maths_2026',
+    meetingUrl: 'https://fairmeeting.net/JantaHighSchoolKhalari_Class10_Maths_2026',
     status: 'live',
     startedAt: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
     createdBy: 'teacher-admin',

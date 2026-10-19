@@ -362,7 +362,7 @@ export function HomeView({
             <button
               key={c}
               onClick={() => onSelectClass(c)}
-              className={`py-2 sm:py-3 px-1 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-black transition-colors border text-center touch-manipulation cursor-pointer ${
+              className={`py-2 sm:py-3 px-1 min-h-[38px] flex items-center justify-center rounded-xl sm:rounded-2xl text-xs sm:text-sm font-black transition-colors border text-center touch-manipulation cursor-pointer ${
                 selectedClass === c
                   ? 'bg-blue-700 text-white border-blue-700 shadow-sm ring-2 ring-blue-300'
                   : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'

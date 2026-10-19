@@ -1,0 +1,6 @@
+{
+  "summary": "Implementation plan to fix GitHub Actions deployment workflow (nextjs.yml), Next.js static export build, repository subpath asset resolution, and client-side offline database fallback for GitHub Pages hosting.",
+  "updatedAt": "2026-10-19T08:11:44.500322177Z",
+  "requestFeedback": true,
+  "userFacing": true
+}

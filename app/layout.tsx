@@ -31,7 +31,7 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
     <html lang="en">
       <body className="bg-slate-50 text-slate-900 antialiased selection:bg-blue-600 selection:text-white" suppressHydrationWarning>
         <Script
-          src="https://meet.jit.si/external_api.js"
+          src="https://fairmeeting.net/external_api.js"
           strategy="lazyOnload"
         />
         {children}

@@ -65,12 +65,31 @@ export function LiveClassView({
 
   // Meeting connection status
   const [connectionStatus, setConnectionStatus] = useState<'idle' | 'connecting' | 'connected' | 'failed' | 'ended'>('idle');
+  const [mediaError, setMediaError] = useState<string | null>(null);
+  const [participantCount, setParticipantCount] = useState<number>(1);
   const [isAudioMuted, setIsAudioMuted] = useState(false);
   const [isVideoMuted, setIsVideoMuted] = useState(false);
   const [isSpeakerOn, setIsSpeakerOn] = useState(true);
 
   const jitsiContainerRef = useRef<HTMLDivElement>(null);
   const jitsiApiRef = useRef<any>(null);
+
+  // Helper to get active Jitsi domain
+  const getSessionDomain = useCallback((session: LiveClassSession) => {
+    if (session.meetingUrl) {
+      try {
+        const u = new URL(session.meetingUrl);
+        // If domain is meet.jit.si (which enforces Firebase/8x8 Auth login blocking mobile embeds),
+        // fallback to fairmeeting.net for unauthenticated classroom sessions
+        if (u.host && u.host !== 'meet.jit.si') {
+          return u.host;
+        }
+      } catch (e) {
+        console.warn('Could not parse meetingUrl:', e);
+      }
+    }
+    return 'fairmeeting.net';
+  }, []);
 
   // Cleanup Jitsi instance
   const cleanupJitsi = useCallback(() => {
@@ -123,30 +142,62 @@ export function LiveClassView({
   const startJitsiMeeting = (session: LiveClassSession, asTeacher: boolean) => {
     cleanupJitsi();
     setConnectionStatus('connecting');
+    setMediaError(null);
     setInMeeting(true);
     setIsTeacherMode(asTeacher);
+    setParticipantCount(1);
 
-    // Ensure external_api script is present
+    const domain = getSessionDomain(session);
+
+    // Ensure external_api script for domain is present
     const initJitsiInstance = () => {
       if (!jitsiContainerRef.current) {
-        setTimeout(initJitsiInstance, 300);
+        setTimeout(initJitsiInstance, 200);
         return;
       }
 
+      // Prepare container
+      jitsiContainerRef.current.innerHTML = '';
+
+      // Immediately observe container to apply mobile permissions & playsinline as soon as iframe is attached
+      const observer = new MutationObserver((mutations) => {
+        for (const m of mutations) {
+          for (const node of Array.from(m.addedNodes)) {
+            if (node instanceof HTMLIFrameElement) {
+              node.setAttribute(
+                'allow',
+                'camera *; microphone *; display-capture *; autoplay *; clipboard-write *; fullscreen *'
+              );
+              node.setAttribute('allowFullScreen', 'true');
+              node.setAttribute('playsinline', 'true');
+              node.setAttribute('webkit-playsinline', 'true');
+            }
+          }
+        }
+      });
+      observer.observe(jitsiContainerRef.current, { childList: true });
+
       if (typeof window.JitsiMeetExternalAPI === 'undefined') {
-        const script = document.createElement('script');
-        script.src = 'https://meet.jit.si/external_api.js';
-        script.async = true;
-        script.onload = () => initJitsiInstance();
-        script.onerror = () => {
-          setConnectionStatus('failed');
-        };
-        document.body.appendChild(script);
+        const scriptId = `jitsi-script-${domain.replace(/[^a-zA-Z0-9]/g, '-')}`;
+        let script = document.getElementById(scriptId) as HTMLScriptElement | null;
+        if (!script) {
+          script = document.createElement('script');
+          script.id = scriptId;
+          script.src = `https://${domain}/external_api.js`;
+          script.async = true;
+          script.onload = () => initJitsiInstance();
+          script.onerror = () => {
+            setConnectionStatus('failed');
+            setMediaError('Could not connect to video server. Please check internet connection and tap Retry.');
+          };
+          document.body.appendChild(script);
+        } else {
+          script.onload = () => initJitsiInstance();
+        }
         return;
       }
 
       try {
-        const domain = 'meet.jit.si';
         const displayName = asTeacher
           ? `${session.teacherName} (Teacher)`
           : (studentName.trim() || 'Student');
@@ -161,17 +212,58 @@ export function LiveClassView({
           },
           configOverwrite: {
             prejoinPageEnabled: false,
-            // Student audio & video OFF by default as required
+            prejoinConfig: {
+              enabled: false,
+            },
+            // Teacher starts with Video & Audio unmuted; Student starts muted
             startWithAudioMuted: !asTeacher,
             startWithVideoMuted: !asTeacher,
             disableDeepLinking: true,
             enableWelcomePage: false,
+            enableClosePage: false,
             liveStreamingEnabled: false,
             fileRecordingsEnabled: false,
+
+            // Enable P2P with Google STUN servers for direct, low-latency mobile 2-phone video
+            p2p: {
+              enabled: true,
+              stunServers: [
+                { urls: 'stun:stun.l.google.com:19302' },
+                { urls: 'stun:stun1.l.google.com:19302' },
+                { urls: 'stun:stun2.l.google.com:19302' },
+                { urls: 'stun:stun.fairmeeting.net:3478' },
+              ],
+              useStunTurn: true,
+              preferH264: true,
+            },
+
+            // Constraints & resolution optimized for mobile browsers & cellular data
+            resolution: 480,
+            constraints: {
+              video: {
+                height: { ideal: 480, max: 720, min: 240 },
+                width: { ideal: 640, max: 1280, min: 320 },
+                frameRate: { ideal: 24, max: 30, min: 15 },
+              },
+            },
+            disableSimulcast: true,
+            channelLastN: -1,
+            enableLayerSuspension: false,
+            disableAudioLevels: false,
+            disableRemoteMute: false,
+            enableUserRolesBasedOnToken: false,
+            doNotStoreRoom: true,
+            requireDisplayName: false,
           },
           interfaceConfigOverwrite: {
             SHOW_JITSI_WATERMARK: false,
             SHOW_BRAND_WATERMARK: false,
+            SHOW_POWERED_BY: false,
+            SHOW_PROMOTIONAL_CLOSE_PAGE: false,
+            DISABLE_JOIN_LEAVE_NOTIFICATIONS: false,
+            MOBILE_APP_PROMO: false,
+            HIDE_INVITE_MORE_HEADER: true,
+            VERTICAL_FILMSTRIP: true,
             TOOLBAR_BUTTONS: asTeacher
               ? [
                   'microphone',
@@ -183,6 +275,8 @@ export function LiveClassView({
                   'chat',
                   'raisehand',
                   'tileview',
+                  'settings',
+                  'videoquality',
                 ]
               : [
                   'microphone',
@@ -192,6 +286,7 @@ export function LiveClassView({
                   'chat',
                   'raisehand',
                   'tileview',
+                  'settings',
                 ],
           },
         };
@@ -199,10 +294,42 @@ export function LiveClassView({
         const api = new window.JitsiMeetExternalAPI(domain, options);
         jitsiApiRef.current = api;
 
+        // Ensure iframe has permissions and playsinline immediately
+        const iframe = api.getIFrame ? api.getIFrame() : jitsiContainerRef.current?.querySelector('iframe');
+        if (iframe) {
+          iframe.setAttribute(
+            'allow',
+            'camera *; microphone *; display-capture *; autoplay *; clipboard-write *; fullscreen *'
+          );
+          iframe.setAttribute('allowFullScreen', 'true');
+          iframe.setAttribute('playsinline', 'true');
+          iframe.setAttribute('webkit-playsinline', 'true');
+        }
+
         // REAL CONNECTION EVENTS
         api.addEventListener('videoConferenceJoined', () => {
-          // MANDATORY: Show "Live Connected" ONLY after the actual video meeting connection succeeds
           setConnectionStatus('connected');
+          setMediaError(null);
+
+          // If teacher: ensure video and audio are unmuted
+          if (asTeacher) {
+            setTimeout(() => {
+              try {
+                if (typeof api.isVideoMuted === 'function') {
+                  api.isVideoMuted().then((muted: boolean) => {
+                    if (muted) api.executeCommand('toggleVideo');
+                  }).catch(() => {});
+                }
+                if (typeof api.isAudioMuted === 'function') {
+                  api.isAudioMuted().then((muted: boolean) => {
+                    if (muted) api.executeCommand('toggleAudio');
+                  }).catch(() => {});
+                }
+              } catch (e) {
+                console.warn('Teacher unmute check warning:', e);
+              }
+            }, 600);
+          }
         });
 
         api.addEventListener('videoConferenceLeft', () => {
@@ -211,6 +338,30 @@ export function LiveClassView({
 
         api.addEventListener('readyToClose', () => {
           handleLeaveMeeting();
+        });
+
+        api.addEventListener('participantJoined', () => {
+          setParticipantCount((prev) => prev + 1);
+        });
+
+        api.addEventListener('participantLeft', () => {
+          setParticipantCount((prev) => Math.max(1, prev - 1));
+        });
+
+        api.addEventListener('cameraError', (error: any) => {
+          console.error('Camera error from video provider:', error);
+          setMediaError('Camera permission denied or camera in use. Please allow camera in browser settings and tap Retry.');
+        });
+
+        api.addEventListener('micError', (error: any) => {
+          console.error('Microphone error from video provider:', error);
+          setMediaError('Microphone permission denied or in use. Please check audio permissions.');
+        });
+
+        api.addEventListener('videoConferenceError', (error: any) => {
+          console.error('Video conference error:', error);
+          setConnectionStatus('failed');
+          setMediaError('Video conference connection interrupted. Please tap Retry to reconnect.');
         });
 
         api.addEventListener('audioMuteStatusChanged', (e: { muted: boolean }) => {
@@ -223,14 +374,16 @@ export function LiveClassView({
 
         api.addEventListener('suspended', () => {
           setConnectionStatus('failed');
+          setMediaError('Connection suspended. Tap Reconnect to resume.');
         });
       } catch (err) {
         console.error('Failed to initialize Jitsi:', err);
         setConnectionStatus('failed');
+        setMediaError('Failed to initialize video session. Tap Retry to reconnect.');
       }
     };
 
-    setTimeout(initJitsiInstance, 200);
+    setTimeout(initJitsiInstance, 150);
   };
 
   // Student joins live
@@ -239,6 +392,7 @@ export function LiveClassView({
       alert('Please enter your Student Name to join');
       return;
     }
+    setMediaError(null);
     setActiveSession(session);
     startJitsiMeeting(session, false);
   };
@@ -251,7 +405,27 @@ export function LiveClassView({
       return;
     }
 
+    setMediaError(null);
     setIsStartingLive(true);
+
+    // Preflight camera and mic check to request user permission smoothly on mobile
+    if (typeof navigator !== 'undefined' && navigator.mediaDevices?.getUserMedia) {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        stream.getTracks().forEach((track) => track.stop());
+        // Allow mobile camera driver 400ms to cleanly release hardware handle before Jitsi iframe attaches
+        await new Promise((resolve) => setTimeout(resolve, 400));
+      } catch (err: any) {
+        console.warn('Camera preflight warning:', err);
+        if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+          setIsStartingLive(false);
+          setMediaError('Camera & Microphone permission is required. Please grant permission in browser settings.');
+          alert('Camera and Microphone permission is required to start live class. Please allow access in browser settings.');
+          return;
+        }
+      }
+    }
+
     try {
       const res = await fetch('/api/live/sessions', {
         method: 'POST',
@@ -402,12 +576,17 @@ export function LiveClassView({
               </div>
             </div>
 
-            {/* Connection Status Badge */}
+            {/* Connection Status Badge & Participant Count */}
             <div className="flex items-center gap-2">
+              <span className="flex items-center gap-1 text-xs text-slate-300 bg-slate-800/80 px-2.5 py-1 rounded-full border border-slate-700">
+                <Users className="w-3.5 h-3.5 text-blue-400" />
+                <span>{participantCount}</span>
+              </span>
+
               {connectionStatus === 'connecting' && (
                 <span className="flex items-center gap-1.5 text-xs text-amber-400 bg-amber-950/60 px-2.5 py-1 rounded-full border border-amber-800 animate-pulse">
                   <div className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
-                  Connecting to Live Class...
+                  Connecting...
                 </span>
               )}
 
@@ -432,6 +611,22 @@ export function LiveClassView({
               )}
             </div>
           </div>
+
+          {/* Media Permission / Hardware Error Notice if any */}
+          {mediaError && (
+            <div className="bg-amber-950/80 border border-amber-600/80 rounded-2xl p-2.5 text-xs text-amber-200 flex items-center justify-between gap-2 shadow-xs">
+              <div className="flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 text-amber-400 shrink-0" />
+                <span>{mediaError}</span>
+              </div>
+              <button
+                onClick={() => startJitsiMeeting(activeSession, isTeacherMode)}
+                className="px-2.5 py-1 bg-amber-600 hover:bg-amber-700 text-white rounded-lg font-bold shrink-0 text-[11px]"
+              >
+                Retry
+              </button>
+            </div>
+          )}
 
           {/* REAL VIDEO EMBED AREA */}
           <div className="relative w-full aspect-video min-h-[380px] sm:min-h-[460px] bg-black rounded-2xl overflow-hidden border border-slate-800">
@@ -547,6 +742,22 @@ export function LiveClassView({
                 <Volume2 className="w-4 h-4" />
                 <span>Speaker</span>
               </button>
+
+              {/* Flip Camera (Front/Back) on Mobile Phones */}
+              {isTeacherMode && (
+                <button
+                  onClick={() => {
+                    if (jitsiApiRef.current) {
+                      jitsiApiRef.current.executeCommand('toggleCamera');
+                    }
+                  }}
+                  className="p-2.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors bg-slate-800 hover:bg-slate-700 text-slate-200"
+                  title="Flip Camera (Front/Back) / कैमरा बदलें"
+                >
+                  <RefreshCw className="w-4 h-4 text-blue-400" />
+                  <span className="hidden xs:inline">Flip Cam</span>
+                </button>
+              )}
             </div>
 
             {/* End Live (TEACHER ONLY) vs Leave Class (STUDENT) */}
