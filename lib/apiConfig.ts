@@ -298,6 +298,57 @@ function getStaticFallback(path: string, options: RequestInit): any | null {
     };
   }
 
+  // MCQ API Fallback for static GitHub Pages & offline usage
+  if (cleanPath.startsWith('/data/mcq') || cleanPath.startsWith('/mcq')) {
+    const url = new URL(path, 'http://localhost');
+    const classNum = url.searchParams.get('class') || '10';
+    const subject = url.searchParams.get('subject');
+
+    // Retrieve any locally created/edited questions in addition to verified JAC question bank
+    const STORAGE_KEY = `janta_mcq_custom_${classNum}`;
+    let customMcqs: any[] = [];
+    if (typeof window !== 'undefined') {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) customMcqs = JSON.parse(raw);
+      } catch {}
+    }
+
+    if (options.method === 'POST' && options.body) {
+      try {
+        const body = typeof options.body === 'string' ? JSON.parse(options.body) : options.body;
+        const newMcq = {
+          ...body,
+          id: body.id || `mcq_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+          class: body.class || classNum,
+        };
+        customMcqs.unshift(newMcq);
+        if (typeof window !== 'undefined') {
+          try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(customMcqs));
+          } catch {}
+        }
+        return { success: true, data: newMcq, message: 'Question saved successfully' };
+      } catch {
+        return { success: false, message: 'Failed to save question' };
+      }
+    }
+
+    let questions = [...customMcqs, ...CLASS_10_VERIFIED_MCQS];
+    if (classNum) {
+      questions = questions.filter((q) => q.class === classNum);
+    }
+    if (subject && subject !== 'All') {
+      questions = questions.filter((q) => q.subject.toLowerCase() === subject.toLowerCase());
+    }
+
+    return {
+      success: true,
+      data: questions,
+      total: questions.length,
+    };
+  }
+
   // Attendance API Fallback
   if (cleanPath.startsWith('/attendance')) {
     const url = new URL(path, 'http://localhost');

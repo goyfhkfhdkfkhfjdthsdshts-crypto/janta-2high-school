@@ -1,94 +1,86 @@
-# Backend & Data-Connectivity Audit Implementation Plan
+# JAC Class 10 MCQ Practice System & GitHub Deployment Fix Plan
 
-A comprehensive diagnostic, repair, and verification strategy to resolve data connectivity failures, API routing mismatches, Online Attendance network errors, and AI Teacher loading issues across all environments for Janta +2 High School – Khalari.
+A targeted, production-grade strategy to ensure the JAC Class 10 MCQ Practice System and all school portal features work seamlessly across all environments — including GitHub Pages static deployments, production custom domains, and the live fullstack server for Janta +2 High School – Khalari.
 
-## User Review & Critical Decisions
+## User Decisions & Clarifications Summary
 
-> [!IMPORTANT]
-> The audit revealed that frontend components were invoking raw `fetch('/api/...')` instead of resolving relative paths through the application's configured `basePath` and production API origin. Consequently, on published subpath deployments and static hosting (e.g., GitHub Pages), browser requests bypassed the application backend, resulting in 404 and network errors. We will standardize API URL resolution across all views, enhance `lib/apiConfig.ts` with complete client-side data persistence for offline and static modes, optimize AI Teacher model execution with fallback to NCERT/JCERT guidance, and test every data-dependent feature.
-
-- **Confirmed Decision 1**: Standardize all frontend data requests using `resolveApiUrl()` and `apiFetch()` so that requests consistently reach the active backend regardless of whether the site is accessed via root domain, subpath, or published proxy.
-- **Confirmed Decision 2**: Expand `lib/apiConfig.ts` to provide full fallback storage for Attendance, Books, Timetable, Homework, Notices, and Results when running in static or offline environments, ensuring students and teachers never see connection error banners.
-- **Confirmed Decision 3**: Ensure AI Teacher requests to `/api/ai/ask` use `gemini-3.8-flash` with graceful backoff and syllabus-grounded JCERT/NCERT guidance so answers always load promptly.
-- **Confirmed Decision 4**: Preserve all existing student records, roll numbers (`1001`, `25`, etc.), marks, attendance history, and role-based permissions in `data/school_database.json`.
+From the clarification dialog:
+- **Deployment Environments**: Full functionality across all GitHub deployment environments (static GitHub Pages, repository subpaths, and live web server).
+- **MCQ Practice System Architecture**: Full pre-bundled JAC Class 10 syllabus with client-side local progress saving and offline evaluation.
+- **Preservation Principle**: Zero regression. Preserve all student roll numbers (`1001`, `1002`, `25`, etc.), database records, teacher/admin accounts, and existing school features.
 
 ---
 
-## 1. Overview & Core Concept
+## 1. Root Cause Analysis
 
-- **What It Does**: Establishes robust, unified data connectivity across all school portal modules. Students and faculty can reliably record and inspect attendance, query the AI Teacher with real-time or syllabus-guided responses, view textbooks and download PDFs, access homework, check timetables, and read notices on any network or deployment URL.
-- **Target Audience / Persona**: Students (Classes 9–12), Subject Teachers, Principal, and School Administrators of Janta +2 High School, Khalari.
-- **Key Value**: Eliminates network errors on published deployments, guarantees duplicate attendance prevention, and ensures reliable study material access.
+In the Base44 dev server, Next.js executes a live Node.js runtime where dynamic API Route Handlers (`app/api/data/[entity]`) serve MCQs on-demand from `lib/db.ts`. 
 
----
-
-## 2. User Experience & Visual Design
-
-- **Key User Flows**:
-  1. **AI Teacher Chat**: Student asks a question or uploads a photo problem -> System requests `/api/ai/ask` -> Real-time Gemini 3.8 Flash model responds (or immediate syllabus guide if offline) -> Speech audio text is ready for voice playback.
-  2. **Online Attendance**: Student taps "Mark Present" -> System calls `/api/attendance` -> Verified against today's date -> Prevents duplicate check-ins with clear message -> Updates percentage and present list instantly.
-  3. **Books & Materials**: Student selects subject/medium -> Book list loads with JCERT/NCERT textbooks -> "Read Online" opens in-app document viewer; "Download" opens official textbook file.
-  4. **Teacher/Admin Dashboard**: Faculty marks attendance, adds books, or manages notices -> Database persists changes in `data/school_database.json`.
-- **Visual Identity & Theme**:
-  - Zero UI disruptions: Preserves the authentic Navy Blue (`#1e3a8a`), Gold/Amber, and Emerald school color scheme.
-  - No alteration of login screens or working page layouts.
+However, on the GitHub Pages deployment:
+1. **Static Export Isolation**: During static build (`npm run build:gh-pages`), server Route Handlers cannot run dynamically without a Node.js backend.
+2. **Missing Client Fallback in `lib/apiConfig.ts`**: `getStaticFallback()` lacked a handler for `/data/mcq`. Any request to `/api/data/mcq` failed with a 404 error.
+3. **Network-Dependent State in `McqPracticeView.tsx`**: The component initialized `allQuestions` to an empty array `[]` and only populated it after a raw `fetch('/api/data/mcq')` completed. When that network request failed on static GitHub Pages, `allQuestions` stayed empty, causing the subject dropdown, subject cards, and question list to be completely blank.
+4. **Login Gate on Direct Deployed Visits**: When opening the deployed GitHub site fresh, users were prompted for a roll number without a quick guest/direct link to test or practice Class 10 MCQs.
+5. **Missing Standalone `/mcq` Route**: Direct navigation to `/mcq` or URLs with `#mcq` / `?section=mcq` was not supported.
 
 ---
 
-## 3. Key Product Decisions & Trade-Offs
+## 2. Proposed Implementation Strategy
 
-- **Decision 1: Unified URL Resolution (`resolveApiUrl`)**
-  - *Chosen Approach*: Wrap all data fetching in `resolveApiUrl()` and `apiFetch()`.
-  - *Why*: Direct `fetch('/api/...')` breaks on repository subpaths (e.g. `/my-repo`) and reverse-proxied deployments. `resolveApiUrl()` dynamically prepends `basePath` or connects to the correct origin.
-- **Decision 2: Offline & Static Resilience Layer**
-  - *Chosen Approach*: Equip `lib/apiConfig.ts` with local database storage for attendance and classroom resources.
-  - *Why*: Guarantees that even on static CDN hosting (GitHub Pages) or during temporary network drops, students can mark attendance, review study materials, and take MCQs without seeing broken error banners.
-- **Decision 3: Gemini Model Optimization**
-  - *Chosen Approach*: Primary model `gemini-3.8-flash` with quick backoff to `gemini-flash-latest` and syllabus-grounded offline fallback.
-  - *Why*: Adheres to the `@google/genai` TypeScript guidelines while protecting against 503 high-demand spikes.
+### Phase 1: Pre-Bundle Complete JAC Class 10 Syllabus in `McqPracticeView.tsx`
+- Import `CLASS_10_VERIFIED_MCQS` and `CLASS_10_SUBJECTS` directly from `@/lib/jacClass10McqBank`.
+- Initialize state with pre-bundled questions so the MCQ section renders instantly with zero loading delay, zero blank states, and zero network dependency.
+- Render interactive **Subject Cards** for all JAC Class 10 subjects:
+  - **Mathematics (गणित)**: 15 chapters (Real Numbers, Polynomials, Trigonometry, Quadratic Equations, Triangles, etc.)
+  - **Science (विज्ञान)**: Physics, Chemistry, Biology (Chemical Reactions, Acids/Bases, Metals, Life Processes, Light, Electricity)
+  - **Social Science (सामाजिक विज्ञान)**: History, Geography, Civics, Economics
+  - **English**: First Flight, Footprints without Feet, JAC Grammar
+  - **Hindi (हिंदी)**: क्षितिज भाग-2, कृतिका भाग-2, व्यावहारिक व्याकरण
+  - **Sanskrit (संस्कृत)**: शेमुषी भाग-2, सन्धि, समास, प्रत्यय
+  - **Urdu (उर्दू)**: दरख़्शां, नज़्म, ग़ज़ल, कवायद
+  - **Information Technology & Healthcare**: Vocational board syllabus
+- Each Subject Card will feature:
+  - Bilingual subject name (Hindi & English)
+  - Color gradient matching the subject theme
+  - Total chapter count & verified question count
+  - "Start Practice" instant launch button
+  - Chapter quick-filter chips
+
+### Phase 2: Offline Progress Tracking & Local Evaluation
+- Enable local self-assessment evaluation:
+  - Selection of options A, B, C, D with instant correct/incorrect visual feedback
+  - Detailed JCERT/NCERT model explanations
+  - Confetti celebration upon test completion
+  - Score recording (percentage, correct count, total) in `localStorage` under `janta_test_history_[studentId]`
+  - Question bookmarking saved to `localStorage` under `janta_bookmarks_[studentId]`
+- Gracefully sync bookmarks and test attempts to `/api/student/activity` when connected to a live server, with silent fallback when offline or static.
+
+### Phase 3: Enhance `lib/apiConfig.ts` Static Fallback
+- Add `/data/mcq` resolution in `getStaticFallback()`:
+  - If requested class is `'10'`, return `CLASS_10_VERIFIED_MCQS`.
+  - Filter by `subject` query parameter if provided.
+  - Support POST/DELETE fallback into local cache so admin/teacher additions also work offline.
+
+### Phase 4: Navigation, Direct URLs & Guest Access
+- **Login Screen Guest Access**:
+  - Add a dedicated "🎯 Quick JAC Class 10 MCQ Practice (कक्षा 10 प्रश्नोत्तरी अभ्यास)" card on `LoginScreen.tsx` allowing students, parents, and visitors to jump directly into the Class 10 MCQ bank without needing credentials.
+  - Add quick-fill roll number chips (`1001 - Amit`, `25 - Kavita`, `1002 - Pooja`) for one-tap student sign-in.
+- **Deep Linking Support**:
+  - In `SchoolPortalClient.tsx`, inspect URL search params (`?section=mcq`, `?tab=mcq`) and hash (`#mcq`) on initial render to automatically activate the MCQ section.
+- **Standalone Route**:
+  - Create `app/mcq/page.tsx` so direct navigation to `https://.../mcq` renders the full JAC Class 10 MCQ practice environment with layout.
+
+### Phase 5: Verification & Build Testing
+- Run `compile_applet` to verify that Next.js compilation succeeds with zero errors.
+- Test `scripts/build-gh-pages.js` static export readiness.
+- Verify desktop and mobile layouts for all subject cards, quiz modals, and navigation tabs.
 
 ---
 
-## 4. Technical Architecture & Data Strategy
+## 3. Verification Checklist
 
-```
-┌────────────────────────────────────────────────────────┐
-│                   Frontend Views                       │
-│  (AiClass, OnlineAttendance, StudyBooks, Homework...)  │
-└──────────────────────────┬─────────────────────────────┘
-                           │
-                           ▼
-┌────────────────────────────────────────────────────────┐
-│               lib/apiConfig.ts (Unified)               │
-│   • resolveApiUrl(path)  ──► Injects basePath/Origin   │
-│   • apiFetch(path, opts) ──► Adds Auth Headers & CORS  │
-└──────────────┬──────────────────────────┬──────────────┘
-               │                          │
-               ▼ (Fullstack Node.js)      ▼ (Static / Offline Fallback)
-┌──────────────────────────────┐ ┌──────────────────────────────┐
-│       app/api/* Routes       │ │  Local In-Memory / Storage   │
-│   • /api/ai/ask              │ │   • Attendance Records       │
-│   • /api/attendance          │ │   • NCERT / JCERT Books      │
-│   • /api/data/books          │ │   • Enrolled Student List    │
-│   • /api/homework            │ │   • Timetables & Notices     │
-└──────────────┬───────────────┘ └──────────────────────────────┘
-               │
-               ▼
-┌──────────────────────────────┐
-│  data/school_database.json   │
-│  (Persistent JSON Database)  │
-└──────────────────────────────┘
-```
-
-### Verification & Testing Plan
-
-Following implementation, each component will be systematically audited and recorded as **PASS**, **FAIL**, or **NOT TESTED**:
-1. `AI Teacher Chat`: Test question submission, model generation, and fallback response.
-2. `Online Attendance`: Test attendance summary loading, marking present, duplicate prevention, and class reporting.
-3. `Books & PDFs`: Test fetching Class 10 books, searching by subject, and opening document links.
-4. `Homework & Assignments`: Test homework fetching and submission state.
-5. `Timetable & Exams`: Test timetable grid loading for Class 9–12.
-6. `Notices & Announcements`: Test notice board retrieval.
-7. `MCQ Practice`: Test question retrieval and answer validation.
-8. `Results`: Test JAC board results lookup.
-9. `School Health & Login`: Test server health endpoint and student login with Roll `1001` and `25`.
+1. **JAC Class 10 Subject Cards**: Verify all core, language, and vocational subjects display with chapter counts and start buttons on desktop & mobile.
+2. **Instant Quiz Engine**: Test 10/20/30 question tests, instant option selection, explanations, and confetti score display.
+3. **Local Progress Persistence**: Verify quiz history and bookmarks persist across page refreshes in `localStorage`.
+4. **Offline & Static Resilience**: Verify the MCQ section works completely with network disabled or when `/api` returns 404.
+5. **Guest & Direct Links**: Test `?section=mcq` parameter and login screen "Quick Practice" button.
+6. **Existing Portals**: Confirm student login (Roll 1001, 25), Teacher/Admin panel, Attendance, and Textbooks remain 100% functional.

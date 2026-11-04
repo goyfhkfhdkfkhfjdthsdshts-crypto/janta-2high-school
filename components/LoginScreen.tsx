@@ -25,7 +25,7 @@ import {
 export type AppLoginRole = 'student' | 'teacher' | 'principal' | 'admin';
 
 interface LoginScreenProps {
-  onLoginSuccess: (user: UserProfile) => void;
+  onLoginSuccess: (user: UserProfile, targetSection?: string) => void;
 }
 
 export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
@@ -288,6 +288,26 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
               <p className="text-[11px] text-slate-500 mt-1">
                 Enter your official JAC board or school roll number. No password required for students.
               </p>
+              <div className="flex items-center gap-1.5 flex-wrap pt-1">
+                <span className="text-[10px] font-semibold text-slate-400">Quick Sign-in:</span>
+                {[
+                  { roll: '1001', name: 'Roll 1001 (Amit)' },
+                  { roll: '1002', name: 'Roll 1002 (Pooja)' },
+                  { roll: '25', name: 'Roll 25 (Kavita)' },
+                ].map((demo) => (
+                  <button
+                    key={demo.roll}
+                    type="button"
+                    onClick={() => {
+                      setRollNumber(demo.roll);
+                      setSelectedClass('10');
+                    }}
+                    className="px-2 py-0.5 rounded-md bg-blue-50 hover:bg-blue-100 text-blue-700 text-[10px] font-bold border border-blue-200 transition-colors cursor-pointer"
+                  >
+                    {demo.name}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Submit Button */}
@@ -300,11 +320,51 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
               ) : (
                 <>
-                  <span>LOGIN</span>
+                  <span>LOGIN AS STUDENT</span>
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
             </button>
+
+            {/* Direct JAC Class 10 MCQ Practice Quick-Access */}
+            <div className="pt-2 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => {
+                  const guestStudent: UserProfile = {
+                    id: 'std-10-1',
+                    loginId: '1001',
+                    name: 'Amit Kumar Singh',
+                    email: 'amit.singh@student.janta.edu',
+                    role: 'student',
+                    selectedClass: '10',
+                    class: '10',
+                    section: 'A',
+                    rollNo: '1001',
+                    createdAt: '2026-01-01T00:00:00.000Z',
+                    updatedAt: '2026-01-01T00:00:00.000Z',
+                  };
+                  saveStoredSession(guestStudent);
+                  onLoginSuccess(guestStudent, 'mcq');
+                }}
+                className="w-full p-2.5 sm:p-3 rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-700 hover:to-teal-800 text-white font-extrabold text-xs shadow-md flex items-center justify-between gap-2 transition-all active:scale-98 cursor-pointer group"
+              >
+                <div className="flex items-center gap-2 text-left min-w-0">
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
+                    <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-300" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-black text-xs tracking-tight truncate">
+                      🎯 JAC Class 10 MCQ Practice (कक्षा 10 प्रश्नोत्तरी अभ्यास)
+                    </p>
+                    <p className="text-[10px] text-emerald-100 font-medium truncate">
+                      Instant Access: All 9 Subjects & Mock Tests (No Password Needed)
+                    </p>
+                  </div>
+                </div>
+                <ArrowRight className="w-4 h-4 text-emerald-200 group-hover:translate-x-0.5 transition-transform shrink-0" />
+              </button>
+            </div>
           </form>
         ) : (
           /* ==================================================== */

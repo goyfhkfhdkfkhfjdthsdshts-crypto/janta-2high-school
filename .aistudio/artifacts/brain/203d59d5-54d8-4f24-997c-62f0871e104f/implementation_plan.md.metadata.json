@@ -1,6 +1,6 @@
 {
-  "summary": "Comprehensive backend connectivity, data persistence, and API routing audit plan to fix AI Teacher chat, Online Attendance, Books/PDFs, and student records across development and published deployments.",
-  "updatedAt": "2026-10-19T09:07:58.551649651Z",
+  "summary": "Detailed implementation plan to fix the missing MCQ section and all website functionality on GitHub-deployed sites. Pre-bundles the complete JAC Class 10 question bank across all subjects (Mathematics, Science, Social Science, Hindi, English, Sanskrit, Urdu, IT, Healthcare), enables client-side offline persistence and evaluation, connects all subject cards and navigation routes, adds standalone /mcq routing, and verifies both server and static GitHub Pages build targets.",
+  "updatedAt": "2026-11-04T02:25:49.965412289Z",
   "requestFeedback": true,
   "userFacing": true
 }

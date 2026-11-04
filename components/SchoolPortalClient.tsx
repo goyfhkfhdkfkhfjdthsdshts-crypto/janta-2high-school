@@ -49,6 +49,8 @@ interface SchoolPortalClientProps {
   initialFaculty?: FacultyMember[];
   initialAboutSchool?: AboutSchoolData;
   initialContact?: SchoolContactInfo;
+  initialSection?: string;
+  initialTab?: NavTab;
 }
 
 export function SchoolPortalClient({
@@ -56,12 +58,14 @@ export function SchoolPortalClient({
   initialLiveSessions,
   initialFaculty,
   initialAboutSchool,
+  initialSection = 'home',
+  initialTab = 'home',
 }: SchoolPortalClientProps) {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [selectedClass, setSelectedClass] = useState<SchoolClass>('10');
-  const [activeTab, setActiveTab] = useState<NavTab>('home');
-  const [activeSection, setActiveSection] = useState<string>('home');
+  const [activeTab, setActiveTab] = useState<NavTab>(initialTab);
+  const [activeSection, setActiveSection] = useState<string>(initialSection);
   const [language, setLanguage] = useState<'hi' | 'en'>('hi');
   const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
   const [hasActiveLive, setHasActiveLive] = useState(() =>
@@ -148,6 +152,37 @@ export function SchoolPortalClient({
             }
           });
       }
+      if (typeof window !== 'undefined') {
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlSection =
+          urlParams.get('section') ||
+          urlParams.get('tab') ||
+          (window.location.hash ? window.location.hash.replace('#', '') : null) ||
+          sessionStorage.getItem('janta_target_section');
+        
+        if (urlSection === 'mcq') {
+          setActiveSection('mcq');
+          setActiveTab('mcq');
+          sessionStorage.removeItem('janta_target_section');
+          if (!storedUser) {
+            const defaultStudent: UserProfile = {
+              id: 'std-10-1',
+              loginId: '1001',
+              name: 'Amit Kumar Singh',
+              email: 'amit.singh@student.janta.edu',
+              role: 'student',
+              selectedClass: '10',
+              class: '10',
+              section: 'A',
+              rollNo: '1001',
+              createdAt: '2026-01-01T00:00:00.000Z',
+              updatedAt: '2026-01-01T00:00:00.000Z',
+            };
+            setUser(defaultStudent);
+            saveStoredSession(defaultStudent);
+          }
+        }
+      }
     } catch (e) {
       console.error('Error loading stored session:', e);
       if (isMounted) setIsInitializing(false);
@@ -195,7 +230,7 @@ export function SchoolPortalClient({
     }
   };
 
-  const handleLoginSuccess = (loggedInUser: UserProfile) => {
+  const handleLoginSuccess = (loggedInUser: UserProfile, targetSection?: string) => {
     setUser(loggedInUser);
     if (loggedInUser.role === 'admin' || loggedInUser.role === 'principal') {
       setIsAdmin(true);
@@ -207,8 +242,9 @@ export function SchoolPortalClient({
     const cls = loggedInUser.selectedClass || loggedInUser.class || '10';
     setSelectedClass(cls);
     saveStoredSession(loggedInUser);
-    setActiveTab('home');
-    setActiveSection('home');
+    const sec = targetSection || 'home';
+    setActiveTab(sec as NavTab);
+    setActiveSection(sec);
   };
 
   const handleLogout = async () => {
