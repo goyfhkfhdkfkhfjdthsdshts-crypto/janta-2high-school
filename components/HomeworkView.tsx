@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   BookOpen,
   Calendar,
@@ -71,7 +71,7 @@ export function HomeworkView({
   const studentId = user?.id || 'guest_student';
   const studentName = user?.name || 'Student';
 
-  const fetchHomework = async () => {
+  const fetchHomework = useCallback(async () => {
     setIsLoading(true);
     try {
       const { res, data } = await apiFetch(`/api/homework?class=${selectedClass}`);
@@ -83,11 +83,11 @@ export function HomeworkView({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [selectedClass]);
 
   useEffect(() => {
     fetchHomework();
-  }, [selectedClass]);
+  }, [fetchHomework]);
 
   const handleToggleCompletion = async (hwId: string) => {
     try {

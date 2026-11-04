@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import confetti from 'canvas-confetti';
 import { SchoolLogo } from './SchoolLogo';
 import { MCQQuestion, SchoolClass, UserProfile } from '@/lib/types';
@@ -67,6 +67,18 @@ function createAttemptRecord(
     date: new Date().toISOString().split('T')[0],
     totalQuestions: totalCount,
     correctCount,
+  };
+}
+
+function createBookmarkRecord(q: MCQQuestion) {
+  return {
+    id: `bm-${Date.now()}`,
+    itemId: q.id,
+    type: 'mcq' as const,
+    title: q.question,
+    subtitle: `${q.subject} • ${q.chapter} (Option ${q.correctAnswer})`,
+    section: 'mcq' as const,
+    savedAt: new Date().toISOString(),
   };
 }
 
@@ -143,7 +155,7 @@ export function McqPracticeView({
   const [formExplanation, setFormExplanation] = useState('');
 
   // Fetch MCQs via unified apiFetch with pre-bundled fallback
-  const fetchMcqs = async () => {
+  const fetchMcqs = useCallback(async () => {
     try {
       const { res, data } = await apiFetch(`/api/data/mcq?class=${selectedClass}`);
       if (res.ok && data?.data && Array.isArray(data.data) && data.data.length > 0) {
@@ -161,7 +173,7 @@ export function McqPracticeView({
       );
       setAllQuestions(fallback.length > 0 ? fallback : CLASS_10_VERIFIED_MCQS);
     }
-  };
+  }, [selectedClass]);
 
   const studentAccountId = user?.studentId || user?.id || 'default_student';
 
@@ -198,7 +210,7 @@ export function McqPracticeView({
           .catch(() => {});
       }
     } catch {}
-  }, [selectedClass, studentAccountId]);
+  }, [fetchMcqs, studentAccountId]);
 
   // Compute available subjects from both static registry and question bank
   const subjectsList = useMemo(() => {
@@ -285,15 +297,7 @@ export function McqPracticeView({
           }).catch(() => {});
         }
       } else {
-        const newBm = {
-          id: `bm-${Date.now()}`,
-          itemId: q.id,
-          type: 'mcq',
-          title: q.question,
-          subtitle: `${q.subject} • ${q.chapter} (Option ${q.correctAnswer})`,
-          section: 'mcq',
-          savedAt: new Date().toISOString(),
-        };
+        const newBm = createBookmarkRecord(q);
         updated = [newBm, ...stored];
         setBookmarkedIds((prev) => [...prev, q.id]);
 

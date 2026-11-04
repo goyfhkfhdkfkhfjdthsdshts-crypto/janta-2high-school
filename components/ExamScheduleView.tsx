@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { SchoolLogo } from './SchoolLogo';
 import { ExamSchedule, SchoolClass, UserProfile } from '@/lib/types';
 import { Calendar, Clock, Plus, Trash2, Edit, AlertCircle, FileText, Lock } from 'lucide-react';
@@ -34,7 +34,7 @@ export function ExamScheduleView({
     'Entry strictly with JAC Admit Card and School Uniform. No electronic devices permitted.'
   );
 
-  const fetchExams = async () => {
+  const fetchExams = useCallback(async () => {
     try {
       const res = await fetch(`/api/data/exams?class=${selectedClass}`);
       const data = await res.json();
@@ -44,11 +44,11 @@ export function ExamScheduleView({
     } catch (err) {
       console.error('Error fetching exams:', err);
     }
-  };
+  }, [selectedClass]);
 
   useEffect(() => {
     fetchExams();
-  }, [selectedClass]);
+  }, [fetchExams]);
 
   const handleSaveExam = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { SchoolLogo } from './SchoolLogo';
 import { Book, SchoolClass, UserProfile } from '@/lib/types';
 import { apiFetch } from '@/lib/apiConfig';
@@ -44,7 +44,7 @@ export function StudyBooksView({
   const [newMedium, setNewMedium] = useState<'Hindi' | 'English'>('Hindi');
   const [newFileUrl, setNewFileUrl] = useState('');
 
-  const fetchBooks = async () => {
+  const fetchBooks = useCallback(async () => {
     try {
       const { res, data } = await apiFetch(`/api/data/books?class=${selectedClass}`);
       if (res.ok && data?.data) {
@@ -53,11 +53,11 @@ export function StudyBooksView({
     } catch (err) {
       console.error('Error fetching books:', err);
     }
-  };
+  }, [selectedClass]);
 
   useEffect(() => {
     fetchBooks();
-  }, [selectedClass]);
+  }, [fetchBooks]);
 
   const uniqueSubjects = ['All', ...Array.from(new Set(books.map((b) => b.subject)))];
 

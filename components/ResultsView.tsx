@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { SchoolLogo } from './SchoolLogo';
 import { Result, SchoolClass, UserProfile } from '@/lib/types';
 import { apiFetch } from '@/lib/apiConfig';
@@ -41,7 +41,7 @@ export function ResultsView({
     { subject: 'Social Science', marks: 85, fullMarks: 100 },
   ]);
 
-  const fetchResults = async () => {
+  const fetchResults = useCallback(async () => {
     try {
       const { res, data } = await apiFetch(`/api/data/results?class=${selectedClass}`);
       if (res.ok && data?.data) {
@@ -50,13 +50,13 @@ export function ResultsView({
     } catch (err) {
       console.error('Error fetching results:', err);
     }
-  };
+  }, [selectedClass]);
 
   useEffect(() => {
     fetchResults();
     setSearchedResult(null);
     setSearchAttempted(false);
-  }, [selectedClass]);
+  }, [fetchResults]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();

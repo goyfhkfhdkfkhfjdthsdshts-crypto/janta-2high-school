@@ -42,6 +42,44 @@ interface MessageItem {
   timestamp: string;
 }
 
+// Subjects by Class
+const SUBJECTS_BY_CLASS: Record<SchoolClass, string[]> = {
+  '9': ['Mathematics', 'Science', 'Social Science', 'Hindi', 'English', 'Sanskrit', 'Information Technology', 'Healthcare'],
+  '10': ['Mathematics', 'Science', 'Social Science', 'Hindi', 'English', 'Sanskrit', 'Information Technology', 'Healthcare'],
+  '11': [
+    'Physics (Science)',
+    'Chemistry (Science)',
+    'Mathematics',
+    'Biology (Science)',
+    'Accountancy (Commerce)',
+    'Business Studies (Commerce)',
+    'Economics',
+    'History (Arts)',
+    'Political Science (Arts)',
+    'Geography (Arts)',
+    'English Core',
+    'Hindi Core',
+    'Information Technology',
+    'Healthcare / Vocational',
+  ],
+  '12': [
+    'Physics (Science)',
+    'Chemistry (Science)',
+    'Mathematics',
+    'Biology (Science)',
+    'Accountancy (Commerce)',
+    'Business Studies (Commerce)',
+    'Economics',
+    'History (Arts)',
+    'Political Science (Arts)',
+    'Geography (Arts)',
+    'English Core',
+    'Hindi Core',
+    'Information Technology',
+    'Healthcare / Vocational',
+  ],
+};
+
 export function AiClassView({
   user,
   selectedClass,
@@ -49,45 +87,8 @@ export function AiClassView({
   language,
   onToggleLanguage,
 }: AiClassViewProps) {
-  // Subjects by Class
-  const subjectsByClass: Record<SchoolClass, string[]> = {
-    '9': ['Mathematics', 'Science', 'Social Science', 'Hindi', 'English', 'Sanskrit', 'Information Technology', 'Healthcare'],
-    '10': ['Mathematics', 'Science', 'Social Science', 'Hindi', 'English', 'Sanskrit', 'Information Technology', 'Healthcare'],
-    '11': [
-      'Physics (Science)',
-      'Chemistry (Science)',
-      'Mathematics',
-      'Biology (Science)',
-      'Accountancy (Commerce)',
-      'Business Studies (Commerce)',
-      'Economics',
-      'History (Arts)',
-      'Political Science (Arts)',
-      'Geography (Arts)',
-      'English Core',
-      'Hindi Core',
-      'Information Technology',
-      'Healthcare / Vocational',
-    ],
-    '12': [
-      'Physics (Science)',
-      'Chemistry (Science)',
-      'Mathematics',
-      'Biology (Science)',
-      'Accountancy (Commerce)',
-      'Business Studies (Commerce)',
-      'Economics',
-      'History (Arts)',
-      'Political Science (Arts)',
-      'Geography (Arts)',
-      'English Core',
-      'Hindi Core',
-      'Information Technology',
-      'Healthcare / Vocational',
-    ],
-  };
-
-  const [currentSubject, setCurrentSubject] = useState(subjectsByClass[selectedClass][0]);
+  const subjectsByClass = SUBJECTS_BY_CLASS;
+  const [currentSubject, setCurrentSubject] = useState(SUBJECTS_BY_CLASS[selectedClass][0]);
   const [question, setQuestion] = useState('');
   const [messages, setMessages] = useState<MessageItem[]>([
     {
@@ -117,11 +118,11 @@ export function AiClassView({
 
   // Update subject when class changes
   useEffect(() => {
-    const available = subjectsByClass[selectedClass];
-    if (!available.includes(currentSubject)) {
+    const available = SUBJECTS_BY_CLASS[selectedClass];
+    if (available && !available.includes(currentSubject)) {
       setCurrentSubject(available[0]);
     }
-  }, [selectedClass]);
+  }, [selectedClass, currentSubject]);
 
   // Scroll to bottom on new message
   useEffect(() => {

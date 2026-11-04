@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   X,
   Bell,
@@ -39,7 +39,7 @@ export function NotificationsModal({
   const [filter, setFilter] = useState<'all' | 'unread' | 'urgent'>('all');
   const [isLoading, setIsLoading] = useState(false);
 
-  const fetchNotifications = async () => {
+  const fetchNotifications = useCallback(async () => {
     setIsLoading(true);
     try {
       const url = `/api/notifications?${selectedClass ? `class=${selectedClass}&` : ''}${
@@ -55,13 +55,13 @@ export function NotificationsModal({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [selectedClass, studentId]);
 
   useEffect(() => {
     if (isOpen) {
       fetchNotifications();
     }
-  }, [isOpen, selectedClass, studentId]);
+  }, [isOpen, fetchNotifications]);
 
   const handleMarkAsRead = async (id: string, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();

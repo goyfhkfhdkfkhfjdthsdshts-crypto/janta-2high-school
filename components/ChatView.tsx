@@ -118,10 +118,11 @@ export function ChatView({
   useEffect(() => {
     if (activeConvId.startsWith('group-')) {
       const targetGroup = `group-${selectedClass}`;
-      setActiveConvId(targetGroup);
-      fetchMessages(targetGroup);
+      if (activeConvId !== targetGroup) {
+        setActiveConvId(targetGroup);
+      }
     }
-  }, [selectedClass]);
+  }, [selectedClass, activeConvId]);
 
   // Load messages on active conv change
   useEffect(() => {

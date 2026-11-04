@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { SchoolLogo } from './SchoolLogo';
 import { Timetable, SchoolClass, UserProfile } from '@/lib/types';
 import { apiFetch } from '@/lib/apiConfig';
@@ -35,7 +35,7 @@ export function TimetableView({
   const [formTeacher, setFormTeacher] = useState('Mr. R. K. Sharma');
   const [formRoom, setFormRoom] = useState('Room 12');
 
-  const fetchTimetable = async () => {
+  const fetchTimetable = useCallback(async () => {
     try {
       const { res, data } = await apiFetch(`/api/data/timetable?class=${selectedClass}`);
       if (res.ok && data?.data) {
@@ -44,11 +44,11 @@ export function TimetableView({
     } catch (err) {
       console.error('Error fetching timetable:', err);
     }
-  };
+  }, [selectedClass]);
 
   useEffect(() => {
     fetchTimetable();
-  }, [selectedClass]);
+  }, [fetchTimetable]);
 
   const periodsForDay = periods
     .filter((p) => p.day.toLowerCase() === activeDay.toLowerCase())

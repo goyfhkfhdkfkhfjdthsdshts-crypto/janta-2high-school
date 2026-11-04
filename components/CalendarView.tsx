@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Calendar as CalendarIcon,
   ChevronLeft,
@@ -49,7 +49,7 @@ export function CalendarView({
   const [formTargetClass, setFormTargetClass] = useState<string>('All');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const fetchEvents = async () => {
+  const fetchEvents = useCallback(async () => {
     setIsLoading(true);
     try {
       const res = await fetch(`/api/calendar?category=${selectedCategory}&class=${selectedClass}`);
@@ -62,11 +62,11 @@ export function CalendarView({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [selectedCategory, selectedClass]);
 
   useEffect(() => {
     fetchEvents();
-  }, [selectedCategory, selectedClass]);
+  }, [fetchEvents]);
 
   const handlePrevMonth = () => {
     setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
