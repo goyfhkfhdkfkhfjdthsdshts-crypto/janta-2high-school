@@ -569,6 +569,10 @@ export function SchoolPortalClient({
             language={language}
             onOpenHelp={() => handleOpenSection('help')}
             onNavigateToSection={handleOpenSection}
+            onUpdateUser={(updated) => {
+              setUser(updated);
+              saveStoredSession(updated);
+            }}
           />
         )}
 

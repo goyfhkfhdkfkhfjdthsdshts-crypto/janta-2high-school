@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
 import { MCQQuestion } from '@/lib/types';
 
-const MODELS_TO_TRY = ['gemini-3.8-flash', 'gemini-flash-latest', 'gemini-3.1-flash-lite'];
+const MODELS_TO_TRY = ['gemini-2.5-flash', 'gemini-3.8-flash', 'gemini-flash-latest'];
 
 async function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));

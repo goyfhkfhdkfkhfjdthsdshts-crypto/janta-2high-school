@@ -1858,27 +1858,90 @@ export const db = {
     userId: string,
     updates: Partial<UserProfile>
   ): { success: boolean; user?: UserProfile; message?: string } {
-    if (!userId) return { success: false, message: 'User ID is required' };
+    if (!userId && !updates.rollNo) return { success: false, message: 'User ID or Roll Number is required' };
     const data = getDatabase();
-    const clean = userId.trim().toLowerCase();
-    const index = data.users.findIndex(
+    const clean = (userId || '').trim().toLowerCase();
+
+    // 1. Primary lookup by ID, studentId, loginId, accountId, or email
+    let index = data.users.findIndex(
       (u) =>
         (u.id && u.id.toLowerCase() === clean) ||
         (u.studentId && u.studentId.toLowerCase() === clean) ||
-        (u.loginId && u.loginId.toLowerCase() === clean)
+        (u.loginId && u.loginId.toLowerCase() === clean) ||
+        (u.accountId && u.accountId.toLowerCase() === clean) ||
+        (u.email && u.email.toLowerCase() === clean)
     );
 
+    // 2. Secondary lookup by Roll Number and Class
     if (index < 0) {
-      return { success: false, message: 'Student account not found in database.' };
+      const targetRoll = (updates.rollNo || updates.rollNumber || userId || '').trim().toLowerCase();
+      const targetClass = updates.selectedClass || updates.class;
+      if (targetRoll) {
+        index = data.users.findIndex((u) => {
+          if (u.role !== 'student') return false;
+          const uRoll = (u.rollNo || u.rollNumber || '').trim().toLowerCase();
+          const matchesClass = !targetClass || u.selectedClass === targetClass || u.class === targetClass;
+          if (!matchesClass) return false;
+          if (uRoll === targetRoll) return true;
+          const numU = parseInt(uRoll, 10);
+          const numT = parseInt(targetRoll, 10);
+          return !isNaN(numU) && !isNaN(numT) && numU === numT;
+        });
+      }
+    }
+
+    // 3. If student not yet registered in database, create permanent record
+    if (index < 0) {
+      const newClass = updates.selectedClass || updates.class || '10';
+      const cleanRoll = (updates.rollNo || updates.rollNumber || '1001').trim();
+      const studentName = updates.name || updates.fullName || 'Student';
+      const newId = userId && !['guest', 'guest_student', 'default_student'].includes(clean)
+        ? userId
+        : `std-${newClass}-${cleanRoll || Date.now()}`;
+
+      const newStudent: UserProfile = {
+        id: newId,
+        studentId: cleanRoll || newId,
+        name: studentName,
+        fullName: studentName,
+        role: 'student',
+        selectedClass: newClass as SchoolClass,
+        class: newClass as SchoolClass,
+        section: updates.section || 'A',
+        rollNo: cleanRoll,
+        rollNumber: cleanRoll,
+        stream: updates.stream || 'General',
+        phone: updates.phone || updates.mobileNumber || '',
+        email: updates.email || `${studentName.toLowerCase().replace(/\s+/g, '.')}.${cleanRoll}@student.janta.edu`,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      data.users.push(newStudent);
+      saveDatabase(data);
+
+      return {
+        success: true,
+        user: newStudent,
+        message: 'Profile created and permanently saved in database.',
+      };
     }
 
     const current = data.users[index];
-    // Guard against unauthorized role escalation
+    // Guard against unauthorized role escalation or id corruption
     const safeUpdates: Partial<UserProfile> = { ...updates };
     delete safeUpdates.role;
-    delete safeUpdates.id;
-    delete safeUpdates.studentId;
     delete safeUpdates.createdAt;
+
+    // Synchronize dual field names
+    if (safeUpdates.selectedClass) safeUpdates.class = safeUpdates.selectedClass;
+    if (safeUpdates.class) safeUpdates.selectedClass = safeUpdates.class;
+    if (safeUpdates.rollNo) safeUpdates.rollNumber = safeUpdates.rollNo;
+    if (safeUpdates.rollNumber) safeUpdates.rollNo = safeUpdates.rollNumber;
+    if (safeUpdates.name) safeUpdates.fullName = safeUpdates.name;
+    if (safeUpdates.fullName) safeUpdates.name = safeUpdates.fullName;
+    if (safeUpdates.phone) safeUpdates.mobileNumber = safeUpdates.phone;
+    if (safeUpdates.mobileNumber) safeUpdates.phone = safeUpdates.mobileNumber;
 
     const updatedUser: UserProfile = {
       ...current,

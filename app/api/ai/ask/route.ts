@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
 
-const MODELS_TO_TRY = ['gemini-3.8-flash', 'gemini-flash-latest'];
+const MODELS_TO_TRY = ['gemini-2.5-flash', 'gemini-3.8-flash', 'gemini-flash-latest'];
 
 async function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -132,7 +132,7 @@ Guidelines:
             },
           }),
           new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('AI generation timed out after 5 seconds')), 5000)
+            setTimeout(() => reject(new Error('AI generation timed out after 20 seconds')), 20000)
           ),
         ])) as any;
 

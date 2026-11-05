@@ -233,13 +233,16 @@ export function ProfileView({
           rollNo: editFormData.rollNo.trim(),
           stream: editFormData.stream,
           phone: editFormData.phone.trim(),
-          picture: editFormData.picture.trim(),
+          picture: user.picture || '',
         }),
       });
 
       const data = await res.json();
       if (res.ok && data.success && data.user) {
         setSaveSuccess(language === 'hi' ? 'प्रोफ़ाइल डेटाबेस में सफलतापूर्वक सहेज ली गई ✓' : 'Profile updated and verified in database ✓');
+        try {
+          localStorage.setItem('janta_school_user', JSON.stringify(data.user));
+        } catch {}
         if (onUpdateUser) {
           onUpdateUser(data.user);
         }
@@ -614,20 +617,6 @@ export function ProfileView({
                   className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
                 />
               </div>
-            </div>
-
-            {/* Photo URL */}
-            <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">
-                {language === 'hi' ? 'प्रोफ़ाइल फोटो URL (वैकल्पिक)' : 'Profile Photo URL (Optional)'}
-              </label>
-              <input
-                type="url"
-                value={editFormData.picture}
-                onChange={(e) => setEditFormData({ ...editFormData, picture: e.target.value })}
-                placeholder="https://example.com/photo.jpg"
-                className="w-full px-3.5 py-2 text-xs bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
-              />
             </div>
 
             {/* Error or Success notification */}

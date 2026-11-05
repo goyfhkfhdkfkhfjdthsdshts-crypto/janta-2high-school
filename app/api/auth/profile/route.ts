@@ -207,32 +207,76 @@ export async function POST(req: NextRequest) {
 export async function PUT(req: NextRequest) {
   try {
     const body = await req.json();
-    const userId = body.id || body.studentId || body.studentAccountId || body.loginId || body.email;
+    const userId =
+      body.id ||
+      body.studentId ||
+      body.studentAccountId ||
+      body.loginId ||
+      body.rollNo ||
+      body.email ||
+      req.cookies.get('school_user_id')?.value ||
+      '';
 
-    if (!userId) {
+    if (!userId && !body.rollNo) {
       const errRes = NextResponse.json(
-        { success: false, message: 'Student Account ID is required for profile updates.' },
+        { success: false, message: 'Student Account ID or Roll Number is required for profile updates.' },
         { status: 400 }
       );
       return applyCors(errRes, req);
     }
 
     const result = db.updateUserProfile(userId, body);
-    if (!result.success) {
-      const failRes = NextResponse.json({ success: false, message: result.message }, { status: 404 });
+    if (!result.success || !result.user) {
+      const failRes = NextResponse.json({ success: false, message: result.message || 'Unable to update profile.' }, { status: 404 });
       return applyCors(failRes, req);
     }
 
+    const updatedUser = result.user;
+    const sessionToken = Buffer.from(
+      JSON.stringify({ id: updatedUser.id, role: updatedUser.role, time: Date.now() })
+    ).toString('base64');
+
     const response = NextResponse.json({
       success: true,
-      user: result.user,
+      user: updatedUser,
       message: 'Profile updated and verified in database.',
     });
+
+    const isHttps =
+      req.headers.get('x-forwarded-proto') === 'https' ||
+      req.nextUrl.protocol === 'https:';
+
+    response.cookies.set('school_user_id', updatedUser.id, {
+      path: '/',
+      httpOnly: false,
+      maxAge: 60 * 60 * 24 * 30,
+      sameSite: isHttps ? 'none' : 'lax',
+      secure: isHttps,
+    });
+
+    response.cookies.set('school_session_token', sessionToken, {
+      path: '/',
+      httpOnly: false,
+      maxAge: 60 * 60 * 24 * 30,
+      sameSite: isHttps ? 'none' : 'lax',
+      secure: isHttps,
+    });
+
+    if (updatedUser.email) {
+      response.cookies.set('school_user_email', updatedUser.email, {
+        path: '/',
+        httpOnly: false,
+        maxAge: 60 * 60 * 24 * 30,
+        sameSite: isHttps ? 'none' : 'lax',
+        secure: isHttps,
+      });
+    }
+
     return applyCors(response, req);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error updating profile:', error);
     const errRes = NextResponse.json(
-      { success: false, message: 'Unable to save changes. Please try again.' },
+      { success: false, message: error?.message || 'Unable to save changes. Please try again.' },
       { status: 500 }
     );
     return applyCors(errRes, req);
