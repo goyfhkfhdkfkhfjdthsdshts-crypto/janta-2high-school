@@ -76,11 +76,28 @@ However, on the GitHub Pages deployment:
 
 ---
 
+### Phase 6: AI Tutor Intelligence, Response Quality & Markdown/TTS Repairs (Completed)
+- **Model Upgrade & High Throughput**: Configured `gemini-3.1-flash-lite`, `gemini-3.8-flash`, and `gemini-flash-latest` with a 22-second generation window to eliminate 404/503 timeouts.
+- **Intelligent Dynamic Pedagogical Prompting**: Replaced repetitive single-template boilerplate with question-aware system instructions supporting exact MCQ counts, step-by-step mathematical calculations, comparisons, definitions, and short/long JAC board questions.
+- **Dynamic Syllabus Fallback**: Built a curriculum-aware fallback for Classes 9–12 covering Mathematics, Science, Social Science, Hindi, and English to prevent empty or broken student queries during network disruptions.
+- **Markdown Display Rendering**: Integrated `react-markdown` and `remark-gfm` in `components/AiClassView.tsx` with customized typographic styling for headings, lists, tables, code blocks, and blockquotes instead of raw formatting characters.
+- **Clean Text-to-Speech**: Implemented `cleanTextForSpeech` in frontend and `cleanMarkdownForSpeech` in backend to strip markdown symbols prior to audio playback, automatically selecting Indian English and Hindi voices.
+
+---
+
 ## 3. Verification Checklist
 
-1. **JAC Class 10 Subject Cards**: Verify all core, language, and vocational subjects display with chapter counts and start buttons on desktop & mobile.
-2. **Instant Quiz Engine**: Test 10/20/30 question tests, instant option selection, explanations, and confetti score display.
-3. **Local Progress Persistence**: Verify quiz history and bookmarks persist across page refreshes in `localStorage`.
-4. **Offline & Static Resilience**: Verify the MCQ section works completely with network disabled or when `/api` returns 404.
-5. **Guest & Direct Links**: Test `?section=mcq` parameter and login screen "Quick Practice" button.
-6. **Existing Portals**: Confirm student login (Roll 1001, 25), Teacher/Admin panel, Attendance, and Textbooks remain 100% functional.
+1. **JAC Class 10 Subject Cards**: Verified all core, language, and vocational subjects display with chapter counts and start buttons on desktop & mobile.
+2. **Instant Quiz Engine**: Tested 10/20/30 question tests, instant option selection, explanations, and confetti score display.
+3. **Local Progress Persistence**: Verified quiz history and bookmarks persist across page refreshes in `localStorage`.
+4. **Offline & Static Resilience**: Verified the MCQ section works completely with network disabled or when `/api` returns 404.
+5. **Guest & Direct Links**: Tested `?section=mcq` parameter and login screen "Quick Practice" button.
+6. **Existing Portals**: Confirmed student login (Roll 1001, 25), Teacher/Admin panel, Attendance, and Textbooks remain 100% functional.
+7. **AI Tutor Quality Verification**: Executed and verified the 6 mandatory test queries:
+   - "Give me 10 Class 10 Mathematics MCQs" -> 10 distinct MCQs with A/B/C/D, answers & explanations.
+   - "Explain trigonometry in simple Hindi" -> Clear, accessible Hindi explanation of त्रिकोणमिति.
+   - "Solve a quadratic equation step by step" -> Precise, multi-step math factorization & quadratic formula guide.
+   - "Explain photosynthesis" -> Comprehensive biology explanation with chemical equation and phases.
+   - "Give five short questions from Class 10 Science" -> 5 curriculum-accurate short exam questions.
+   - "Explain the difference between democracy and dictatorship" -> Thorough comparison table and analysis.
+8. **Build & Lint Verification**: Ran `compile_applet`, `lint_applet`, and `scripts/build-gh-pages.js` with 100% passing results.

@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import Markdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { SchoolLogo } from './SchoolLogo';
 import { SchoolClass, UserProfile } from '@/lib/types';
 import { apiFetch } from '@/lib/apiConfig';
@@ -146,6 +148,24 @@ export function AiClassView({
     setIsTranscribeModalOpen(true);
   };
 
+  // Clean markdown for text-to-speech
+  const cleanTextForSpeech = (text: string): string => {
+    if (!text) return '';
+    return text
+      .replace(/```[\s\S]*?```/g, ' ')
+      .replace(/`([^`]+)`/g, '$1')
+      .replace(/^#+\s+/gm, '')
+      .replace(/(\*\*|__)(.*?)\1/g, '$2')
+      .replace(/(\*|_)(.*?)\1/g, '$2')
+      .replace(/~~(.*?)~~/g, '$2')
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+      .replace(/^[>\s*-]+\s*/gm, '')
+      .replace(/\|/g, ' ')
+      .replace(/[-]{3,}/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  };
+
   // Voice Output (Text-to-Speech)
   const handleSpeakAnswer = (msgId: string, textToSpeak: string) => {
     if (typeof window === 'undefined' || !window.speechSynthesis) {
@@ -162,14 +182,21 @@ export function AiClassView({
 
     window.speechSynthesis.cancel();
 
-    const utterance = new SpeechSynthesisUtterance(textToSpeak);
-    utterance.lang = language === 'hi' ? 'hi-IN' : 'en-IN';
+    const cleaned = cleanTextForSpeech(textToSpeak);
+    if (!cleaned) return;
+
+    const utterance = new SpeechSynthesisUtterance(cleaned);
+    const hasHindiChars = /[\u0900-\u097F]/.test(cleaned);
+    const targetLang = hasHindiChars ? 'hi-IN' : language === 'hi' ? 'hi-IN' : 'en-IN';
+    utterance.lang = targetLang;
     utterance.rate = 0.95;
 
     // Try finding Indian English or Hindi voice
     const voices = window.speechSynthesis.getVoices();
     const voiceMatch = voices.find((v) =>
-      language === 'hi' ? v.lang.startsWith('hi') : v.lang.includes('en-IN') || v.lang.includes('en')
+      targetLang.startsWith('hi')
+        ? v.lang.toLowerCase().startsWith('hi')
+        : v.lang.toLowerCase().includes('en-in') || v.lang.toLowerCase().includes('en')
     );
     if (voiceMatch) utterance.voice = voiceMatch;
 
@@ -392,9 +419,65 @@ export function AiClassView({
                 )}
 
                 {/* Text Content */}
-                <div className="text-xs sm:text-sm leading-relaxed whitespace-pre-wrap font-sans">
-                  {msg.text}
-                </div>
+                {isUser ? (
+                  <div className="text-xs sm:text-sm leading-relaxed whitespace-pre-wrap font-sans">
+                    {msg.text}
+                  </div>
+                ) : (
+                  <div className="ai-markdown-content text-xs sm:text-sm text-slate-800 leading-relaxed font-sans">
+                    <Markdown
+                      remarkPlugins={[remarkGfm]}
+                      components={{
+                        h1: ({ children }) => (
+                          <h1 className="text-sm sm:text-base font-extrabold text-slate-900 border-b border-slate-200 pb-1 mt-2.5 mb-1.5">
+                            {children}
+                          </h1>
+                        ),
+                        h2: ({ children }) => (
+                          <h2 className="text-xs sm:text-sm font-bold text-blue-900 mt-2 mb-1">
+                            {children}
+                          </h2>
+                        ),
+                        h3: ({ children }) => (
+                          <h3 className="text-xs sm:text-sm font-bold text-slate-900 mt-2 mb-1">
+                            {children}
+                          </h3>
+                        ),
+                        p: ({ children }) => <p className="mb-2 last:mb-0 leading-relaxed">{children}</p>,
+                        ul: ({ children }) => <ul className="list-disc pl-5 mb-2 space-y-1">{children}</ul>,
+                        ol: ({ children }) => <ol className="list-decimal pl-5 mb-2 space-y-1">{children}</ol>,
+                        li: ({ children }) => <li className="leading-relaxed">{children}</li>,
+                        strong: ({ children }) => <strong className="font-extrabold text-slate-900">{children}</strong>,
+                        blockquote: ({ children }) => (
+                          <blockquote className="border-l-3 border-blue-600 bg-blue-50/70 px-3 py-1.5 my-2 rounded-r-xl text-slate-700 text-xs italic">
+                            {children}
+                          </blockquote>
+                        ),
+                        table: ({ children }) => (
+                          <div className="overflow-x-auto my-2.5 border border-slate-200 rounded-xl">
+                            <table className="min-w-full divide-y divide-slate-200 text-xs text-left">
+                              {children}
+                            </table>
+                          </div>
+                        ),
+                        th: ({ children }) => (
+                          <th className="px-2.5 py-1.5 font-bold text-slate-800 whitespace-nowrap bg-slate-100">
+                            {children}
+                          </th>
+                        ),
+                        td: ({ children }) => <td className="px-2.5 py-1.5 text-slate-700">{children}</td>,
+                        hr: () => <hr className="my-2.5 border-slate-200" />,
+                        code: ({ children }) => (
+                          <code className="bg-slate-100 text-blue-800 font-mono text-[11px] px-1.5 py-0.5 rounded-md border border-slate-200">
+                            {children}
+                          </code>
+                        ),
+                      }}
+                    >
+                      {msg.text}
+                    </Markdown>
+                  </div>
+                )}
 
                 {/* Footer Controls: Audio Listen / Stop / Replay */}
                 <div
