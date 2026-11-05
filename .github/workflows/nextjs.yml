@@ -53,6 +53,7 @@ jobs:
           node-version: "20"
           cache: ${{ steps.detect-package-manager.outputs.manager }}
       - name: Setup Pages
+        id: pages
         uses: actions/configure-pages@v5
         with:
           static_site_generator: next
@@ -65,12 +66,13 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json', '**/yarn.lock') }}-
       - name: Install dependencies
-        run: ${{ steps.detect-package-manager.outputs.manager }} ${{ steps.detect-package-manager.outputs.command }}
+        run: ${{ steps.detect-package-manager.outputs.manager }} ${{ steps.detect-package-manager.outputs.command }} || npm install --legacy-peer-deps
       - name: Build static export for GitHub Pages
         env:
           GITHUB_PAGES: 'true'
           STATIC_EXPORT: 'true'
           GITHUB_REPOSITORY: ${{ github.repository }}
+          ACTIONS_PAGES_BASE_PATH: ${{ steps.pages.outputs.base_path }}
         run: npm run build:gh-pages
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

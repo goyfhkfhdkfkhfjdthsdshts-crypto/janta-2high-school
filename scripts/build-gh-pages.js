@@ -22,9 +22,10 @@ const PUBLIC_DIR = path.join(ROOT_DIR, 'public');
 
 console.log('🚀 Starting GitHub Pages Static Export Build...\n');
 
-// 1. Detect and configure basePath
 let repoName = '';
-if (process.env.GITHUB_REPOSITORY) {
+const hasCname = fs.existsSync(path.join(PUBLIC_DIR, 'CNAME')) || fs.existsSync(path.join(ROOT_DIR, 'CNAME'));
+
+if (!hasCname && process.env.GITHUB_REPOSITORY) {
   const parts = process.env.GITHUB_REPOSITORY.split('/');
   const repo = parts[1];
   if (repo && !repo.endsWith('.github.io')) {

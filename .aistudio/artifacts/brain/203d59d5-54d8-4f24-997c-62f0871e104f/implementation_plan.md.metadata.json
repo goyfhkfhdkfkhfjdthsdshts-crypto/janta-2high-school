@@ -1,6 +1,6 @@
 {
-  "summary": "Detailed implementation plan to fix the missing MCQ section and all website functionality on GitHub-deployed sites. Pre-bundles the complete JAC Class 10 question bank across all subjects (Mathematics, Science, Social Science, Hindi, English, Sanskrit, Urdu, IT, Healthcare), enables client-side offline persistence and evaluation, connects all subject cards and navigation routes, adds standalone /mcq routing, and verifies both server and static GitHub Pages build targets.",
-  "updatedAt": "2026-11-04T02:25:49.965412289Z",
+  "summary": "Comprehensive repair plan for GitHub Actions build failure on GitHub Pages, synchronizing package-lock.json for npm ci, configuring resilient installation fallback, and supporting automated dual-mode basePath detection for both repository subpaths and custom root domains.",
+  "updatedAt": "2026-11-05T07:21:23.333665449Z",
   "requestFeedback": true,
   "userFacing": true
 }
